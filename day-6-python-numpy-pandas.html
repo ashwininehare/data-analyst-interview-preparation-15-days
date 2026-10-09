@@ -1,0 +1,777 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 6 — Python + NumPy + Pandas · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#1e3a8a;color:#bfdbfe}
+.b2{background:#14532d;color:#bbf7d0}
+.b3{background:#4c1d95;color:#ddd6fe}
+.b4{background:#7f1d1d;color:#fecaca}
+.b5{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#1e40af;border-bottom:2px solid #1e40af;padding-bottom:4px;margin-bottom:14px}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.dark{color:#1f2328;border-color:#1f2328}
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+.card.warn{background:#fffbeb;border-color:#fde68a}
+.card.success{background:#f0fdf4;border-color:#86efac}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.st{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}.dec{color:#e3b341}
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.green{color:#166634}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+.qa{border-left:3px solid #1e40af;padding:10px 14px;background:#f0f6ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#1e3a5f}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#1e40af}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}.qa.green .q{color:#14532d}.qa.green .a strong{color:#1a7f4b}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}.qa.purple .q{color:#4c1d95}.qa.purple .a strong{color:#7c5cd8}
+.qa.red{border-color:#b91c1c;background:#fff5f5}.qa.red .q{color:#7f1d1d}.qa.red .a strong{color:#b91c1c}
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166634;border:2px solid #86efac}
+.today{background:#dbeafe;color:#1e40af;border:2px dotted #3b82d4}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+.analogy-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.analogy-box{border-radius:7px;padding:11px 12px;border:1px solid #e5e7eb;background:#f7f8fa}
+.analogy-box .concept{font-size:12px;font-weight:800;color:#1e40af;margin-bottom:3px}
+.analogy-box .excel{font-size:11px;color:#57606a;margin-bottom:3px}
+.analogy-box .sql{font-size:11px;color:#166534}
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>🐍 Day 6 — Python + NumPy + Pandas</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 3.5 Hours</p>
+  <div class="badge-row">
+    <span class="badge b1">NumPy Arrays</span>
+    <span class="badge b2">DataFrames · Series</span>
+    <span class="badge b3">Load · Inspect · Select</span>
+    <span class="badge b4">Filter · Sort · Basic Stats</span>
+    <span class="badge b5">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div><div class="day-dot done">2</div><div class="day-dot done">3</div>
+    <div class="day-dot done">4</div><div class="day-dot done">5</div>
+    <div class="day-dot today">6</div>
+    <div class="day-dot future">7</div><div class="day-dot future">8</div><div class="day-dot future">9</div>
+    <div class="day-dot future">10</div><div class="day-dot future">11</div><div class="day-dot future">12</div>
+    <div class="day-dot future">13</div><div class="day-dot future">14</div><div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–5 (SQL + Excel) complete · 🔵 Today: Day 6 Python · ⬜ Days 7–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🧠 Mental Model — Map Python to What You Already Know</div>
+  <div class="analogy-grid">
+    <div class="analogy-box">
+      <div class="concept">DataFrame</div>
+      <div class="excel">Excel: A named table with headers</div>
+      <div class="sql">SQL: A table / query result</div>
+    </div>
+    <div class="analogy-box">
+      <div class="concept">Series</div>
+      <div class="excel">Excel: A single column</div>
+      <div class="sql">SQL: One column of a result set</div>
+    </div>
+    <div class="analogy-box">
+      <div class="concept">df.shape</div>
+      <div class="excel">Excel: Count rows + columns</div>
+      <div class="sql">SQL: SELECT COUNT(*) FROM t</div>
+    </div>
+    <div class="analogy-box">
+      <div class="concept">df.dtypes</div>
+      <div class="excel">Excel: Format cells (number/text/date)</div>
+      <div class="sql">SQL: DESC table_name</div>
+    </div>
+    <div class="analogy-box">
+      <div class="concept">df[df['x']&gt;n]</div>
+      <div class="excel">Excel: Filter by column value</div>
+      <div class="sql">SQL: WHERE x &gt; n</div>
+    </div>
+    <div class="analogy-box">
+      <div class="concept">df.groupby()</div>
+      <div class="excel">Excel: Pivot Table</div>
+      <div class="sql">SQL: GROUP BY + aggregate</div>
+    </div>
+    <div class="analogy-box">
+      <div class="concept">df.merge()</div>
+      <div class="excel">Excel: XLOOKUP / INDEX-MATCH</div>
+      <div class="sql">SQL: JOIN</div>
+    </div>
+    <div class="analogy-box">
+      <div class="concept">df.isnull()</div>
+      <div class="excel">Excel: ISBLANK()</div>
+      <div class="sql">SQL: IS NULL</div>
+    </div>
+    <div class="analogy-box">
+      <div class="concept">df.fillna(0)</div>
+      <div class="excel">Excel: IFERROR(,0)</div>
+      <div class="sql">SQL: COALESCE(col, 0)</div>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 6 Agenda — 3.5 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Topic</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:20</td><td>Theory Blitz</td><td>NumPy arrays · DataFrame vs Series · dtypes · memory</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:20–0:50</td><td>Q&amp;A Round (5 Qs)</td><td>pandas interview questions — graded</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:50–1:30</td><td>Task 1 — Load + Inspect</td><td>read_csv · head/tail · shape · dtypes · describe · info</td><td><span class="tag easy">Hands-On</span></td></tr>
+      <tr><td>1:30–2:10</td><td>Task 2 — Select + Filter</td><td>Column select · boolean filter · loc · iloc · sort_values</td><td><span class="tag med">Hands-On</span></td></tr>
+      <tr><td>2:10–2:50</td><td>Task 3 — NumPy + Stats</td><td>Arrays · vectorised ops · mean/std/percentile · Z-score</td><td><span class="tag med">Hands-On</span></td></tr>
+      <tr><td>2:50–3:20</td><td>Task 4 — Merge + Apply</td><td>merge (left join) · apply with lambda · new columns</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>3:20–3:30</td><td>Debrief</td><td>Score card · mistakes → fixes · Day 7 prep</td><td><span class="tag easy">Review</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎓 Theory Q&amp;A — 5 Interview Questions</div>
+
+  <div class="qa">
+    <div class="q">Q1. What is the difference between a pandas Series and a DataFrame? Give a BFSI example of each.</div>
+    <div class="a"><strong>Hired answer:</strong> A <strong>Series</strong> is a one-dimensional labelled array — it has an index and values, but only one column of data. Example: <code>df['revenue']</code> — a Series of 6 revenue values indexed 0–5. A <strong>DataFrame</strong> is a two-dimensional labelled data structure — like a table with rows and columns. Example: the full sales table with sale_id, region, product, revenue, sale_date, rep_name. <strong>Relationship:</strong> a DataFrame is a collection of Series — each column is a Series. When you select one column from a DataFrame you get a Series; selecting two or more columns gives you a DataFrame.</div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">Q2. What does df.info() tell you that df.describe() doesn't? When do you run each?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>df.info()</strong> shows: column names, non-null count per column, data type (dtype), and memory usage. It tells you WHERE the NULLs are and whether types are correct (e.g., is revenue float64 or object?). Run it first as a schema + quality check. <strong>df.describe()</strong> shows statistical summary for numeric columns: count, mean, std, min, 25th/50th/75th percentile, max. It tells you the distribution — are there outliers? Is min negative when it shouldn't be? Run it second to understand the data range. <strong>Rule: df.info() = schema health. df.describe() = value distribution.</strong></div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q3. What is the difference between .loc and .iloc in pandas?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>.loc</strong> = label-based — uses the actual index label and column name: <code>df.loc[0, 'revenue']</code> selects the row with index label 0 and the column named 'revenue'. <strong>.iloc</strong> = integer position-based — uses numeric positions: <code>df.iloc[0, 3]</code> selects the first row, fourth column regardless of labels. <strong>BFSI trap:</strong> if a DataFrame has been filtered and the index is now 2, 4, 6... — <code>df.loc[0]</code> raises a KeyError, but <code>df.iloc[0]</code> still works. Always reset_index() after filtering if you plan to use .loc with sequential integers.</div>
+  </div>
+
+  <div class="qa red">
+    <div class="q">Q4. What is vectorisation in NumPy and why is it faster than a Python for loop?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>Vectorisation</strong> means applying an operation to an entire array at once without writing an explicit loop. NumPy operations execute in compiled C code internally — <code>arr * 2</code> multiplies every element simultaneously at C speed. A Python for loop executes each iteration in the Python interpreter, which has overhead per iteration. For 6 rows the difference is negligible. For 1 million loan records, a NumPy vectorised operation is typically 50–200× faster than an equivalent Python loop. <strong>BFSI analogy:</strong> calculating interest on 10M accounts — NumPy does it in milliseconds; a for loop takes minutes.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5. What is df.merge() and how does it compare to SQL JOIN? What is the default merge type?</div>
+    <div class="a"><strong>Hired answer:</strong> <code>df.merge()</code> combines two DataFrames on a common column — it is the pandas equivalent of SQL JOIN. Syntax: <code>sales.merge(reps, on='rep_name', how='left')</code>. The <strong>how</strong> parameter maps directly to SQL: <code>how='inner'</code> = INNER JOIN, <code>how='left'</code> = LEFT JOIN, <code>how='right'</code> = RIGHT JOIN, <code>how='outer'</code> = FULL OUTER JOIN. <strong>Default is 'inner'</strong> — just like SQL INNER JOIN, Eve (with no sales) disappears by default. Always specify <code>how='left'</code> when the left DataFrame is your primary entity and you need all rows preserved. Apply <code>fillna(0)</code> after a left merge to handle NaN values.</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">Task 1 — Load + Inspect (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Open Jupyter Notebook. Create a new notebook. Run each cell top-to-bottom.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Cell 1 — Imports and Load</h3>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Load CSVs ────────────────────────────────────────────────────</span>
+sales = pd.read_csv(<span class="st">'sales.csv'</span>)
+reps  = pd.read_csv(<span class="st">'reps.csv'</span>)
+
+<span class="cm"># Fix date column type immediately on load</span>
+sales[<span class="st">'sale_date'</span>] = pd.to_datetime(sales[<span class="st">'sale_date'</span>])
+
+<span class="fn">print</span>(<span class="st">"sales loaded:"</span>, sales.shape)   <span class="cm"># (6, 6)</span>
+<span class="fn">print</span>(<span class="st">"reps loaded: "</span>, reps.shape)    <span class="cm"># (5, 4)</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Cell 2 — Full Inspection Sequence (run in order every session)</h3>
+    <pre><span class="cm"># ── Step 1: First look ──────────────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"── HEAD ──"</span>)
+<span class="fn">print</span>(sales.head())          <span class="cm"># first 5 rows</span>
+<span class="fn">print</span>(sales.tail(<span class="num">3</span>))         <span class="cm"># last 3 rows</span>
+
+<span class="cm"># ── Step 2: Schema + NULL check ─────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\n── INFO ──"</span>)
+sales.info()
+<span class="cm"># Expected: 6 non-null in all columns · sale_date = datetime64 · revenue = float64</span>
+
+<span class="cm"># ── Step 3: NULL count per column ───────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\n── NULL COUNT ──"</span>)
+<span class="fn">print</span>(sales.isnull().<span class="fn">sum</span>())
+<span class="cm"># Expected: all zeros for sales</span>
+
+<span class="cm"># ── Step 4: Statistical summary ─────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\n── DESCRIBE ──"</span>)
+<span class="fn">print</span>(sales.describe().<span class="fn">round</span>(<span class="num">0</span>))
+<span class="cm"># revenue: count=6, mean=90833, std=22481, min=60000, max=120000</span>
+
+<span class="cm"># ── Step 5: Column names + dtypes ───────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\n── DTYPES ──"</span>)
+<span class="fn">print</span>(sales.dtypes)
+
+<span class="cm"># ── Step 6: Unique values in categorical columns ─────────────────</span>
+<span class="fn">print</span>(<span class="st">"\n── VALUE COUNTS ──"</span>)
+<span class="fn">print</span>(sales[<span class="st">'product'</span>].value_counts())
+<span class="fn">print</span>(sales[<span class="st">'region'</span>].value_counts())</pre>
+  </div>
+
+  <div class="card success">
+    <h3 style="color:#166634">Expected Output — Verify These Values</h3>
+    <table>
+      <thead><tr><th>Check</th><th>Expected Value</th><th>If Wrong</th></tr></thead>
+      <tbody>
+        <tr><td>sales.shape</td><td>(6, 6)</td><td>Re-check CSV has header row and 6 data rows</td></tr>
+        <tr><td>revenue dtype</td><td>float64</td><td>Cast: sales['revenue'] = sales['revenue'].astype(float)</td></tr>
+        <tr><td>sale_date dtype</td><td>datetime64[ns]</td><td>Re-run: pd.to_datetime(sales['sale_date'])</td></tr>
+        <tr><td>isnull().sum() total</td><td>0 for all columns</td><td>Check CSV for empty cells</td></tr>
+        <tr><td>revenue.sum()</td><td>545000.0</td><td>Data entry error in CSV</td></tr>
+        <tr><td>product value_counts</td><td>Loan=3, Insurance=2, Deposit=1</td><td>Spelling mismatch in CSV</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 2 — Select + Filter + Sort (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Slice and filter the sales DataFrame to answer specific business questions. Use boolean filters, loc, iloc, and sort_values.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Cell 3 — Column Selection</h3>
+    <pre><span class="cm"># ── Single column → Series ──────────────────────────────────────</span>
+rev_series = sales[<span class="st">'revenue'</span>]
+<span class="fn">print</span>(<span class="fn">type</span>(rev_series))           <span class="cm"># pandas.core.series.Series</span>
+<span class="fn">print</span>(rev_series)
+
+<span class="cm"># ── Multiple columns → DataFrame ────────────────────────────────</span>
+subset = sales[[<span class="st">'rep_name'</span>, <span class="st">'product'</span>, <span class="st">'revenue'</span>]]
+<span class="fn">print</span>(<span class="fn">type</span>(subset))              <span class="cm"># pandas.core.frame.DataFrame</span>
+<span class="fn">print</span>(subset)
+
+<span class="cm"># ── iloc: row 0, columns 0 to 2 ─────────────────────────────────</span>
+<span class="fn">print</span>(sales.iloc[<span class="num">0</span>, :<span class="num">3</span>])         <span class="cm"># first row, first 3 columns</span>
+<span class="fn">print</span>(sales.iloc[<span class="num">2</span>:<span class="num">5</span>])           <span class="cm"># rows 2,3,4</span>
+
+<span class="cm"># ── loc: label-based ────────────────────────────────────────────</span>
+<span class="fn">print</span>(sales.loc[<span class="num">0</span>, <span class="st">'revenue'</span>])  <span class="cm"># row index 0, 'revenue' column → 120000.0</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Cell 4 — Boolean Filtering (SQL WHERE equivalent)</h3>
+    <pre><span class="cm"># ── Single condition ────────────────────────────────────────────</span>
+high_rev = sales[sales[<span class="st">'revenue'</span>] &gt; <span class="num">90000</span>]
+<span class="fn">print</span>(<span class="st">"High revenue deals:"</span>, <span class="fn">len</span>(high_rev))  <span class="cm"># 3 rows</span>
+<span class="fn">print</span>(high_rev[[<span class="st">'rep_name'</span>,<span class="st">'revenue'</span>,<span class="st">'product'</span>]])
+
+<span class="cm"># ── AND condition (&amp;) — must wrap each in () ─────────────────────</span>
+loan_north = sales[
+    (sales[<span class="st">'product'</span>] == <span class="st">'Loan'</span>) &amp;
+    (sales[<span class="st">'region'</span>]  == <span class="st">'North'</span>)
+]
+<span class="fn">print</span>(<span class="st">"\nLoan deals in North:"</span>)
+<span class="fn">print</span>(loan_north)  <span class="cm"># 1 row: Alice, 120000</span>
+
+<span class="cm"># ── OR condition (|) ────────────────────────────────────────────</span>
+north_or_south = sales[
+    (sales[<span class="st">'region'</span>] == <span class="st">'North'</span>) |
+    (sales[<span class="st">'region'</span>] == <span class="st">'South'</span>)
+]
+<span class="fn">print</span>(<span class="st">"\nNorth or South:"</span>, <span class="fn">len</span>(north_or_south), <span class="st">"rows"</span>)  <span class="cm"># 4 rows</span>
+
+<span class="cm"># ── isin() — equivalent to SQL IN ───────────────────────────────</span>
+key_products = sales[sales[<span class="st">'product'</span>].isin([<span class="st">'Loan'</span>, <span class="st">'Insurance'</span>])]
+<span class="fn">print</span>(<span class="st">"\nLoan + Insurance only:"</span>, <span class="fn">len</span>(key_products), <span class="st">"rows"</span>)  <span class="cm"># 5 rows</span>
+
+<span class="cm"># ── NOT condition (~) — equivalent to SQL NOT IN ─────────────────</span>
+no_deposit = sales[~(sales[<span class="st">'product'</span>] == <span class="st">'Deposit'</span>)]
+<span class="fn">print</span>(<span class="st">"\nExclude Deposit:"</span>, <span class="fn">len</span>(no_deposit), <span class="st">"rows"</span>)  <span class="cm"># 5 rows</span>
+
+<span class="cm"># ── sort_values ─────────────────────────────────────────────────</span>
+top_deals = sales.sort_values(<span class="st">'revenue'</span>, ascending=<span class="kw">False</span>).head(<span class="num">3</span>)
+<span class="fn">print</span>(<span class="st">"\nTop 3 deals:"</span>)
+<span class="fn">print</span>(top_deals[[<span class="st">'rep_name'</span>,<span class="st">'revenue'</span>]])
+<span class="cm"># Alice 120K · Alice 110K · Carol 95K</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 3 — NumPy + Statistics (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Calculate key statistical metrics on revenue. Detect outliers using Z-score. Use NumPy for vectorised operations.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Cell 5 — NumPy Arrays and Vectorised Operations</h3>
+    <pre><span class="cm"># ── Create NumPy array from revenue column ───────────────────────</span>
+rev_arr = np.array(sales[<span class="st">'revenue'</span>])
+<span class="fn">print</span>(<span class="st">"Array:"</span>, rev_arr)
+<span class="fn">print</span>(<span class="st">"dtype:"</span>, rev_arr.dtype)    <span class="cm"># float64</span>
+<span class="fn">print</span>(<span class="st">"shape:"</span>, rev_arr.shape)    <span class="cm"># (6,)</span>
+
+<span class="cm"># ── Vectorised operations (no loop needed) ───────────────────────</span>
+rev_inr    = rev_arr * <span class="num">1000</span>                    <span class="cm"># convert to paise</span>
+rev_above  = rev_arr[rev_arr &gt; <span class="num">90000</span>]          <span class="cm"># boolean mask</span>
+rev_pct    = rev_arr / rev_arr.<span class="fn">sum</span>() * <span class="num">100</span>      <span class="cm"># % of total</span>
+
+<span class="fn">print</span>(<span class="st">"\nRevenue % of total:"</span>, np.<span class="fn">round</span>(rev_pct, <span class="num">1</span>))
+<span class="cm"># [22.  15.6 17.4 11.  20.2 13.8]</span>
+
+<span class="cm"># ── Key stats using NumPy ────────────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\n── NumPy Statistics ──"</span>)
+<span class="fn">print</span>(<span class="st">"Mean:  "</span>, np.<span class="fn">mean</span>(rev_arr).<span class="fn">round</span>(<span class="num">0</span>))       <span class="cm"># 90833</span>
+<span class="fn">print</span>(<span class="st">"Median:"</span>, np.<span class="fn">median</span>(rev_arr).<span class="fn">round</span>(<span class="num">0</span>))     <span class="cm"># 90000</span>
+<span class="fn">print</span>(<span class="st">"Std:   "</span>, np.<span class="fn">std</span>(rev_arr).<span class="fn">round</span>(<span class="num">0</span>))        <span class="cm"># 20412</span>
+<span class="fn">print</span>(<span class="st">"Min:   "</span>, np.<span class="fn">min</span>(rev_arr))                 <span class="cm"># 60000</span>
+<span class="fn">print</span>(<span class="st">"Max:   "</span>, np.<span class="fn">max</span>(rev_arr))                 <span class="cm"># 120000</span>
+<span class="fn">print</span>(<span class="st">"P25:   "</span>, np.<span class="fn">percentile</span>(rev_arr, <span class="num">25</span>))      <span class="cm"># 78750</span>
+<span class="fn">print</span>(<span class="st">"P75:   "</span>, np.<span class="fn">percentile</span>(rev_arr, <span class="num">75</span>))      <span class="cm"># 107500</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Cell 6 — Z-Score Outlier Detection</h3>
+    <pre><span class="cm"># ── Z-score = (value - mean) / std ──────────────────────────────</span>
+<span class="cm"># Z &gt; 2 or Z &lt; -2 = potential outlier</span>
+mean_rev = sales[<span class="st">'revenue'</span>].<span class="fn">mean</span>()
+std_rev  = sales[<span class="st">'revenue'</span>].<span class="fn">std</span>()
+
+sales[<span class="st">'z_score'</span>] = ((sales[<span class="st">'revenue'</span>] - mean_rev) / std_rev).<span class="fn">round</span>(<span class="num">2</span>)
+<span class="fn">print</span>(sales[[<span class="st">'rep_name'</span>, <span class="st">'revenue'</span>, <span class="st">'z_score'</span>]])
+
+<span class="cm"># ── Flag outliers ────────────────────────────────────────────────</span>
+sales[<span class="st">'is_outlier'</span>] = sales[<span class="st">'z_score'</span>].abs() &gt; <span class="num">1.5</span>
+outliers = sales[sales[<span class="st">'is_outlier'</span>]]
+<span class="fn">print</span>(<span class="st">"\nOutliers (|z| &gt; 1.5):"</span>, <span class="fn">len</span>(outliers))
+
+<span class="cm"># ── Revenue band using np.where (vectorised CASE WHEN) ───────────</span>
+sales[<span class="st">'rev_band'</span>] = np.<span class="fn">where</span>(
+    sales[<span class="st">'revenue'</span>] &gt;= <span class="num">100000</span>, <span class="st">'High'</span>,
+    np.<span class="fn">where</span>(sales[<span class="st">'revenue'</span>] &gt;= <span class="num">75000</span>, <span class="st">'Mid'</span>, <span class="st">'Low'</span>)
+)
+<span class="fn">print</span>(<span class="st">"\nRevenue Bands:"</span>)
+<span class="fn">print</span>(sales[<span class="st">'rev_band'</span>].value_counts())
+<span class="cm"># High=2 (Alice 120K + 110K) · Mid=3 · Low=1 (Dave 60K)</span>
+
+<span class="cm"># ── Business insight ─────────────────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">f"""
+Business Insight:
+  Mean deal size: ₹{mean_rev:,.0f}
+  Std deviation:  ₹{std_rev:,.0f}
+  Range:          ₹{sales['revenue'].min():,.0f} – ₹{sales['revenue'].max():,.0f}
+  Alice's deals ({sales[sales['rep_name']=='Alice']['revenue'].sum():,.0f}) = {sales[sales['rep_name']=='Alice']['revenue'].sum()/545000*100:.1f}% of total
+  High-value deals (≥100K): only Alice — key-person revenue risk
+"""</span>)</pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 4 — Merge + Apply (30 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Merge sales with reps data. Build a rep scorecard with % of target and status label using apply + lambda.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Cell 7 — Merge (LEFT JOIN equivalent)</h3>
+    <pre><span class="cm"># ── Aggregate sales per rep ──────────────────────────────────────</span>
+rep_sales = sales.groupby(<span class="st">'rep_name'</span>)[<span class="st">'revenue'</span>]\
+                 .<span class="fn">sum</span>()\
+                 .reset_index()
+rep_sales.columns = [<span class="st">'rep_name'</span>, <span class="st">'actual_revenue'</span>]
+<span class="fn">print</span>(<span class="st">"Sales per rep:"</span>)
+<span class="fn">print</span>(rep_sales)
+
+<span class="cm"># ── LEFT MERGE: keep all 5 reps including Eve ────────────────────</span>
+scorecard = reps.merge(
+    rep_sales,
+    on=<span class="st">'rep_name'</span>,
+    how=<span class="st">'left'</span>                      <span class="cm"># how='left' = SQL LEFT JOIN</span>
+)
+
+<span class="cm"># Fix Eve's NaN revenue → 0 (same as SQL COALESCE)</span>
+scorecard[<span class="st">'actual_revenue'</span>] = scorecard[<span class="st">'actual_revenue'</span>].fillna(<span class="num">0</span>)
+
+<span class="fn">print</span>(<span class="st">"\nAll 5 reps after left merge:"</span>)
+<span class="fn">print</span>(scorecard[[<span class="st">'rep_name'</span>,<span class="st">'team'</span>,<span class="st">'target'</span>,<span class="st">'actual_revenue'</span>]])
+<span class="cm"># Eve: actual_revenue = 0.0 ✅</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Cell 8 — Apply + Lambda for Derived Columns</h3>
+    <pre><span class="cm"># ── % of target ─────────────────────────────────────────────────</span>
+scorecard[<span class="st">'pct_target'</span>] = (
+    scorecard[<span class="st">'actual_revenue'</span>] / scorecard[<span class="st">'target'</span>] * <span class="num">100</span>
+).round(<span class="num">1</span>)
+
+<span class="cm"># ── Variance: actual - target ────────────────────────────────────</span>
+scorecard[<span class="st">'variance'</span>] = scorecard[<span class="st">'actual_revenue'</span>] - scorecard[<span class="st">'target'</span>]
+
+<span class="cm"># ── Status label using apply + lambda (SQL CASE WHEN) ────────────</span>
+scorecard[<span class="st">'status'</span>] = scorecard[<span class="st">'pct_target'</span>].apply(
+    <span class="kw">lambda</span> x:
+        <span class="st">'🟢 On Track'</span>       <span class="kw">if</span> x &gt;= <span class="num">100</span> <span class="kw">else</span>
+        (<span class="st">'🟡 At Risk'</span>        <span class="kw">if</span> x &gt;= <span class="num">80</span>  <span class="kw">else</span>
+         <span class="st">'🔴 Underperforming'</span>)
+)
+
+<span class="cm"># ── Final scorecard ──────────────────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\n── Rep Scorecard ──"</span>)
+<span class="fn">print</span>(scorecard[[<span class="st">'rep_name'</span>,<span class="st">'team'</span>,<span class="st">'target'</span>,
+                 <span class="st">'actual_revenue'</span>,<span class="st">'pct_target'</span>,<span class="st">'variance'</span>,<span class="st">'status'</span>]]
+      .to_string(index=<span class="kw">False</span>))
+
+<span class="cm"># ── Business summary ─────────────────────────────────────────────</span>
+under = scorecard[scorecard[<span class="st">'status'</span>].str.contains(<span class="st">'Under'</span>)]
+<span class="fn">print</span>(<span class="st">f"""
+Business Insight:
+  On Track: {(scorecard['status']=='🟢 On Track').sum()} rep(s)
+  At Risk:  {(scorecard['status']=='🟡 At Risk').sum()} rep(s)
+  Under:    {len(under)} rep(s) — {', '.join(under['rep_name'].tolist())}
+  Action:   Immediate 1:1 review for underperforming reps before Q3
+"""</span>)
+
+<span class="cm"># ── Export for Day 7 EDA ─────────────────────────────────────────</span>
+scorecard.to_csv(<span class="st">'rep_scorecard.csv'</span>, index=<span class="kw">False</span>)
+<span class="fn">print</span>(<span class="st">"Saved rep_scorecard.csv"</span>)</pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Day 6 Flowchart — Pandas Workflow Decision Tree</div>
+  <div class="flow-wrap">
+    <svg width="700" height="570" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 6 — Pandas Workflow Decision Tree</text>
+
+      
+      <rect x="210" y="34" width="280" height="36" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#e6edf3" font-weight="700">Load CSV + Fix Types</text>
+      <text x="350" y="63" text-anchor="middle" fill="#8b949e" font-size="11">pd.read_csv() · pd.to_datetime() · astype(float)</text>
+      <line x1="350" y1="70" x2="350" y2="90" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="120" y="90" width="460" height="50" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="350" y="108" text-anchor="middle" fill="#1e3a8a" font-weight="700" font-size="13">Always Inspect First — 6-Step Sequence</text>
+      <text x="210" y="124" text-anchor="middle" fill="#1e40af" font-size="11">shape · head()</text>
+      <text x="350" y="124" text-anchor="middle" fill="#1e40af" font-size="11">info() · isnull().sum()</text>
+      <text x="490" y="124" text-anchor="middle" fill="#1e40af" font-size="11">describe() · value_counts()</text>
+      <line x1="350" y1="140" x2="350" y2="160" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,160 468,192 350,224 232,192" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="186" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Nulls or wrong</text>
+      <text x="350" y="200" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">dtypes found?</text>
+      <text x="178" y="188" text-anchor="middle" fill="#57606a" font-size="10">NO — proceed</text>
+      <text x="522" y="188" text-anchor="middle" fill="#57606a" font-size="10">YES — fix first</text>
+
+      
+      <line x1="468" y1="192" x2="568" y2="192" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="568" y="172" width="120" height="40" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="628" y="188" text-anchor="middle" fill="#7f1d1d" font-weight="700">Fix Nulls/Types</text>
+      <text x="628" y="200" text-anchor="middle" fill="#991b1b" font-size="10">fillna(0) · astype()</text>
+      <line x1="628" y1="212" x2="628" y2="252" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="628" y1="252" x2="480" y2="252" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+      <line x1="350" y1="224" x2="350" y2="252" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,252 464,282 350,312 236,282" fill="#ede9fe" stroke="#c4b5fd" stroke-width="2"></polygon>
+      <text x="350" y="277" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">What operation</text>
+      <text x="350" y="291" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">is needed?</text>
+
+      
+      <text x="100" y="278" text-anchor="middle" fill="#57606a" font-size="10">Filter /</text>
+      <text x="100" y="290" text-anchor="middle" fill="#57606a" font-size="10">Select rows</text>
+      <text x="350" y="320" text-anchor="middle" fill="#57606a" font-size="10">Stats / NumPy</text>
+      <text x="600" y="278" text-anchor="middle" fill="#57606a" font-size="10">Join / Merge</text>
+
+      
+      <line x1="236" y1="282" x2="138" y2="282" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="18" y="350" width="160" height="68" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="98" y="368" text-anchor="middle" fill="#14532d" font-weight="700">Filter / Select</text>
+      <text x="98" y="382" text-anchor="middle" fill="#166634" font-size="11">df[df['col']&gt;n]</text>
+      <text x="98" y="395" text-anchor="middle" fill="#166634" font-size="11">isin() · ~</text>
+      <text x="98" y="408" text-anchor="middle" fill="#166634" font-size="11">sort_values()</text>
+      <line x1="138" y1="282" x2="98" y2="282" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="98" y1="282" x2="98" y2="350" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <line x1="350" y1="312" x2="350" y2="350" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="230" y="350" width="240" height="68" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="350" y="368" text-anchor="middle" fill="#1e3a8a" font-weight="700">NumPy / Stats</text>
+      <text x="350" y="382" text-anchor="middle" fill="#1e40af" font-size="11">mean · std · percentile</text>
+      <text x="350" y="395" text-anchor="middle" fill="#1e40af" font-size="11">Z-score outlier detection</text>
+      <text x="350" y="408" text-anchor="middle" fill="#1e40af" font-size="11">np.where() = CASE WHEN</text>
+
+      
+      <line x1="464" y1="282" x2="562" y2="282" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="522" y="350" width="166" height="68" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="605" y="368" text-anchor="middle" fill="#4c1d95" font-weight="700">Merge (JOIN)</text>
+      <text x="605" y="382" text-anchor="middle" fill="#5b21b6" font-size="11">df1.merge(df2,</text>
+      <text x="605" y="395" text-anchor="middle" fill="#5b21b6" font-size="11">on='key', how='left')</text>
+      <text x="605" y="408" text-anchor="middle" fill="#5b21b6" font-size="11">fillna(0) after left</text>
+      <line x1="562" y1="282" x2="605" y2="282" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="605" y1="282" x2="605" y2="350" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <line x1="98" y1="418" x2="98" y2="458" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="418" x2="350" y2="458" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="605" y1="418" x2="605" y2="458" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="98" y1="458" x2="605" y2="458" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="458" x2="350" y2="478" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="130" y="478" width="440" height="40" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="495" text-anchor="middle" fill="#854d0e" font-weight="700">Add Labels — apply(lambda) = SQL CASE WHEN</text>
+      <text x="350" y="510" text-anchor="middle" fill="#b45309" font-size="11">df['status'] = df['pct'].apply(lambda x: '🟢' if x&gt;=100 else ('🟡' if x&gt;=80 else '🔴'))</text>
+      <line x1="350" y1="518" x2="350" y2="538" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="180" y="538" width="340" height="26" rx="7" fill="#1f2328"></rect>
+      <text x="350" y="556" text-anchor="middle" fill="#e6edf3" font-weight="700">✅ Business Insight + Export CSV</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 6 Cheat Sheet — Python + NumPy + Pandas</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="blue">📥 Load + Inspect (Run Every Session)</h4>
+      <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+df = pd.read_csv(<span class="st">'sales.csv'</span>)
+df[<span class="st">'date'</span>] = pd.to_datetime(df[<span class="st">'date'</span>])
+
+<span class="cm"># 6-step inspection</span>
+df.shape            <span class="cm"># (rows, cols)</span>
+df.head()           <span class="cm"># first 5 rows</span>
+df.info()           <span class="cm"># types + nulls</span>
+df.isnull().<span class="fn">sum</span>()  <span class="cm"># nulls per col</span>
+df.describe()       <span class="cm"># stats summary</span>
+df[<span class="st">'col'</span>].value_counts()
+
+<span class="cm"># Verify total</span>
+<span class="kw">assert</span> df[<span class="st">'revenue'</span>].<span class="fn">sum</span>() == <span class="num">545000</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">🔍 Select + Filter + Sort</h4>
+      <pre><span class="cm"># Single column → Series</span>
+df[<span class="st">'revenue'</span>]
+
+<span class="cm"># Multiple cols → DataFrame</span>
+df[[<span class="st">'rep_name'</span>, <span class="st">'revenue'</span>]]
+
+<span class="cm"># Boolean filter</span>
+df[df[<span class="st">'revenue'</span>] &gt; <span class="num">90000</span>]
+
+<span class="cm"># AND / OR / NOT</span>
+df[(df[<span class="st">'a'</span>]==<span class="st">'X'</span>) &amp; (df[<span class="st">'b'</span>]&gt;<span class="num">10</span>)]
+df[(df[<span class="st">'a'</span>]==<span class="st">'X'</span>) | (df[<span class="st">'b'</span>]&gt;<span class="num">10</span>)]
+df[~(df[<span class="st">'a'</span>]==<span class="st">'X'</span>)]
+
+<span class="cm"># isin (SQL IN)</span>
+df[df[<span class="st">'prod'</span>].isin([<span class="st">'Loan'</span>,<span class="st">'Ins'</span>])]
+
+<span class="cm"># Sort</span>
+df.sort_values(<span class="st">'revenue'</span>,
+               ascending=<span class="kw">False</span>)
+df.sort_values(<span class="st">'revenue'</span>).head(<span class="num">3</span>)
+
+<span class="cm"># loc vs iloc</span>
+df.loc[<span class="num">0</span>, <span class="st">'revenue'</span>]   <span class="cm"># label</span>
+df.iloc[<span class="num">0</span>, <span class="num">3</span>]           <span class="cm"># position</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">🔢 NumPy + Statistics</h4>
+      <pre><span class="cm"># Array from Series</span>
+arr = np.array(df[<span class="st">'revenue'</span>])
+
+<span class="cm"># Stats</span>
+np.<span class="fn">mean</span>(arr)
+np.<span class="fn">median</span>(arr)
+np.<span class="fn">std</span>(arr)
+np.<span class="fn">percentile</span>(arr, <span class="num">25</span>)
+np.<span class="fn">percentile</span>(arr, <span class="num">75</span>)
+
+<span class="cm"># Vectorised operations</span>
+arr * <span class="num">1.1</span>        <span class="cm"># 10% markup all</span>
+arr / arr.<span class="fn">sum</span>() <span class="cm"># % of total</span>
+
+<span class="cm"># Z-score outlier detection</span>
+z = (df[<span class="st">'revenue'</span>] - df[<span class="st">'revenue'</span>]
+     .<span class="fn">mean</span>()) / df[<span class="st">'revenue'</span>].<span class="fn">std</span>()
+outliers = df[z.abs() &gt; <span class="num">2</span>]
+
+<span class="cm"># np.where = CASE WHEN</span>
+np.<span class="fn">where</span>(df[<span class="st">'rev'</span>]&gt;=<span class="num">100000</span>,
+         <span class="st">'High'</span>, <span class="st">'Low'</span>)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="red">🔗 Merge + Apply + Traps</h4>
+      <pre><span class="cm"># Merge (LEFT JOIN)</span>
+result = reps.merge(
+    rep_sales,
+    on=<span class="st">'rep_name'</span>,
+    how=<span class="st">'left'</span>         <span class="cm"># default=inner!</span>
+)
+result[<span class="st">'rev'</span>].fillna(<span class="num">0</span>)
+
+<span class="cm"># groupby then merge</span>
+agg = df.groupby(<span class="st">'rep'</span>)[<span class="st">'rev'</span>]\
+        .<span class="fn">sum</span>().reset_index()
+
+<span class="cm"># apply + lambda (CASE WHEN)</span>
+df[<span class="st">'status'</span>] = df[<span class="st">'pct'</span>].apply(
+    <span class="kw">lambda</span> x:
+    <span class="st">'On Track'</span> <span class="kw">if</span> x&gt;=<span class="num">100</span> <span class="kw">else</span>
+    (<span class="st">'At Risk'</span> <span class="kw">if</span> x&gt;=<span class="num">80</span> <span class="kw">else</span>
+     <span class="st">'Under'</span>))
+
+<span class="cm"># Common traps</span>
+<span class="cm"># &amp; not 'and' for boolean filter</span>
+<span class="cm"># how='inner' → Eve disappears</span>
+<span class="cm"># forget fillna → NaN in calc</span>
+<span class="cm"># date as object → fix with to_datetime</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 6</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>Uses <code>and</code> instead of <code>&amp;</code> for boolean filter — TypeError</li>
+        <li>Forgets parentheses around each condition in multi-condition filter</li>
+        <li>merge() without <code>how='left'</code> — Eve disappears silently (default = inner)</li>
+        <li>Forgets fillna(0) after left merge — NaN propagates into % calculation</li>
+        <li>Can't explain difference between Series and DataFrame</li>
+        <li>Says df.info() and df.describe() do the same thing</li>
+        <li>Uses a for loop to apply logic per row — no vectorisation awareness</li>
+        <li>Produces statistics but no business insight attached to them</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>Runs the 6-step inspection sequence before any analysis — automatic habit</li>
+        <li>States <code>how='left'</code> explicitly and why: "keep all 5 reps including Eve"</li>
+        <li>fillna(0) immediately after left merge — same instinct as SQL COALESCE</li>
+        <li>Uses <code>&amp;</code> and <code>|</code> with parentheses — no boolean operator mistakes</li>
+        <li>Explains np.where() as vectorised CASE WHEN — shows SQL-Python mapping</li>
+        <li>Z-score for outlier detection — "threshold 1.5 or 2 std deviations"</li>
+        <li>assert df['revenue'].sum() == 545000 — validation gate on load</li>
+        <li>Ends with business insight: "Alice = 42% of revenue — key-person risk"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 6 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #3b82d4;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 6 of my 15-day Data Analyst prep.
+Topic: Python Fundamentals — NumPy · pandas · DataFrames · Series · Load · Filter · Merge · Apply
+Tool: Jupyter Notebook
+Data: sales.csv + reps.csv (persistence_analytics dataset)
+Time available: 3.5 hours (20% theory, 80% hands-on)
+
+Key context: I come from SQL and Excel — map every pandas concept to its SQL/Excel equivalent.
+
+START DAY 6 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 6 → session begins.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 7 (EDA + GroupBy + Business Insights)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>What does df.groupby().agg() do? How is it different from groupby().sum()?</td><td>Day 7 opens with a GroupBy task — agg() is more powerful than single-method</td></tr>
+      <tr><td>What is the difference between reset_index() and without it after groupby?</td><td>Forgetting reset_index() after groupby is one of the most common Day 7 bugs</td></tr>
+      <tr><td>Run today's Cell 7+8 (merge + apply) from memory tonight</td><td>Day 7 builds directly on today's scorecard — speed and accuracy matter</td></tr>
+      <tr><td>Save rep_scorecard.csv — Day 7 EDA starts from this file</td><td>Continuity: Day 6 output = Day 7 input</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–5 ✅  | 
+  <strong style="color:#1e40af">Day 6 🔵 TODAY</strong>  | 
+  Day 7 · 8 · 9 · 10 · 11 · 12 · 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

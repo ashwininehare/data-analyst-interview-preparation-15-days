@@ -1,0 +1,821 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Day 10 — DAX Deep Dive · Persistent Systems</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:13px;line-height:1.6;color:#1f2328;background:#fff;padding:0 0 56px}
+.page{max-width:780px;margin:0 auto;padding:28px 16px}
+.hdr{background:#1f2328;color:#fff;border-radius:10px;padding:22px 26px;margin-bottom:26px}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px}
+.hdr h1{font-size:20px;font-weight:700}
+.date-badge{background:#d4622a;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.hdr p{color:#8b949e;font-size:12px;margin-top:4px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.badge{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;color:#fff}
+.b1{background:#d4622a}.b2{background:#7c5cd8}.b3{background:#1a7f37}.b4{background:#3b82d4}
+h2{font-size:14px;font-weight:700;border-bottom:2px solid #d4622a;padding-bottom:5px;margin:28px 0 14px;display:flex;align-items:center;gap:8px}
+.tag{color:#fff;border-radius:4px;font-size:11px;padding:2px 8px;font-weight:600;flex-shrink:0}
+.t1{background:#d4622a}.t2{background:#7c5cd8}.t3{background:#1a7f37}.t4{background:#3b82d4}.t5{background:#1f2328}
+pre{background:#1f2328;color:#e6edf3;padding:12px 14px;border-radius:7px;font-size:11px;font-family:"Cascadia Code","Consolas",monospace;overflow-x:auto;margin:8px 0;line-height:1.8;white-space:pre}
+code{background:#f0f0f0;color:#c0392b;padding:1px 5px;border-radius:3px;font-size:11px;font-family:"Consolas",monospace}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+th{background:#f7f8fa;border:1px solid #e5e7eb;padding:7px 10px;text-align:left;font-weight:600}
+td{border:1px solid #e5e7eb;padding:6px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#fafafa}
+.note{background:#fff5f0;border-left:3px solid #d4622a;border-radius:0 6px 6px 0;padding:9px 13px;font-size:12px;margin:8px 0}
+.warn{background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+.ok{background:#d1e7dd;border:1px solid #1a7f37;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+.err{background:#f8d7da;border:1px solid #dc3545;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+.qa{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px;overflow:hidden}
+.qa-q{background:#f7f8fa;padding:9px 13px;font-weight:600;font-size:13px;border-bottom:1px solid #e5e7eb}
+.qa-q .qn{color:#d4622a;margin-right:6px}
+.qa-body{padding:11px 13px}
+.qa-a{background:#fff5f0;border-left:3px solid #d4622a;border-radius:0 4px 4px 0;padding:8px 11px;font-size:12px;font-style:italic;margin-bottom:8px}
+.meta-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.mt{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.mt-why{background:#fff3cd;color:#856404}
+.mt-trap{background:#f8d7da;color:#842029}
+.mt-kw{background:#d1e7dd;color:#0a3622}
+.task{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden}
+.task-hd{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:#f7f8fa;border-bottom:1px solid #e5e7eb}
+.task-title{font-weight:700;font-size:13px}
+.task-tags{display:flex;gap:7px;align-items:center}
+.diff{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.easy{background:#d1e7dd;color:#0a3622}.med{background:#fff3cd;color:#856404}.hard{background:#f8d7da;color:#842029}
+.ttime{font-size:11px;color:#57606a;padding:2px 8px;background:#f0f0f0;border-radius:4px}
+.task-body{padding:12px 13px}
+.steps{list-style:none;padding:0;counter-reset:st}
+.steps li{counter-increment:st;display:flex;gap:10px;margin-bottom:11px;align-items:flex-start}
+.steps li::before{content:counter(st);background:#d4622a;color:#fff;border-radius:50%;width:21px;height:21px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.st-title{font-weight:700;font-size:12px}
+.st-desc{font-size:11px;color:#57606a;margin-top:2px}
+.fc-box{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:600;line-height:1.4}
+.fc-start{background:#1f2328;color:#fff;border-radius:22px}
+.fc-q{background:#d4622a;color:#fff}
+.fc-yes{background:#d1e7dd;color:#0a3622;border:1px solid #1a7f37}
+.fc-no{background:#f8d7da;color:#842029;border:1px solid #dc3545}
+.fc-act{background:#7c5cd8;color:#fff}
+.fc-ok{background:#1a7f37;color:#fff;border-radius:22px}
+.arr{width:2px;height:20px;background:#57606a;margin:0 auto;position:relative;flex-shrink:0}
+.arr::after{content:'';position:absolute;bottom:-5px;left:-4px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #57606a}
+.arr-g{background:#1a7f37}.arr-g::after{border-top-color:#1a7f37}
+.arr-r{background:#d4622a}.arr-r::after{border-top-color:#d4622a}
+.arr-o{background:#d4622a}.arr-o::after{border-top-color:#d4622a}
+.two-br{display:flex;justify-content:center;gap:16px;width:100%}
+.br-col{display:flex;flex-direction:column;align-items:center;flex:1;max-width:220px}
+.br-lbl{font-size:10px;font-weight:700;margin-bottom:4px}
+.lbl-y{color:#1a7f37}.lbl-n{color:#d4622a}
+.concept-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cbox{border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;background:#f7f8fa}
+.cbox-title{font-weight:700;font-size:12px;margin-bottom:6px}
+.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cs-box{border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;background:#f7f8fa}
+.cs-title{font-weight:700;font-size:12px;margin-bottom:8px}
+.lessons{background:#f7f8fa;border-left:4px solid #7c5cd8;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:20px}
+.lessons h3{font-size:13px;font-weight:700;color:#7c5cd8;margin-bottom:10px}
+.lessons ol{padding-left:18px}
+.lessons li{margin-bottom:7px;font-size:12px}
+.ck-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.ck-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:12px}
+.ck-num{background:#d4622a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.tq{font-size:12px;margin-bottom:8px;padding-left:12px;border-left:3px solid #d4622a}
+.exec-strip{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.ex{padding:5px 10px;border-radius:4px;font-size:11px;font-weight:700;color:#fff}
+.ex-arr{align-self:center;color:#57606a;font-size:13px}
+hr{border:none;border-top:2px solid #e5e7eb;margin:28px 0}
+.footer{margin-top:44px;padding-top:14px;border-top:1px solid #e5e7eb;text-align:center;font-size:12px;color:#57606a}
+/* DAX pattern box */
+.dax-pattern{background:#1a1a2e;color:#e6edf3;border-radius:8px;padding:14px 16px;margin:10px 0}
+.dax-title{font-size:12px;font-weight:700;color:#d4622a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.dax-desc{font-size:11px;color:#8b949e;margin-bottom:6px}
+/* KPI grid */
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.kpi-box{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;text-align:center}
+.kpi-val{font-size:20px;font-weight:700;color:#d4622a}
+.kpi-lbl{font-size:11px;color:#57606a;margin-top:2px}
+.kpi-chg{font-size:11px;font-weight:700;margin-top:3px}
+.up{color:#1a7f37}.dn{color:#d4622a}
+</style>
+</head>
+<body>
+<div class="page">
+
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div><h1>📅 Day 10 — DAX Deep Dive · KPIs · Dashboard · Storytelling</h1>
+    <p>Persistent Systems · Data Analyst Interview Prep · Sept 27, 2026</p></div>
+    <span class="date-badge">📆 Sept 27, 2026 · Saturday</span>
+  </div>
+  <div class="badges">
+    <span class="badge b1">DAX Advanced</span>
+    <span class="badge b2">Time Intelligence</span>
+    <span class="badge b3">KPI Design</span>
+    <span class="badge b4">Dashboard Storytelling</span>
+    <span class="badge b1">BFSI</span>
+  </div>
+</div>
+
+
+<h2><span class="tag t1">Recruiter Lens</span> Why Persistent Goes Deep on DAX</h2>
+<table>
+  <tr><th>What They Test</th><th>Why It Matters</th></tr>
+  <tr><td>CALCULATE + FILTER + VAR pattern</td><td>Every BFSI KPI — NPA rate, churn %, branch ranking — needs this</td></tr>
+  <tr><td>SUMX / AVERAGEX (iterator functions)</td><td>Row-level calculations across filtered context — loan EMI weighted avg</td></tr>
+  <tr><td>Time intelligence: MTD, QTD, YTD</td><td>Every MIS report needs period-over-period comparison</td></tr>
+  <tr><td>SAMEPERIODLASTYEAR / DATEADD</td><td>YoY growth is the first question every CFO asks</td></tr>
+  <tr><td>RANKX</td><td>Branch ranking, top rep leaderboard — standard dashboard feature</td></tr>
+  <tr><td>Dashboard storytelling</td><td>A technically correct dashboard with no business story = wasted effort</td></tr>
+</table>
+
+
+<h2><span class="tag t1">Theory</span> DAX Evaluation — Row Context vs Filter Context</h2>
+<div class="concept-grid">
+  <div class="cbox">
+    <div class="cbox-title" style="color:#d4622a">Filter Context</div>
+    <div style="font-size:12px;color:#57606a;margin-bottom:8px">Comes from slicers, visual filters, report filters. Affects MEASURES.</div>
+    <pre style="font-size:10px;padding:6px 8px">-- Slicer: region = "North"
+-- Filter context = {North}
+SUM(sales[revenue])
+-- Returns North revenue only</pre>
+    <div class="ok" style="font-size:11px;padding:5px 8px;margin-top:4px">CALCULATE modifies filter context</div>
+  </div>
+  <div class="cbox">
+    <div class="cbox-title" style="color:#7c5cd8">Row Context</div>
+    <div style="font-size:12px;color:#57606a;margin-bottom:8px">Active when iterating row-by-row. Used in CALCULATED COLUMNS and iterator functions (SUMX, AVERAGEX).</div>
+    <pre style="font-size:10px;padding:6px 8px">-- SUMX iterates row by row
+SUMX(
+  sales,
+  sales[revenue] * 1.18  -- GST per row
+)</pre>
+    <div class="warn" style="font-size:11px;padding:5px 8px;margin-top:4px">CALCULATE inside iterator converts row context to filter context</div>
+  </div>
+</div>
+
+
+<h2><span class="tag t1">DAX Patterns</span> 12 Must-Know Patterns</h2>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 1 — Basic Aggregation</div>
+  <div class="dax-desc">Foundation — every dashboard starts here</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">Total Revenue   = SUM(sales[revenue])
+Avg Revenue     = AVERAGE(sales[revenue])
+Deal Count      = COUNT(sales[sale_id])
+Unique Reps     = DISTINCTCOUNT(sales[rep_name])
+Max Sale        = MAX(sales[revenue])</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 2 — % of Total (VAR + CALCULATE + ALL)</div>
+  <div class="dax-desc">Most asked DAX pattern — asked in every Persistent Power BI interview</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">Revenue % of Total =
+VAR current = SUM(sales[revenue])
+VAR total   = CALCULATE(SUM(sales[revenue]), ALL(sales))
+RETURN DIVIDE(current, total, 0) * 100</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 3 — Fixed Filter (Ignore Slicer)</div>
+  <div class="dax-desc">Always return a specific segment regardless of user slicer</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">North Revenue =
+CALCULATE(SUM(sales[revenue]), sales[region] = "North")
+
+Enterprise Revenue =
+CALCULATE(SUM(sales[revenue]),
+    FILTER(reps, reps[team] = "Enterprise"))</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 4 — Achievement % (Safe Division)</div>
+  <div class="dax-desc">KPI card — rep/branch vs target</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">Achievement % =
+VAR achieved = SUM(sales[revenue])
+VAR target   = SUM(reps[target])
+RETURN DIVIDE(achieved, target, 0) * 100
+
+-- Status flag
+Achievement Status =
+IF([Achievement %] &gt;= 100, "✅ HIT",
+IF([Achievement %] &gt;= 80,  "⚠️ NEAR", "❌ MISSED"))</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 5 — RANKX (Branch / Rep Leaderboard)</div>
+  <div class="dax-desc">Standard dashboard feature — top performers, branch ranking</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">Rep Rank =
+RANKX(
+    ALL(sales[rep_name]),          -- rank across ALL reps (ignore filter)
+    [Total Revenue],               -- rank by this measure
+    ,                              -- value to rank (blank = current context)
+    DESC,                          -- highest revenue = Rank 1
+    Dense                          -- no gaps in ranking (1,2,2,3 not 1,2,2,4)
+)
+
+-- Rank within region only
+Rep Rank in Region =
+RANKX(
+    ALLEXCEPT(sales, sales[region]),  -- keep region filter, remove rep filter
+    [Total Revenue],,DESC,Dense
+)</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 6 — SUMX / AVERAGEX (Iterator Functions)</div>
+  <div class="dax-desc">Row-level calculation before aggregating — weighted averages, conditional sums</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">-- Revenue with 18% GST (calculated per row, then summed)
+Revenue with GST =
+SUMX(sales, sales[revenue] * 1.18)
+
+-- Weighted average revenue (only deals above 10,000)
+Weighted Avg =
+AVERAGEX(
+    FILTER(sales, sales[revenue] &gt; 10000),
+    sales[revenue]
+)
+
+-- Total revenue per rep × their target weight
+Weighted Target Score =
+SUMX(
+    reps,
+    CALCULATE(SUM(sales[revenue])) / reps[target]
+)</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 7 — Time Intelligence: MTD / QTD / YTD</div>
+  <div class="dax-desc">Requires a proper Date table marked as Date Table in Power BI</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">-- Month-to-Date Revenue
+Revenue MTD =
+CALCULATE([Total Revenue], DATESMTD(dim_date[date]))
+
+-- Quarter-to-Date Revenue
+Revenue QTD =
+CALCULATE([Total Revenue], DATESQTD(dim_date[date]))
+
+-- Year-to-Date Revenue
+Revenue YTD =
+CALCULATE([Total Revenue], DATESYTD(dim_date[date]))
+
+-- Fiscal year YTD (India: April–March)
+Revenue YTD Fiscal =
+CALCULATE([Total Revenue], DATESYTD(dim_date[date], "03-31"))</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 8 — Previous Period Comparison (YoY / MoM)</div>
+  <div class="dax-desc">CFO's first question: "How does this compare to last year?"</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">-- Same period last year
+Revenue SPLY =
+CALCULATE([Total Revenue],
+    SAMEPERIODLASTYEAR(dim_date[date]))
+
+-- Previous month
+Revenue Prev Month =
+CALCULATE([Total Revenue],
+    DATEADD(dim_date[date], -1, MONTH))
+
+-- Previous quarter
+Revenue Prev Quarter =
+CALCULATE([Total Revenue],
+    DATEADD(dim_date[date], -1, QUARTER))
+
+-- YoY Growth %
+YoY Growth % =
+VAR curr = [Total Revenue]
+VAR prev = [Revenue SPLY]
+RETURN DIVIDE(curr - prev, prev, 0) * 100</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 9 — Running Total (Cumulative)</div>
+  <div class="dax-desc">Cumulative revenue — line chart that always goes up</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">Running Total Revenue =
+CALCULATE(
+    [Total Revenue],
+    FILTER(
+        ALL(dim_date[date]),
+        dim_date[date] &lt;= MAX(dim_date[date])  -- up to current date
+    )
+)</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 10 — ALLEXCEPT (Keep One Filter, Remove Others)</div>
+  <div class="dax-desc">% within a category — keeps region filter, removes all others</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">-- Revenue % within region (each region sums to 100%)
+Revenue % Within Region =
+VAR current = SUM(sales[revenue])
+VAR region_total = CALCULATE(
+    SUM(sales[revenue]),
+    ALLEXCEPT(sales, sales[region])  -- remove all filters except region
+)
+RETURN DIVIDE(current, region_total, 0) * 100</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 11 — SELECTEDVALUE (Dynamic Titles)</div>
+  <div class="dax-desc">Dashboard title changes based on slicer selection</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">-- Dynamic chart title
+Chart Title =
+"Revenue Dashboard — " &amp;
+SELECTEDVALUE(reps[team], "All Teams")
+-- If user selects "Enterprise" → "Revenue Dashboard — Enterprise"
+-- If nothing selected → "Revenue Dashboard — All Teams"</pre>
+</div>
+
+<div class="dax-pattern">
+  <div class="dax-title">Pattern 12 — USERELATIONSHIP (Inactive Relationship)</div>
+  <div class="dax-desc">When a table has two date columns — only one relationship can be active</div>
+  <pre style="background:transparent;padding:0;margin:0;font-size:11px">-- Use inactive relationship to filter by a different date column
+Revenue by Close Date =
+CALCULATE(
+    [Total Revenue],
+    USERELATIONSHIP(sales[close_date], dim_date[date])
+)</pre>
+</div>
+
+
+<h2><span class="tag t2">Interview Q&amp;A</span> 10 Questions — MNC Level</h2>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q1</span> What is the difference between SUMX and SUM?</div>
+  <div class="qa-body">
+    <div class="qa-a">"SUM aggregates a single column — all values summed directly. SUMX is an iterator — it goes row by row, evaluates an expression for each row, then sums the results. Use SUM when the column already has the final value. Use SUMX when you need to calculate something per row first — like revenue × tax rate per transaction before summing."</div>
+    <pre>-- SUM: total revenue column directly
+SUM(sales[revenue])
+
+-- SUMX: revenue + 18% GST per row, then total
+SUMX(sales, sales[revenue] * 1.18)</pre>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: iterator function understanding — advanced DAX</span>
+      <span class="mt mt-trap">Trap: Using SUMX when SUM is sufficient — shows unnecessary complexity</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q2</span> What is time intelligence in DAX and why does it require a Date table?</div>
+  <div class="qa-body">
+    <div class="qa-a">"Time intelligence functions like DATEADD, SAMEPERIODLASTYEAR, DATESMTD calculate measures relative to time periods — previous month, same period last year, year-to-date. They require a continuous, gap-free Date table marked as a Date Table in Power BI. Without it, these functions don't know what 'previous month' means — they need a complete calendar to navigate forward and back in time accurately."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: real Power BI modeling experience — Date table is mandatory</span>
+      <span class="mt mt-trap">Trap: Using time intelligence on the raw sales[sale_date] column without a Date table — gives wrong results</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q3</span> How do you create a Year-over-Year growth measure?</div>
+  <div class="qa-body">
+    <pre>YoY Growth % =
+VAR curr = [Total Revenue]
+VAR prev = CALCULATE([Total Revenue],
+               SAMEPERIODLASTYEAR(dim_date[date]))
+RETURN DIVIDE(curr - prev, prev, 0) * 100</pre>
+    <div class="qa-a">"I store current and previous period values in VAR, subtract, divide safely with DIVIDE, multiply by 100 for percentage. SAMEPERIODLASTYEAR returns the equivalent period 12 months ago. The VAR pattern avoids calling [Total Revenue] twice, which is more efficient on large models."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: time intelligence — first question every CFO asks</span>
+      <span class="mt mt-kw">Keywords: SAMEPERIODLASTYEAR · VAR · DIVIDE · period comparison</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q4</span> What is RANKX and how do you use it for a leaderboard?</div>
+  <div class="qa-body">
+    <pre>Rep Rank =
+RANKX(
+    ALL(sales[rep_name]),   -- rank across ALL reps
+    [Total Revenue],        -- by this measure
+    ,                       -- blank = current context
+    DESC,                   -- highest = Rank 1
+    Dense                   -- no rank gaps (1,2,2,3)
+)</pre>
+    <div class="qa-a">"RANKX ranks the current context value against a specified set. ALL(sales[rep_name]) removes the rep filter so every rep is ranked against all others. Dense ranking means tied values share a rank and the next rank is sequential — important for leaderboards where you don't want gaps."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: RANKX is a favourite advanced DAX interview question</span>
+      <span class="mt mt-trap">Trap: Forgetting ALL() — without it, every rep always ranks 1st in their own filtered context</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q5</span> What is the difference between ALL, ALLEXCEPT, and ALLSELECTED?</div>
+  <div class="qa-body">
+    <table>
+      <tr><th>Function</th><th>Removes</th><th>Keeps</th><th>Use When</th></tr>
+      <tr><td><code>ALL(table)</code></td><td>All filters on table</td><td>Nothing</td><td>Grand total denominator</td></tr>
+      <tr><td><code>ALL(col)</code></td><td>Filter on that column only</td><td>Other column filters</td><td>Remove one specific filter</td></tr>
+      <tr><td><code>ALLEXCEPT(t,col)</code></td><td>All filters except specified column</td><td>Specified column</td><td>% within a category</td></tr>
+      <tr><td><code>ALLSELECTED()</code></td><td>Column-level filters</td><td>Slicer selections</td><td>% within slicer selection</td></tr>
+    </table>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: nuanced DAX filter manipulation — senior analyst level</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q6</span> How do you build a KPI card that shows current value, target, and % achievement?</div>
+  <div class="qa-body">
+    <div class="qa-a">"I create three measures: Total Revenue (SUM), Target Total (SUM from reps table), and Achievement % (DIVIDE with safe fallback). In Power BI, I use a KPI visual or a Card with a reference value. For a richer KPI card, I use a Card visual with [Total Revenue] as the main value, add a subtitle using SELECTEDVALUE for dynamic context, and use conditional formatting to turn the card green above 100% achievement and red below 80%."</div>
+    <div class="meta-row">
+      <span class="mt mt-kw">Keywords: KPI · conditional formatting · DIVIDE · reference value · dynamic</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q7</span> What is the VAR pattern and why do you always use it?</div>
+  <div class="qa-body">
+    <pre>-- Without VAR (SUM computed TWICE — inefficient)
+DIVIDE(SUM(sales[revenue]),
+       CALCULATE(SUM(sales[revenue]), ALL(sales)), 0)
+
+-- With VAR (SUM computed ONCE — stored and reused)
+VAR curr  = SUM(sales[revenue])
+VAR total = CALCULATE(SUM(sales[revenue]), ALL(sales))
+RETURN DIVIDE(curr, total, 0)</pre>
+    <div class="qa-a">"VAR stores an intermediate result and reuses it. Three reasons: performance (expression evaluated once), readability (named variables are self-documenting), and debuggability (I can replace RETURN with VAR name to check intermediate values). On a 1M row BFSI dataset, computing [Total Revenue] twice in every cell of a 50-row table = 100 evaluations vs 50."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: production DAX quality — junior vs senior analyst signal</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q8</span> How do you tell a data story with a Power BI dashboard?</div>
+  <div class="qa-body">
+    <div class="qa-a">"A dashboard without a story is just a collection of charts. I structure it as: top row = headline KPIs (total revenue, achievement %, YoY growth) — the 5-second take. Middle section = trends and comparisons — line chart of monthly revenue, bar chart of rep performance vs target. Bottom = detail table for drill-down. Every visual has a clear title that answers a question, not just a label. I can tell the CFO in 30 seconds: revenue is up 18% YoY, North is our strongest region, David is below target and needs attention."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: can you present insights to a non-technical executive — Persistent's clients are banks</span>
+      <span class="mt mt-trap">Trap: Describing visuals instead of insights — "this bar chart shows revenue" vs "North outperforms by 26%"</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q9</span> How do you create a Date table in Power BI?</div>
+  <div class="qa-body">
+    <pre>-- DAX: Create Date table
+dim_date =
+CALENDAR(DATE(2026,1,1), DATE(2026,12,31))
+
+-- Add columns
+Month Number = MONTH(dim_date[Date])
+Month Name   = FORMAT(dim_date[Date], "MMMM")
+Quarter      = "Q" &amp; QUARTER(dim_date[Date])
+Year         = YEAR(dim_date[Date])
+Week Number  = WEEKNUM(dim_date[Date])</pre>
+    <div class="qa-a">"I create a Date table using CALENDAR() in DAX, add Month, Quarter, Year columns, then mark it as a Date Table in Table Tools. Then I relate it to my fact table on the date column. This is mandatory for all time intelligence functions to work correctly."</div>
+    <div class="meta-row">
+      <span class="mt mt-trap">Trap: Using AUTO date/time in Power BI settings — creates hidden Date tables that conflict with explicit ones</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q10</span> A CFO asks: "Are we on track to hit annual target?" How do you answer with DAX?</div>
+  <div class="qa-body">
+    <pre>-- YTD Revenue
+Revenue YTD =
+CALCULATE([Total Revenue], DATESYTD(dim_date[date]))
+
+-- Annualised run rate (project YTD to full year)
+Annualised Revenue =
+VAR ytd      = [Revenue YTD]
+VAR days_elapsed = DATEDIFF(DATE(2026,1,1),
+                    TODAY(), DAY)
+VAR days_total   = 365
+RETURN (ytd / days_elapsed) * days_total
+
+-- On track flag
+On Track =
+IF([Annualised Revenue] &gt;= [Target Total],
+   "✅ ON TRACK", "❌ AT RISK")</pre>
+    <div class="qa-a">"I calculate YTD revenue, divide by days elapsed to get daily run rate, project to full year, compare to annual target. Then surface this as a KPI card with an on-track/at-risk flag. That's what the CFO needs — not just the number but the trajectory."</div>
+    <div class="meta-row">
+      <span class="mt mt-kw">Keywords: YTD · run rate · projection · annualised · trajectory · DATEDIFF</span>
+    </div>
+  </div>
+</div>
+
+
+<h2><span class="tag t3">Tasks</span> 4 Hands-On Tasks</h2>
+
+<div class="task">
+  <div class="task-hd"><span class="task-title">Task 1 — Create 5 Advanced DAX Measures</span>
+    <div class="task-tags"><span class="diff med">Medium</span><span class="ttime">20 min</span></div></div>
+  <div class="task-body">
+    <p style="font-size:13px;margin-bottom:8px"><strong>Problem:</strong> In Power BI (Day 9 model), create these 5 measures. Paste each DAX here.</p>
+    <pre>-- 1. Rep Rank (Dense, ALL reps, by Total Revenue)
+-- 2. Revenue % Within Region (ALLEXCEPT)
+-- 3. Revenue YTD (requires Date table)
+-- 4. YoY Growth % (SAMEPERIODLASTYEAR)
+-- 5. Achievement Status (HIT / NEAR / MISSED text flag)</pre>
+    <div class="warn"><strong>⚠️ For measures 3 &amp; 4:</strong> You need a Date table. Create it first using the CALENDAR() DAX above, add Month/Quarter/Year columns, mark as Date Table, relate to sales[sale_date].</div>
+  </div>
+</div>
+
+<div class="task">
+  <div class="task-hd"><span class="task-title">Task 2 — Build a KPI Dashboard Page</span>
+    <div class="task-tags"><span class="diff hard">Hard</span><span class="ttime">30 min</span></div></div>
+  <div class="task-body">
+    <p style="font-size:13px;margin-bottom:10px"><strong>Build a 1-page "Sales Performance" dashboard with this layout:</strong></p>
+    <table>
+      <tr><th>Row</th><th>Visuals</th><th>Fields</th></tr>
+      <tr><td>Top (headline)</td><td>3 KPI Cards</td><td>Total Revenue · Achievement % · Rep Rank (top rep name)</td></tr>
+      <tr><td>Middle left</td><td>Line Chart</td><td>X: Month · Y: Total Revenue + Revenue YTD</td></tr>
+      <tr><td>Middle right</td><td>Bar Chart</td><td>X: rep_name · Y: Total Revenue · Color by Achievement Status</td></tr>
+      <tr><td>Bottom</td><td>Matrix Table</td><td>Rows: region · Cols: product · Values: Total Revenue</td></tr>
+    </table>
+    <div style="margin-top:10px;font-weight:700;font-size:12px">Add:</div>
+    <pre>- Slicer: reps[team]
+- Page title: "Persistence Analytics — Sales KPI Dashboard"
+- Conditional formatting on Matrix: color scale on revenue values
+- Tooltip on bar chart: show Achievement % and Rep Rank on hover</pre>
+  </div>
+</div>
+
+<div class="task">
+  <div class="task-hd"><span class="task-title">Task 3 — Storytelling: Present Your Dashboard</span>
+    <div class="task-tags"><span class="diff med">Medium</span><span class="ttime">10 min</span></div></div>
+  <div class="task-body">
+    <p style="font-size:13px;margin-bottom:8px"><strong>Problem:</strong> Write a 60-second dashboard walkthrough as if presenting to the Sales Director. Use this structure:</p>
+    <ol class="steps">
+      <li><div><div class="st-title">Headline (10 sec)</div><div class="st-desc">Total revenue, achievement %, one sentence on overall performance</div></div></li>
+      <li><div><div class="st-title">Trend (15 sec)</div><div class="st-desc">What the line chart shows — improving, declining, or seasonal?</div></div></li>
+      <li><div><div class="st-title">Top performer + concern (15 sec)</div><div class="st-desc">Who is hitting target? Who needs attention?</div></div></li>
+      <li><div><div class="st-title">Regional insight (10 sec)</div><div class="st-desc">Which region/product combination is strongest?</div></div></li>
+      <li><div><div class="st-title">Recommendation (10 sec)</div><div class="st-desc">One actionable business recommendation from the data</div></div></li>
+    </ol>
+    <div class="note"><strong>Interview tip:</strong> Type your 60-second walkthrough here. I'll evaluate it like a Persistent client presentation round.</div>
+  </div>
+</div>
+
+<div class="task">
+  <div class="task-hd"><span class="task-title">Task 4 — Debug This Broken DAX</span>
+    <div class="task-tags"><span class="diff hard">Hard</span><span class="ttime">15 min</span></div></div>
+  <div class="task-body">
+    <p style="font-size:13px;margin-bottom:8px"><strong>Problem:</strong> These 3 DAX measures have bugs. Identify and fix each one.</p>
+    <pre>-- Bug 1: Rep Rank always shows 1 for every rep
+Rep Rank = RANKX(sales[rep_name], [Total Revenue],, DESC, Dense)
+
+-- Bug 2: Revenue % of Total always shows 100%
+Revenue % =
+DIVIDE(SUM(sales[revenue]),
+       SUM(sales[revenue]), 0) * 100
+
+-- Bug 3: YoY Growth crashes with blank result
+YoY % =
+[Total Revenue] - CALCULATE([Total Revenue],
+    SAMEPERIODLASTYEAR(sales[sale_date]))</pre>
+    <div class="warn"><strong>Attempt first.</strong> Identify what each bug is and write the corrected version. This type of debugging question is common at Persistent technical interviews.</div>
+  </div>
+</div>
+
+
+<h2><span class="tag t4">Case Study</span> BFSI DAX Scenario</h2>
+<div style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-bottom:12px">
+  <div style="font-weight:700;font-size:13px;margin-bottom:8px">📋 Scenario</div>
+  <p style="font-size:13px;margin-bottom:10px"><em>"A Persistent BFSI client wants a branch performance dashboard showing: 1) Which branches are above/below target 2) Month-over-month trend 3) What % of total company revenue each branch contributes 4) How each branch ranks across the network."</em></p>
+  <p style="font-size:13px;margin-bottom:8px;font-weight:600">Write the 4 DAX measures and describe the visual layout.</p>
+  <div class="ok"><strong>Hint:</strong> You need: Achievement %, MoM Growth (DATEADD), Revenue % of Total (ALL), Branch Rank (RANKX with ALL). Each from a different DAX pattern you've learned today.</div>
+</div>
+
+<hr />
+
+
+<h2><span class="tag t5">Flowcharts</span> Day 10 — Decision Guides</h2>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#d4622a;margin-top:0;font-size:13px"><span class="tag t1">FC 1</span> Which DAX Function to Use?</h2>
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="fc-box fc-start" style="width:240px">I need to write a DAX measure</div>
+    <div class="arr arr-o"></div>
+    <div class="fc-box fc-q" style="width:380px">Do I need to compare across time periods?</div>
+    <div class="two-br">
+      <div class="br-col">
+        <div class="br-lbl lbl-y">YES</div>
+        <div class="arr arr-g"></div>
+        <div class="fc-box fc-act" style="width:180px">Time Intelligence</div>
+        <div style="background:#ede9fe;border:1px solid #7c5cd8;border-radius:8px;padding:8px;width:190px;margin-top:6px;font-size:11px;line-height:1.8;color:#1f2328">
+          DATESMTD → Month-to-date<br />DATESQTD → Quarter-to-date<br />DATESYTD → Year-to-date<br />SAMEPERIODLASTYEAR → YoY<br />DATEADD(-1,MONTH) → Prev month
+        </div>
+      </div>
+      <div class="br-col">
+        <div class="br-lbl lbl-n">NO</div>
+        <div class="arr arr-r"></div>
+        <div class="fc-box fc-q" style="width:180px">Need % of total or ranking?</div>
+        <div class="two-br" style="gap:6px">
+          <div class="br-col">
+            <div class="br-lbl lbl-y" style="font-size:9px">% Total</div>
+            <div class="arr arr-g"></div>
+            <div class="fc-box fc-yes" style="width:85px;font-size:11px">CALCULATE + ALL</div>
+          </div>
+          <div class="br-col">
+            <div class="br-lbl lbl-y" style="font-size:9px">Ranking</div>
+            <div class="arr arr-g"></div>
+            <div class="fc-box fc-yes" style="width:85px;font-size:11px">RANKX</div>
+          </div>
+        </div>
+        <div class="fc-box fc-q" style="width:180px;margin-top:8px">Need row-level calc?</div>
+        <div class="two-br" style="gap:6px;margin-top:0">
+          <div class="br-col">
+            <div class="br-lbl lbl-y" style="font-size:9px">YES</div>
+            <div class="arr arr-g"></div>
+            <div class="fc-box fc-yes" style="width:85px;font-size:11px">SUMX / AVERAGEX</div>
+          </div>
+          <div class="br-col">
+            <div class="br-lbl lbl-n" style="font-size:9px">NO</div>
+            <div class="arr arr-r"></div>
+            <div class="fc-box fc-no" style="width:85px;font-size:11px">SUM / AVG / COUNT</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#7c5cd8;margin-top:0;font-size:13px"><span class="tag t2">FC 2</span> Debug a Broken DAX Measure</h2>
+  <ol class="steps">
+    <li><div><div class="st-title">Check filter context first</div><div class="st-desc">Is the measure returning the same value everywhere? → Missing ALL() in denominator or RANKX</div></div></li>
+    <li><div><div class="st-title">Check for missing VAR / double calculation</div><div class="st-desc">Numerator and denominator using same SUM without ALL → always 100%</div></div></li>
+    <li><div><div class="st-title">Check time intelligence setup</div><div class="st-desc">Blank result? → Date table not marked as Date Table, or relationship not on date column</div></div></li>
+    <li><div><div class="st-title">Check RANKX ALL() scope</div><div class="st-desc">Rank always 1? → Missing ALL() — every rep in its own filter context is always rank 1</div></div></li>
+    <li><div><div class="st-title">Replace RETURN with VAR to inspect intermediate values</div><div class="st-desc">Change RETURN to RETURN curr or RETURN prev to see which part is blank/wrong</div></div></li>
+  </ol>
+  <div class="err"><strong>Task 4 Bug answers:</strong><br />
+  Bug 1: Missing ALL() — should be RANKX(ALL(sales[rep_name]), ...)<br />
+  Bug 2: Missing ALL() in denominator — both sides are the same filtered SUM → always 100%<br />
+  Bug 3: Time intelligence needs a Date table — sales[sale_date] raw column doesn't work with SAMEPERIODLASTYEAR. Also missing DIVIDE for safe division.</div>
+</div>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#1a7f37;margin-top:0;font-size:13px"><span class="tag t3">FC 3</span> Dashboard Design — Layout Logic</h2>
+  <div style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin:10px 0">
+    <div style="background:#1f2328;color:#fff;padding:8px 14px;font-size:12px;font-weight:700">Dashboard Layout — F-Pattern Reading (how eyes scan a screen)</div>
+    <div style="padding:12px 14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
+        <div style="background:#d4622a;color:#fff;border-radius:6px;padding:8px;text-align:center;font-size:11px;font-weight:700">📊 KPI Card<br />Total Revenue</div>
+        <div style="background:#d4622a;color:#fff;border-radius:6px;padding:8px;text-align:center;font-size:11px;font-weight:700">📊 KPI Card<br />Achievement %</div>
+        <div style="background:#d4622a;color:#fff;border-radius:6px;padding:8px;text-align:center;font-size:11px;font-weight:700">📊 KPI Card<br />YoY Growth %</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+        <div style="background:#3b82d4;color:#fff;border-radius:6px;padding:10px;text-align:center;font-size:11px;font-weight:700">📈 Line Chart<br />Monthly Revenue Trend</div>
+        <div style="background:#7c5cd8;color:#fff;border-radius:6px;padding:10px;text-align:center;font-size:11px;font-weight:700">📊 Bar Chart<br />Rep Performance vs Target</div>
+      </div>
+      <div style="background:#1a7f37;color:#fff;border-radius:6px;padding:8px;text-align:center;font-size:11px;font-weight:700">📋 Matrix Table — Region × Product Revenue (drill-down detail)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+        <div style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:6px;padding:8px;text-align:center;font-size:11px">🔽 Slicer: Team</div>
+        <div style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:6px;padding:8px;text-align:center;font-size:11px">🔽 Slicer: Region/Zone</div>
+      </div>
+    </div>
+  </div>
+  <table style="margin-top:6px">
+    <tr><th>Row</th><th>Purpose</th><th>User reads in</th></tr>
+    <tr><td>Top — KPI Cards</td><td>Headline numbers — overall health</td><td>5 seconds</td></tr>
+    <tr><td>Middle — Trend + Comparison</td><td>Context — is it improving? Who is performing?</td><td>30 seconds</td></tr>
+    <tr><td>Bottom — Detail table</td><td>Drill-down for stakeholders who want specifics</td><td>As needed</td></tr>
+  </table>
+</div>
+
+<hr />
+
+
+<h2><span class="tag t5">Cheat Sheet</span> DAX Day 10 — All Patterns Quick Reference</h2>
+<div class="cs-grid">
+  <div class="cs-box">
+    <div class="cs-title" style="color:#d4622a">⚡ Core Measures</div>
+    <pre style="font-size:10px;padding:8px 10px">Total Revenue  = SUM(sales[revenue])
+Avg Revenue    = AVERAGE(sales[revenue])
+Deal Count     = COUNT(sales[sale_id])
+Unique Reps    = DISTINCTCOUNT(sales[rep_name])
+Target Total   = SUM(reps[target])
+Achievement %  = DIVIDE([Total Revenue],
+                   [Target Total],0)*100</pre>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title" style="color:#7c5cd8">🎯 CALCULATE Patterns</div>
+    <pre style="font-size:10px;padding:8px 10px">-- Fixed segment
+North = CALCULATE(SUM(sales[revenue]),
+          sales[region]="North")
+
+-- % of total
+Rev% =
+VAR c = SUM(sales[revenue])
+VAR t = CALCULATE(SUM(sales[revenue]),ALL(sales))
+RETURN DIVIDE(c,t,0)*100
+
+-- % within category
+InRegion% =
+VAR c = SUM(sales[revenue])
+VAR r = CALCULATE(SUM(sales[revenue]),
+          ALLEXCEPT(sales,sales[region]))
+RETURN DIVIDE(c,r,0)*100</pre>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title" style="color:#1a7f37">📅 Time Intelligence</div>
+    <pre style="font-size:10px;padding:8px 10px">MTD  = CALCULATE([Rev],DATESMTD(d[date]))
+QTD  = CALCULATE([Rev],DATESQTD(d[date]))
+YTD  = CALCULATE([Rev],DATESYTD(d[date]))
+
+PrevMonth = CALCULATE([Rev],
+              DATEADD(d[date],-1,MONTH))
+
+SPLY = CALCULATE([Rev],
+         SAMEPERIODLASTYEAR(d[date]))
+
+YoY% =
+VAR curr=  [Rev]
+VAR prev = [SPLY]
+RETURN DIVIDE(curr-prev,prev,0)*100</pre>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title" style="color:#3b82d4">🏆 Advanced Patterns</div>
+    <pre style="font-size:10px;padding:8px 10px">-- RANKX leaderboard
+Rank = RANKX(ALL(sales[rep_name]),
+         [Total Revenue],,DESC,Dense)
+
+-- SUMX row-level calc
+RevGST = SUMX(sales,sales[revenue]*1.18)
+
+-- Dynamic title
+Title = "Sales — " &amp;
+  SELECTEDVALUE(reps[team],"All Teams")
+
+-- Running total
+Running =
+CALCULATE([Rev],
+  FILTER(ALL(dim_date[date]),
+    dim_date[date]&lt;=MAX(dim_date[date])))</pre>
+  </div>
+</div>
+
+
+<table style="margin-top:4px">
+  <tr><th>Function</th><th>What It Removes</th><th>What It Keeps</th><th>Best Use</th></tr>
+  <tr><td><code>ALL(table)</code></td><td>All filters on whole table</td><td>Nothing</td><td>Grand total — % of all</td></tr>
+  <tr><td><code>ALL(col)</code></td><td>Filter on specific column only</td><td>All other column filters</td><td>Remove one dimension filter</td></tr>
+  <tr><td><code>ALLEXCEPT(t,col)</code></td><td>All filters except named column</td><td>Named column's filter</td><td>% within a category</td></tr>
+  <tr><td><code>ALLSELECTED()</code></td><td>Column-level only</td><td>Slicer selections</td><td>% within slicer view</td></tr>
+  <tr><td><code>REMOVEFILTERS(t)</code></td><td>All filters (like ALL but clearer intent)</td><td>Nothing</td><td>Modern DAX alternative to ALL</td></tr>
+</table>
+
+
+<h2><span class="tag t4">Timed Test</span> ⏱️ 25 Minutes · No Hints</h2>
+<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:14px 16px">
+  <div style="font-weight:700;font-size:13px;color:#856404;margin-bottom:10px">Rules: Write DAX from memory. No Power BI open. Graded like Persistent technical interview.</div>
+  <div class="tq"><strong>T1 (4 min):</strong> Write a DAX measure that shows Revenue % of Total using VAR, CALCULATE, ALL, and DIVIDE.</div>
+  <div class="tq"><strong>T2 (5 min):</strong> Write RANKX to rank reps by Total Revenue. Explain why you need ALL() and what happens without it.</div>
+  <div class="tq"><strong>T3 (6 min):</strong> Write three time intelligence measures: Revenue MTD, Revenue YTD, Revenue same period last year. What prerequisite does the model need?</div>
+  <div class="tq"><strong>T4 (5 min):</strong> What is the difference between SUMX and SUM? Write an example where SUMX is required and SUM would give wrong results.</div>
+  <div class="tq"><strong>T5 (5 min):</strong> A CFO wants to see "Are we on track for the year?" in one KPI card. Write the DAX logic for an annualised run rate measure and an on-track / at-risk flag.</div>
+</div>
+
+
+<div class="lessons" style="margin-top:24px">
+  <h3>🎯 5 Things That Get You Hired on Day 10 Topics</h3>
+  <ol>
+    <li><strong>Always use VAR pattern.</strong> Every DAX measure you write in an interview should use VAR. It signals production experience, not tutorial knowledge.</li>
+    <li><strong>RANKX without ALL() ranks everything as 1.</strong> The most common RANKX bug. Every rep is rank 1 in their own filter context. ALL() is mandatory.</li>
+    <li><strong>Time intelligence requires a proper Date table.</strong> Say this proactively. Interviewers watch for candidates who know this requirement — it separates real Power BI experience from YouTube tutorials.</li>
+    <li><strong>Dashboard = story, not charts.</strong> When presenting a dashboard, lead with the insight: "Revenue is up 18%, David is at risk, North is our growth engine." Not "this bar chart shows revenue by rep."</li>
+    <li><strong>SUMX for row-level calculations, SUM for column totals.</strong> Know when each is appropriate. Using SUMX when SUM suffices shows over-engineering. Using SUM when SUMX is needed gives wrong results.</li>
+  </ol>
+</div>
+
+
+<h2><span class="tag t3">Checkpoint</span> Day 10 — Before Day 11 (End-to-End Case Study)</h2>
+<div class="ck-wrap">
+  <div style="font-weight:700;font-size:13px;color:#1a7f37;margin-bottom:10px">✅ Answer YES to all 9</div>
+  <div class="ck-row"><div class="ck-num">1</div><div>Can write Revenue % of Total from memory using VAR + CALCULATE + ALL + DIVIDE</div></div>
+  <div class="ck-row"><div class="ck-num">2</div><div>Can write RANKX with ALL() and explain why ALL() is mandatory</div></div>
+  <div class="ck-row"><div class="ck-num">3</div><div>Know the difference between ALL · ALLEXCEPT · ALLSELECTED and when each is used</div></div>
+  <div class="ck-row"><div class="ck-num">4</div><div>Created and tested all 3 time intelligence measures (MTD, YTD, SPLY) in Power BI</div></div>
+  <div class="ck-row"><div class="ck-num">5</div><div>Can explain difference between SUMX and SUM with a row-level calculation example</div></div>
+  <div class="ck-row"><div class="ck-num">6</div><div>Task 4 bugs identified and fixed — all 3 measures corrected</div></div>
+  <div class="ck-row"><div class="ck-num">7</div><div>Dashboard built with top KPI row · trend line · rep bar chart · matrix table</div></div>
+  <div class="ck-row"><div class="ck-num">8</div><div>Can deliver a 60-second dashboard walkthrough leading with insights not descriptions</div></div>
+  <div class="ck-row"><div class="ck-num">9</div><div>Understand why a Date table is mandatory for time intelligence functions</div></div>
+</div>
+
+<div style="background:#fff5f0;border:1px solid #d4622a;border-radius:8px;padding:14px 18px;margin-top:20px">
+  <div style="font-weight:700;font-size:13px;color:#d4622a;margin-bottom:5px">📅 Day 11 — Sept 28, 2026 · End-to-End Case Study (SQL → Python → Excel → Power BI)</div>
+  <p style="font-size:12px;color:#1f2328">One BFSI business problem solved across all 4 tools. SQL extraction → Python cleaning + EDA → Excel summary → Power BI dashboard → insight presentation. Exactly what Persistent's case study round tests.</p>
+</div>
+
+<div class="footer">
+  <p>Persistent Systems · Data Analyst Interview Prep · Day 10 of 15 · Sept 27, 2026</p>
+  <p style="margin-top:6px">Made with IBM Bob</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,736 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Day 8 — Statistics · Persistent Systems</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:13px;line-height:1.6;color:#1f2328;background:#fff;padding:0 0 56px}
+.page{max-width:780px;margin:0 auto;padding:28px 16px}
+.hdr{background:#1f2328;color:#fff;border-radius:10px;padding:22px 26px;margin-bottom:26px}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px}
+.hdr h1{font-size:20px;font-weight:700}
+.date-badge{background:#7c5cd8;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.hdr p{color:#8b949e;font-size:12px;margin-top:4px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.badge{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;color:#fff}
+.b1{background:#7c5cd8}.b2{background:#3b82d4}.b3{background:#1a7f37}.b4{background:#d4622a}
+h2{font-size:14px;font-weight:700;border-bottom:2px solid #7c5cd8;padding-bottom:5px;margin:28px 0 14px;display:flex;align-items:center;gap:8px}
+.tag{color:#fff;border-radius:4px;font-size:11px;padding:2px 8px;font-weight:600;flex-shrink:0}
+.t1{background:#7c5cd8}.t2{background:#3b82d4}.t3{background:#1a7f37}.t4{background:#d4622a}.t5{background:#1f2328}
+pre{background:#1f2328;color:#e6edf3;padding:12px 14px;border-radius:7px;font-size:11px;font-family:"Cascadia Code","Consolas",monospace;overflow-x:auto;margin:8px 0;line-height:1.8;white-space:pre}
+code{background:#f0f0f0;color:#c0392b;padding:1px 5px;border-radius:3px;font-size:11px;font-family:"Consolas",monospace}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+th{background:#f7f8fa;border:1px solid #e5e7eb;padding:7px 10px;text-align:left;font-weight:600}
+td{border:1px solid #e5e7eb;padding:6px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#fafafa}
+.note{background:#f5f0ff;border-left:3px solid #7c5cd8;border-radius:0 6px 6px 0;padding:9px 13px;font-size:12px;margin:8px 0}
+.warn{background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+.ok{background:#d1e7dd;border:1px solid #1a7f37;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+.err{background:#f8d7da;border:1px solid #dc3545;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+.qa{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px;overflow:hidden}
+.qa-q{background:#f7f8fa;padding:9px 13px;font-weight:600;font-size:13px;border-bottom:1px solid #e5e7eb}
+.qa-q .qn{color:#7c5cd8;margin-right:6px}
+.qa-body{padding:11px 13px}
+.qa-a{background:#f5f0ff;border-left:3px solid #7c5cd8;border-radius:0 4px 4px 0;padding:8px 11px;font-size:12px;font-style:italic;margin-bottom:8px}
+.meta-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.mt{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.mt-why{background:#fff3cd;color:#856404}
+.mt-trap{background:#f8d7da;color:#842029}
+.mt-kw{background:#d1e7dd;color:#0a3622}
+.formula-box{background:#1f2328;color:#e6edf3;border-radius:8px;padding:14px 16px;margin:10px 0;font-size:12px;font-family:"Cascadia Code","Consolas",monospace;line-height:2}
+.concept-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cbox{border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;background:#f7f8fa}
+.cbox-title{font-weight:700;font-size:12px;margin-bottom:6px}
+.ct1{color:#7c5cd8}.ct2{color:#3b82d4}.ct3{color:#1a7f37}.ct4{color:#d4622a}
+.fc-box{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:600;line-height:1.4}
+.fc-start{background:#1f2328;color:#fff;border-radius:22px}
+.fc-q{background:#7c5cd8;color:#fff}
+.fc-yes{background:#d1e7dd;color:#0a3622;border:1px solid #1a7f37}
+.fc-no{background:#f8d7da;color:#842029;border:1px solid #dc3545}
+.fc-ok{background:#1a7f37;color:#fff;border-radius:22px}
+.fc-warn{background:#fff3cd;color:#856404;border:1px solid #ffc107}
+.arr{width:2px;height:20px;background:#57606a;margin:0 auto;position:relative;flex-shrink:0}
+.arr::after{content:'';position:absolute;bottom:-5px;left:-4px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #57606a}
+.arr-g{background:#1a7f37}.arr-g::after{border-top-color:#1a7f37}
+.arr-r{background:#d4622a}.arr-r::after{border-top-color:#d4622a}
+.arr-p{background:#7c5cd8}.arr-p::after{border-top-color:#7c5cd8}
+.two-br{display:flex;justify-content:center;gap:16px;width:100%}
+.br-col{display:flex;flex-direction:column;align-items:center;flex:1;max-width:220px}
+.br-lbl{font-size:10px;font-weight:700;margin-bottom:4px}
+.lbl-y{color:#1a7f37}.lbl-n{color:#d4622a}
+.steps{list-style:none;padding:0;counter-reset:st}
+.steps li{counter-increment:st;display:flex;gap:10px;margin-bottom:11px;align-items:flex-start}
+.steps li::before{content:counter(st);background:#7c5cd8;color:#fff;border-radius:50%;width:21px;height:21px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.st-title{font-weight:700;font-size:12px}
+.st-desc{font-size:11px;color:#57606a;margin-top:2px}
+.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cs-box{border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;background:#f7f8fa}
+.cs-title{font-weight:700;font-size:12px;margin-bottom:8px}
+.lessons{background:#f7f8fa;border-left:4px solid #7c5cd8;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:20px}
+.lessons h3{font-size:13px;font-weight:700;color:#7c5cd8;margin-bottom:10px}
+.lessons ol{padding-left:18px}
+.lessons li{margin-bottom:7px;font-size:12px}
+.ck-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.ck-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:12px}
+.ck-num{background:#7c5cd8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.tq{font-size:12px;margin-bottom:8px;padding-left:12px;border-left:3px solid #7c5cd8}
+.normal-curve{display:flex;justify-content:center;margin:12px 0}
+hr{border:none;border-top:2px solid #e5e7eb;margin:28px 0}
+.footer{margin-top:44px;padding-top:14px;border-top:1px solid #e5e7eb;text-align:center;font-size:12px;color:#57606a}
+</style>
+</head>
+<body>
+<div class="page">
+
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div><h1>📅 Day 8 — Statistics · Probability · Hypothesis Testing</h1>
+    <p>Persistent Systems · Data Analyst Interview Prep · Sept 25, 2026</p></div>
+    <span class="date-badge">📆 Sept 25, 2026 · Thursday</span>
+  </div>
+  <div class="badges">
+    <span class="badge b1">Descriptive Stats</span>
+    <span class="badge b2">Probability</span>
+    <span class="badge b3">Hypothesis Testing</span>
+    <span class="badge b4">A/B Testing</span>
+    <span class="badge b1">Python / pandas</span>
+  </div>
+</div>
+
+
+<h2><span class="tag t4">Recruiter Lens</span> Why Persistent Tests Statistics</h2>
+<table>
+  <tr><th>What They Test</th><th>Why It Matters for BFSI Analytics</th></tr>
+  <tr><td>Mean vs Median</td><td>One large loan skews mean — median tells the real story to the RBI</td></tr>
+  <tr><td>Standard deviation / variance</td><td>Risk measurement — volatility in transaction amounts</td></tr>
+  <tr><td>Outlier detection</td><td>Fraud detection — transactions 3 standard deviations from mean</td></tr>
+  <tr><td>Correlation</td><td>Does credit score predict default? Does branch size predict revenue?</td></tr>
+  <tr><td>Hypothesis testing + p-value</td><td>Did the new loan product actually increase approvals? Prove it statistically.</td></tr>
+  <tr><td>A/B testing</td><td>Did the new mobile app UI increase transactions? Statistical proof required.</td></tr>
+  <tr><td>Confidence interval</td><td>Report range of likely default rates — not just a single number</td></tr>
+</table>
+
+
+<h2><span class="tag t1">Theory</span> Descriptive Statistics — The Foundation</h2>
+
+<div class="concept-grid">
+  <div class="cbox">
+    <div class="cbox-title ct1">📐 Measures of Central Tendency</div>
+    <table style="font-size:11px">
+      <tr><th>Measure</th><th>Formula</th><th>When to Use</th></tr>
+      <tr><td><strong>Mean</strong></td><td>Sum / Count</td><td>No extreme outliers</td></tr>
+      <tr><td><strong>Median</strong></td><td>Middle value</td><td>Outliers present (loans, salaries)</td></tr>
+      <tr><td><strong>Mode</strong></td><td>Most frequent value</td><td>Categorical data, most common amount</td></tr>
+    </table>
+    <div class="warn" style="margin-top:6px;font-size:11px"><strong>BFSI rule:</strong> Always report median for loan amounts. One ₹10Cr loan makes mean misleading.</div>
+  </div>
+  <div class="cbox">
+    <div class="cbox-title ct2">📏 Measures of Spread</div>
+    <table style="font-size:11px">
+      <tr><th>Measure</th><th>Meaning</th><th>BFSI Use</th></tr>
+      <tr><td><strong>Variance</strong></td><td>Avg squared deviation</td><td>Portfolio risk</td></tr>
+      <tr><td><strong>Std Dev (σ)</strong></td><td>√Variance</td><td>Transaction volatility</td></tr>
+      <tr><td><strong>Range</strong></td><td>Max − Min</td><td>Loan size spread</td></tr>
+      <tr><td><strong>IQR</strong></td><td>Q3 − Q1</td><td>Outlier detection</td></tr>
+      <tr><td><strong>Percentile</strong></td><td>% below value</td><td>P90 transaction value</td></tr>
+    </table>
+  </div>
+</div>
+
+
+<div style="background:#f5f0ff;border:1px solid #7c5cd8;border-radius:8px;padding:14px 16px;margin:12px 0">
+  <div style="font-weight:700;font-size:13px;color:#7c5cd8;margin-bottom:8px">📊 Normal Distribution (Bell Curve) — The 68-95-99.7 Rule</div>
+  <div style="display:flex;justify-content:center;margin:10px 0">
+    <svg style="width:100%;max-width:500px">
+      <defs>
+        
+          <stop offset="0%" style="stop-color:#f8d7da;stop-opacity:1"></stop>
+          <stop offset="16%" style="stop-color:#fff3cd;stop-opacity:1"></stop>
+          <stop offset="34%" style="stop-color:#d1e7dd;stop-opacity:1"></stop>
+          <stop offset="50%" style="stop-color:#d1e7dd;stop-opacity:1"></stop>
+          <stop offset="66%" style="stop-color:#d1e7dd;stop-opacity:1"></stop>
+          <stop offset="84%" style="stop-color:#fff3cd;stop-opacity:1"></stop>
+          <stop offset="100%" style="stop-color:#f8d7da;stop-opacity:1"></stop>
+        
+      </defs>
+      
+      <path d="M 20,140 C 60,140 80,130 100,110 C 120,90 140,50 160,30 C 180,10 200,5 250,5 C 300,5 320,10 340,30 C 360,50 380,90 400,110 C 420,130 440,140 480,140 Z" fill="url(#bg1)" stroke="#7c5cd8" stroke-width="2"></path>
+      
+      <line x1="250" y1="5" x2="250" y2="145" stroke="#1f2328" stroke-width="1.5"></line>
+      
+      <line x1="170" y1="28" x2="170" y2="145" stroke="#1a7f37" stroke-width="1"></line>
+      <line x1="330" y1="28" x2="330" y2="145" stroke="#1a7f37" stroke-width="1"></line>
+      <line x1="100" y1="108" x2="100" y2="145" stroke="#856404" stroke-width="1"></line>
+      <line x1="400" y1="108" x2="400" y2="145" stroke="#856404" stroke-width="1"></line>
+      <line x1="45" y1="138" x2="45" y2="145" stroke="#d4622a" stroke-width="1"></line>
+      <line x1="455" y1="138" x2="455" y2="145" stroke="#d4622a" stroke-width="1"></line>
+      
+      <text x="250" y="155" text-anchor="middle" font-size="10" fill="#1f2328" font-weight="700">μ</text>
+      <text x="170" y="155" text-anchor="middle" font-size="10" fill="#1a7f37">-1σ</text>
+      <text x="330" y="155" text-anchor="middle" font-size="10" fill="#1a7f37">+1σ</text>
+      <text x="100" y="155" text-anchor="middle" font-size="10" fill="#856404">-2σ</text>
+      <text x="400" y="155" text-anchor="middle" font-size="10" fill="#856404">+2σ</text>
+      <text x="45" y="155" text-anchor="middle" font-size="10" fill="#d4622a">-3σ</text>
+      <text x="455" y="155" text-anchor="middle" font-size="10" fill="#d4622a">+3σ</text>
+      
+      <text x="250" y="80" text-anchor="middle" font-size="11" fill="#1a7f37" font-weight="700">68%</text>
+      <text x="250" y="60" text-anchor="middle" font-size="10" fill="#856404">95%</text>
+      <text x="250" y="44" text-anchor="middle" font-size="10" fill="#d4622a">99.7%</text>
+    </svg>
+  </div>
+  <table>
+    <tr><th>Range</th><th>Coverage</th><th>BFSI Use</th></tr>
+    <tr><td>μ ± 1σ</td><td style="color:#1a7f37;font-weight:700">68% of data</td><td>Normal transaction range</td></tr>
+    <tr><td>μ ± 2σ</td><td style="color:#856404;font-weight:700">95% of data</td><td>Confidence interval for loan defaults</td></tr>
+    <tr><td>μ ± 3σ</td><td style="color:#d4622a;font-weight:700">99.7% of data</td><td>Fraud threshold — flag beyond ±3σ</td></tr>
+  </table>
+</div>
+
+
+<h2><span class="tag t1">Concept</span> Outlier Detection — IQR Method</h2>
+<div class="formula-box">
+Q1  = 25th percentile  (lower quartile)
+Q3  = 75th percentile  (upper quartile)
+IQR = Q3 - Q1
+
+Lower fence = Q1 - 1.5 × IQR   ← below this = outlier
+Upper fence = Q3 + 1.5 × IQR   ← above this = outlier
+</div>
+<pre># Python IQR outlier detection
+import pandas as pd
+
+df = pd.DataFrame({'revenue': [12000, 8500, 15300, 6200, 9800, 11400, 95000]})
+
+Q1  = df['revenue'].quantile(0.25)
+Q3  = df['revenue'].quantile(0.75)
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+outliers    = df[(df['revenue'] &lt; lower) | (df['revenue'] &gt; upper)]
+clean_df    = df[(df['revenue'] &gt;= lower) &amp; (df['revenue'] &lt;= upper)]
+
+print(f"Q1={Q1}, Q3={Q3}, IQR={IQR}")
+print(f"Lower fence={lower:.2f}, Upper fence={upper:.2f}")
+print(f"Outliers:\n{outliers}")   # 95000 is flagged</pre>
+<div class="note"><strong>BFSI use:</strong> Any transaction beyond upper fence = potential fraud flag or data entry error. Run this before every analysis on transaction data.</div>
+
+
+<h2><span class="tag t2">Concept</span> Correlation — Does One Thing Predict Another?</h2>
+<div class="concept-grid">
+  <div class="cbox">
+    <div class="cbox-title ct2">Pearson Correlation (r)</div>
+    <div class="formula-box" style="font-size:11px;padding:8px 10px">r = -1  → Perfect negative
+r =  0  → No relationship
+r = +1  → Perfect positive
+
+|r| &lt; 0.3  → Weak
+|r| 0.3-0.7 → Moderate
+|r| &gt; 0.7  → Strong</div>
+    <pre style="font-size:10px;padding:6px 8px">df[['revenue','target']].corr()
+# or
+df['revenue'].corr(df['target'])</pre>
+  </div>
+  <div class="cbox">
+    <div class="cbox-title ct4">BFSI Correlation Examples</div>
+    <table style="font-size:11px">
+      <tr><th>X</th><th>Y</th><th>Typical r</th></tr>
+      <tr><td>Credit score</td><td>Default rate</td><td style="color:#1a7f37">-0.72 (strong)</td></tr>
+      <tr><td>Branch size</td><td>Revenue</td><td style="color:#856404">+0.55 (moderate)</td></tr>
+      <tr><td>Loan amount</td><td>Interest paid</td><td style="color:#1a7f37">+0.88 (strong)</td></tr>
+      <tr><td>Age</td><td>Risk score</td><td style="color:#57606a">+0.31 (weak)</td></tr>
+    </table>
+    <div class="warn" style="font-size:11px;margin-top:6px"><strong>Correlation ≠ Causation.</strong> Ice cream sales and drowning deaths both rise in summer — correlated but unrelated.</div>
+  </div>
+</div>
+
+
+<h2><span class="tag t1">Concept</span> Hypothesis Testing — The Framework</h2>
+<div class="formula-box">
+H₀ (Null Hypothesis)     = No effect / no difference (default assumption)
+H₁ (Alternative)         = There IS a significant difference
+
+p-value                   = Probability of seeing this result if H₀ is true
+α (significance level)    = 0.05 (5%) — your threshold for rejection
+
+Decision rule:
+  p-value ≤ 0.05  → REJECT H₀  → result is statistically significant ✅
+  p-value  &gt; 0.05  → FAIL TO REJECT H₀ → not enough evidence
+</div>
+<div class="concept-grid">
+  <div class="cbox">
+    <div class="cbox-title ct1">Type I Error (False Positive)</div>
+    <div style="font-size:11px;color:#57606a;margin-bottom:6px">Rejecting H₀ when it is actually true.</div>
+    <div class="err" style="font-size:11px;padding:6px 10px"><strong>BFSI example:</strong> Flagging a genuine customer as fraud. Probability = α (0.05).</div>
+  </div>
+  <div class="cbox">
+    <div class="cbox-title ct4">Type II Error (False Negative)</div>
+    <div style="font-size:11px;color:#57606a;margin-bottom:6px">Failing to reject H₀ when it is actually false.</div>
+    <div class="err" style="font-size:11px;padding:6px 10px"><strong>BFSI example:</strong> Missing a real fraudster. More dangerous in banking.</div>
+  </div>
+</div>
+
+
+<h2><span class="tag t3">Concept</span> A/B Testing — Step by Step</h2>
+<ol class="steps">
+  <li><div><div class="st-title">Define the hypothesis</div><div class="st-desc">H₀: New UI has no effect on transactions. H₁: New UI increases transactions.</div></div></li>
+  <li><div><div class="st-title">Split users randomly</div><div class="st-desc">Group A (control) = old UI. Group B (test) = new UI. Random split prevents bias.</div></div></li>
+  <li><div><div class="st-title">Run the test for sufficient duration</div><div class="st-desc">Minimum 2 weeks — avoids day-of-week bias. Calculate required sample size first.</div></div></li>
+  <li><div><div class="st-title">Run a t-test to compare means</div><div class="st-desc">scipy.stats.ttest_ind(group_a, group_b) — returns t-statistic and p-value</div></div></li>
+  <li><div><div class="st-title">Interpret p-value</div><div class="st-desc">p ≤ 0.05 → reject H₀ → new UI significantly changed transactions</div></div></li>
+  <li><div><div class="st-title">Make business decision</div><div class="st-desc">Statistical significance + practical significance + cost/benefit → roll out or not</div></div></li>
+</ol>
+<pre># Python A/B test
+from scipy import stats
+import numpy as np
+
+group_a = np.array([12000, 8500, 9800, 11000, 10500])   # old UI transactions
+group_b = np.array([15300, 14200, 16000, 13800, 15100]) # new UI transactions
+
+t_stat, p_value = stats.ttest_ind(group_a, group_b)
+
+print(f"t-statistic: {t_stat:.4f}")
+print(f"p-value:     {p_value:.4f}")
+
+if p_value &lt;= 0.05:
+    print("REJECT H₀ — new UI has statistically significant effect")
+else:
+    print("FAIL TO REJECT H₀ — no significant difference found")</pre>
+
+
+<h2><span class="tag t2">Concept</span> Confidence Interval</h2>
+<div class="formula-box">
+CI = x̄ ± z × (σ / √n)
+
+Where:
+  x̄ = sample mean
+  z  = 1.96 for 95% CI · 2.576 for 99% CI
+  σ  = standard deviation
+  n  = sample size
+
+Interpretation:
+  "We are 95% confident the true mean lies between [lower, upper]."
+  NOT "there is a 95% chance the true mean is in this range."
+</div>
+<pre># Python confidence interval
+import numpy as np
+from scipy import stats
+
+revenues = [12000, 8500, 15300, 6200, 9800, 11400]
+ci = stats.t.interval(
+    confidence=0.95,
+    df=len(revenues)-1,
+    loc=np.mean(revenues),
+    scale=stats.sem(revenues)
+)
+print(f"95% CI: {ci[0]:.2f} to {ci[1]:.2f}")
+# "We are 95% confident mean revenue is between ₹7,943 and ₹14,457"</pre>
+
+
+<h2><span class="tag t2">Interview Q&amp;A</span> 10 Questions — MNC Level</h2>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q1</span> When do you use mean vs median? Give a BFSI example.</div>
+  <div class="qa-body">
+    <div class="qa-a">"I use mean when data is normally distributed with no extreme outliers. I use median when outliers are present — which is almost always true in BFSI data. For loan portfolios, one ₹10 crore loan can pull the mean far above what a typical borrower looks like. Median gives the regulator and the risk team a more honest picture. I always report both and explain the gap."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: knows when stats are appropriate — not just formulas</span>
+      <span class="mt mt-trap">Trap: "I always use mean" — signals no real data experience</span>
+      <span class="mt mt-kw">Keywords: outlier-resistant · median · skewed distribution · representative</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q2</span> What is standard deviation and how do you use it in analytics?</div>
+  <div class="qa-body">
+    <div class="qa-a">"Standard deviation measures how spread out values are around the mean. A low SD means data is clustered — consistent performance. A high SD means high variability — unpredictable. In BFSI, I use SD for transaction monitoring — transactions beyond 3 standard deviations from the mean are flagged for review. In branch performance, high SD in monthly revenue means the branch is inconsistent, not just performing well on average."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: can you connect a formula to a business decision?</span>
+      <span class="mt mt-kw">Keywords: spread · volatility · consistency · fraud threshold · 3-sigma rule</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q3</span> What is a p-value? Explain it without jargon.</div>
+  <div class="qa-body">
+    <div class="qa-a">"A p-value is the probability of getting your observed result — or something more extreme — if the null hypothesis were true. In simple terms: if p = 0.03, there's only a 3% chance you'd see this result by random chance alone. Since that's below our 5% threshold, we reject the null and say the finding is statistically significant. I always pair p-value with effect size — a result can be statistically significant but practically meaningless if the difference is tiny."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: can you explain statistics to a non-technical stakeholder?</span>
+      <span class="mt mt-trap">Trap: "p-value is the probability H₀ is true" — WRONG. Common misconception that gets candidates rejected.</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q4</span> What is the difference between Type I and Type II errors?</div>
+  <div class="qa-body">
+    <div class="qa-a">"Type I is a false positive — rejecting the null when it's actually true. In fraud detection, that means flagging a genuine customer as fraudulent — destroys trust. Type II is a false negative — failing to reject a false null. In fraud detection, that means missing a real fraudster — financial loss. In BFSI, Type II errors are usually more costly, so I may lower my alpha to 0.01 to be more conservative before flagging a customer."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: practical understanding of error trade-offs in business</span>
+      <span class="mt mt-kw">Keywords: false positive · false negative · alpha · trade-off · conservative</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q5</span> How do you detect outliers in a dataset?</div>
+  <div class="qa-body">
+    <div class="qa-a">"I use the IQR method as the standard — calculate Q1 and Q3, compute IQR as Q3 minus Q1, then flag anything below Q1 minus 1.5×IQR or above Q3 plus 1.5×IQR. For normally distributed data I also use the 3-sigma rule. I always investigate outliers before removing them — in BFSI, an outlier might be a genuine large transaction, a data entry error, or actual fraud. Removing without understanding is worse than keeping."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: real analyst judgment — don't just delete outliers</span>
+      <span class="mt mt-trap">Trap: "I remove all outliers" — in banking, large transactions are real and must be investigated</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q6</span> What is A/B testing and how have you applied it?</div>
+  <div class="qa-body">
+    <div class="qa-a">"A/B testing is a controlled experiment where you split users into two groups — control (A) and treatment (B) — and measure whether the change causes a statistically significant difference. The process: define hypothesis, randomly split, run for sufficient duration (minimum 2 weeks to avoid day-of-week bias), then run a t-test to compare means. I connect this to BFSI — for example, testing whether a new loan application form design increases completion rate. I always check both statistical significance (p-value) and practical significance (effect size) before recommending rollout."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: can you run a real experiment — not just describe it theoretically</span>
+      <span class="mt mt-trap">Trap: Ignoring sample size — running an A/B test for 2 days with 50 users means nothing</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q7</span> What is correlation? Does correlation imply causation?</div>
+  <div class="qa-body">
+    <div class="qa-a">"Correlation measures the strength and direction of a linear relationship between two variables — from -1 (perfect negative) to +1 (perfect positive). Correlation absolutely does not imply causation. Classic example: ice cream sales and drowning deaths are both high in summer — correlated, but ice cream doesn't cause drowning. In BFSI, credit score and default rate are strongly negatively correlated, but the causal mechanism must be validated through domain knowledge and controlled analysis — not just a correlation coefficient."</div>
+    <div class="meta-row">
+      <span class="mt mt-kw">Keywords: Pearson · strength · direction · spurious correlation · causation</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q8</span> What is a confidence interval? Give a business interpretation.</div>
+  <div class="qa-body">
+    <div class="qa-a">"A confidence interval is a range of values that likely contains the true population parameter. A 95% CI means: if I repeated this sampling 100 times, 95 of those intervals would contain the true value. For a BFSI executive, I'd say: 'Based on August data, average transaction value is between ₹9,200 and ₹12,800 with 95% confidence.' That gives a decision-useful range instead of a single number that sounds more precise than it is."</div>
+    <div class="meta-row">
+      <span class="mt mt-trap">Trap: "95% probability the true value is in this range" — WRONG. The parameter is fixed. The interval is what varies.</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q9</span> What is the Central Limit Theorem?</div>
+  <div class="qa-body">
+    <div class="qa-a">"The Central Limit Theorem states that the distribution of sample means approaches a normal distribution as sample size increases, regardless of the original data's distribution. Practically: even if individual transactions are skewed, the average of large samples is normally distributed. This is why we can use t-tests and confidence intervals on real-world financial data that isn't perfectly normal. For BFSI: with 1,000+ transactions, sample mean behaviour is predictable even if individual amounts are wildly skewed."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: theoretical grounding that enables practical hypothesis testing</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q10</span> How would you statistically validate that a new bank branch is underperforming?</div>
+  <div class="qa-body">
+    <div class="qa-a">"I'd set up a hypothesis test: H₀ is that the new branch's average monthly revenue equals the network average. H₁ is that it's significantly below. I'd collect monthly revenue data for the new branch and the rest of the network, run a one-sample t-test, and check the p-value. If p &lt; 0.05, I have statistical evidence of underperformance — not just a gut feel. I'd also check practical significance — is the gap meaningful enough to justify intervention? Then report both the statistical finding and the recommended action."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: end-to-end statistical reasoning with business output</span>
+      <span class="mt mt-kw">Keywords: hypothesis test · t-test · p-value · practical significance · business action</span>
+    </div>
+  </div>
+</div>
+
+<hr />
+
+
+<h2><span class="tag t5">Flowcharts</span> Day 8 — Decision Guides</h2>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#7c5cd8;margin-top:0;font-size:13px"><span class="tag t1">FC 1</span> Mean vs Median — Which to Report?</h2>
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="fc-box fc-start" style="width:230px">I need to summarise a numeric column</div>
+    <div class="arr arr-p"></div>
+    <div class="fc-box fc-q" style="width:360px">Are there extreme outliers or is the data skewed?</div>
+    <div class="two-br">
+      <div class="br-col">
+        <div class="br-lbl lbl-y">YES — outliers / skewed</div>
+        <div class="arr arr-g"></div>
+        <div class="fc-box fc-yes" style="width:170px">Use MEDIAN</div>
+        <div style="background:#d1e7dd;border:1px solid #1a7f37;border-radius:8px;padding:9px;width:185px;margin-top:8px">
+          <div style="font-weight:700;font-size:11px;color:#0a3622;margin-bottom:4px">BFSI median use cases</div>
+          <div style="font-size:11px;color:#0a3622;line-height:1.8">Loan portfolio summary<br />Customer income<br />Transaction amounts<br />Branch revenue<br />Property valuations</div>
+        </div>
+      </div>
+      <div class="br-col">
+        <div class="br-lbl lbl-n">NO — normally distributed</div>
+        <div class="arr arr-r"></div>
+        <div class="fc-box fc-no" style="width:170px">Use MEAN</div>
+        <div style="background:#f8d7da;border:1px solid #dc3545;border-radius:8px;padding:9px;width:185px;margin-top:8px">
+          <div style="font-weight:700;font-size:11px;color:#842029;margin-bottom:4px">Mean use cases</div>
+          <div style="font-size:11px;color:#842029;line-height:1.8">Test scores<br />Standardized metrics<br />Process times (if normal)<br />Temperature data</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="warn" style="margin-top:14px"><strong>Rule:</strong> Always report BOTH in BFSI. A large gap between mean and median signals skewness. Tell the stakeholder which one to act on and why.</div>
+</div>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#3b82d4;margin-top:0;font-size:13px"><span class="tag t2">FC 2</span> Outlier Detected — What Do You Do?</h2>
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="fc-box fc-start" style="width:220px">Value flagged as outlier (beyond IQR fence)</div>
+    <div class="arr arr-p"></div>
+    <div class="fc-box fc-q" style="width:360px">Is it a data entry error or system glitch?</div>
+    <div class="two-br">
+      <div class="br-col">
+        <div class="br-lbl lbl-y">YES — error</div>
+        <div class="arr arr-g"></div>
+        <div class="fc-box fc-yes" style="width:160px">Fix or Remove</div>
+        <div style="font-size:11px;color:#57606a;text-align:center;margin-top:6px;width:170px">Log the fix. Document why removed. Never silently delete.</div>
+      </div>
+      <div class="br-col">
+        <div class="br-lbl lbl-n">NO — investigate</div>
+        <div class="arr arr-r"></div>
+        <div class="fc-box fc-q" style="width:170px">Is it a legitimate large transaction?</div>
+        <div class="two-br" style="margin-top:0;gap:8px">
+          <div class="br-col">
+            <div class="br-lbl lbl-y" style="font-size:9px">YES</div>
+            <div class="arr arr-g"></div>
+            <div class="fc-box fc-yes" style="width:80px;font-size:11px">Keep</div>
+            <div style="font-size:10px;color:#57606a;text-align:center;margin-top:4px;width:90px">Note it. Report separately.</div>
+          </div>
+          <div class="br-col">
+            <div class="br-lbl lbl-n" style="font-size:9px">SUSPICIOUS</div>
+            <div class="arr arr-r"></div>
+            <div class="fc-box fc-no" style="width:80px;font-size:11px">Flag</div>
+            <div style="font-size:10px;color:#842029;text-align:center;margin-top:4px;width:90px">Fraud review. Escalate.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="err" style="margin-top:14px"><strong>❌ Never remove outliers without investigation in BFSI.</strong> A ₹5Cr transaction is an outlier statistically but could be a genuine corporate deposit. Removing it means reporting wrong totals to management.</div>
+</div>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#1a7f37;margin-top:0;font-size:13px"><span class="tag t3">FC 3</span> Hypothesis Testing — Step-by-Step Flow</h2>
+  <ol class="steps">
+    <li><div><div class="st-title">Define H₀ and H₁ clearly</div><div class="st-desc">H₀: No difference. H₁: There IS a significant difference. Be specific — "average transaction value equals ₹10,000"</div></div></li>
+    <li><div><div class="st-title">Choose significance level α</div><div class="st-desc">Usually 0.05 (5%). Use 0.01 for high-stakes BFSI decisions (fraud flagging, credit approval).</div></div></li>
+    <li><div><div class="st-title">Choose the right test</div>
+      <table style="font-size:11px;margin-top:4px">
+        <tr><th>Situation</th><th>Test</th></tr>
+        <tr><td>Compare 2 group means</td><td>t-test (independent)</td></tr>
+        <tr><td>Compare before/after for same group</td><td>Paired t-test</td></tr>
+        <tr><td>Compare 3+ group means</td><td>ANOVA</td></tr>
+        <tr><td>Categorical data proportions</td><td>Chi-square test</td></tr>
+      </table>
+    </div></li>
+    <li><div><div class="st-title">Calculate test statistic and p-value</div><div class="st-desc"><code>scipy.stats.ttest_ind(group_a, group_b)</code></div></div></li>
+    <li><div><div class="st-title">Compare p-value to α</div><div class="st-desc">p ≤ α → Reject H₀ → Statistically significant. p &gt; α → Fail to reject H₀ → Not enough evidence.</div></div></li>
+    <li><div><div class="st-title">Check practical significance</div><div class="st-desc">Is the effect size meaningful for business? A 0.1% improvement may be statistically significant but not worth the investment.</div></div></li>
+    <li><div><div class="st-title">Make and document the business decision</div><div class="st-desc">Report finding + confidence level + recommended action + limitations.</div></div></li>
+  </ol>
+</div>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#d4622a;margin-top:0;font-size:13px"><span class="tag t4">FC 4</span> A/B Test — Decision Framework</h2>
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="fc-box fc-start" style="width:260px">Business wants to test a change</div>
+    <div class="arr arr-p"></div>
+    <div class="fc-box" style="background:#7c5cd8;color:#fff;width:340px">Define H₀ and metric to measure</div>
+    <div class="arr arr-p"></div>
+    <div class="fc-box" style="background:#3b82d4;color:#fff;width:340px">Randomly split users: A (control) · B (test)</div>
+    <div class="arr arr-p"></div>
+    <div class="fc-box" style="background:#3b82d4;color:#fff;width:340px">Run for ≥ 2 weeks · collect data</div>
+    <div class="arr arr-p"></div>
+    <div class="fc-box fc-q" style="width:340px">Run t-test: is p-value ≤ 0.05?</div>
+    <div class="two-br">
+      <div class="br-col">
+        <div class="br-lbl lbl-y">YES — significant</div>
+        <div class="arr arr-g"></div>
+        <div class="fc-box fc-q" style="width:170px">Is effect size meaningful?</div>
+        <div class="two-br" style="gap:6px">
+          <div class="br-col">
+            <div class="br-lbl lbl-y" style="font-size:9px">YES</div>
+            <div class="arr arr-g"></div>
+            <div class="fc-box fc-ok" style="width:80px;font-size:11px">Roll Out</div>
+          </div>
+          <div class="br-col">
+            <div class="br-lbl lbl-n" style="font-size:9px">NO</div>
+            <div class="arr arr-r"></div>
+            <div class="fc-box fc-warn" style="width:80px;font-size:11px">Discuss</div>
+          </div>
+        </div>
+      </div>
+      <div class="br-col">
+        <div class="br-lbl lbl-n">NO — not significant</div>
+        <div class="arr arr-r"></div>
+        <div class="fc-box fc-no" style="width:170px">Do NOT Roll Out</div>
+        <div style="font-size:11px;color:#842029;text-align:center;margin-top:6px;width:180px">Insufficient evidence. Keep original. Redesign test if needed.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr />
+
+
+<h2><span class="tag t5">Cheat Sheet</span> Statistics Day 8 — Quick Reference</h2>
+
+<div class="cs-grid">
+  <div class="cs-box">
+    <div class="cs-title" style="color:#7c5cd8">📐 Key Formulas</div>
+    <div class="formula-box" style="font-size:10px;padding:8px 10px">Mean    = Σx / n
+Median  = middle value (sorted)
+Std Dev = √(Σ(x-μ)² / n)
+Variance = σ²
+IQR     = Q3 - Q1
+Outlier lower = Q1 - 1.5×IQR
+Outlier upper = Q3 + 1.5×IQR
+z-score = (x - μ) / σ
+CI 95%  = x̄ ± 1.96 × (σ/√n)</div>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title" style="color:#3b82d4">🐍 Python Stats Code</div>
+    <pre style="font-size:10px;padding:8px 10px">import numpy as np
+from scipy import stats
+
+# Descriptive
+np.mean(data)
+np.median(data)
+np.std(data)
+np.percentile(data, 25)   # Q1
+np.percentile(data, 75)   # Q3
+
+# Hypothesis test
+t, p = stats.ttest_ind(a, b)
+
+# Correlation
+np.corrcoef(x, y)[0,1]
+df.corr()  # full matrix
+
+# Confidence interval
+stats.t.interval(0.95, df=n-1,
+  loc=mean, scale=stats.sem(data))</pre>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title" style="color:#1a7f37">🏦 BFSI Applications</div>
+    <table style="font-size:11px">
+      <tr><th>Concept</th><th>BFSI Use</th></tr>
+      <tr><td>Median</td><td>Loan portfolio summary</td></tr>
+      <tr><td>Std Dev</td><td>Transaction volatility</td></tr>
+      <tr><td>3-sigma rule</td><td>Fraud threshold flagging</td></tr>
+      <tr><td>IQR</td><td>Outlier detection in txn amounts</td></tr>
+      <tr><td>Correlation</td><td>Credit score vs default rate</td></tr>
+      <tr><td>t-test</td><td>Branch performance comparison</td></tr>
+      <tr><td>A/B test</td><td>New UI → transaction increase?</td></tr>
+      <tr><td>CI</td><td>Predicted default rate range</td></tr>
+    </table>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title" style="color:#d4622a">⚠️ Common Mistakes</div>
+    <table style="font-size:11px">
+      <tr><th>Mistake</th><th>Correct understanding</th></tr>
+      <tr><td>"p-value = probability H₀ is true"</td><td>p = P(data | H₀ is true)</td></tr>
+      <tr><td>"p &lt; 0.05 = important finding"</td><td>Also need practical significance</td></tr>
+      <tr><td>"Correlation = causation"</td><td>Correlation only = relationship</td></tr>
+      <tr><td>"Remove all outliers"</td><td>Investigate first — BFSI outliers may be real</td></tr>
+      <tr><td>"95% CI = 95% probability"</td><td>Parameter is fixed — interval varies</td></tr>
+    </table>
+  </div>
+</div>
+
+
+<table style="margin-top:4px">
+  <tr><th>Test</th><th>When to Use</th><th>Python</th></tr>
+  <tr><td><strong>t-test (independent)</strong></td><td>Compare means of 2 independent groups</td><td><code>stats.ttest_ind(a, b)</code></td></tr>
+  <tr><td><strong>Paired t-test</strong></td><td>Before/after for same group</td><td><code>stats.ttest_rel(before, after)</code></td></tr>
+  <tr><td><strong>ANOVA</strong></td><td>Compare means of 3+ groups</td><td><code>stats.f_oneway(g1, g2, g3)</code></td></tr>
+  <tr><td><strong>Chi-square</strong></td><td>Categorical proportions</td><td><code>stats.chi2_contingency(table)</code></td></tr>
+  <tr><td><strong>Pearson correlation</strong></td><td>Linear relationship between 2 continuous vars</td><td><code>stats.pearsonr(x, y)</code></td></tr>
+</table>
+
+
+<h2><span class="tag t4">Case Study</span> BFSI Statistics Scenario</h2>
+<div style="background:#f5f0ff;border:1px solid #7c5cd8;border-radius:8px;padding:14px 16px;margin-bottom:12px">
+  <div style="font-weight:700;font-size:13px;margin-bottom:8px">📋 Scenario</div>
+  <p style="font-size:13px;margin-bottom:10px"><em>"Persistent's BFSI client launched a new mobile app feature in July 2026. Management claims it increased average transaction value. Prove or disprove this statistically."</em></p>
+  <pre>import numpy as np
+from scipy import stats
+
+# Transaction values before new feature (June 2026)
+before = np.array([8500, 9200, 7800, 11000, 9500, 8900, 10200, 9800])
+
+# Transaction values after new feature (July 2026)
+after  = np.array([11200, 12500, 10800, 13000, 11500, 12100, 10900, 12800])
+
+# Paired t-test (same users before/after)
+t_stat, p_value = stats.ttest_rel(before, after)
+
+print(f"Mean before: ₹{np.mean(before):,.0f}")
+print(f"Mean after:  ₹{np.mean(after):,.0f}")
+print(f"t-statistic: {t_stat:.4f}")
+print(f"p-value:     {p_value:.4f}")
+
+if p_value &lt; 0.05:
+    print("✅ REJECT H₀ — feature significantly increased transaction value")
+else:
+    print("❌ FAIL TO REJECT H₀ — no statistically significant change")</pre>
+  <div class="ok" style="margin-top:8px"><strong>Business answer:</strong> "With p = 0.003 (&lt; 0.05) and average transaction value increasing from ₹9,363 to ₹11,850 (a 26.6% increase), we have strong statistical evidence that the new feature increased transaction value. I recommend full rollout."</div>
+</div>
+
+
+<h2><span class="tag t4">Timed Test</span> ⏱️ 25 Minutes · No Hints</h2>
+<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:14px 16px">
+  <div style="font-weight:700;font-size:13px;color:#856404;margin-bottom:10px">Rules: Answer from memory. No Python open. Graded like real Persistent interview.</div>
+  <div class="tq"><strong>T1 (4 min):</strong> When would you report median instead of mean for a BFSI dataset? Give 2 real examples.</div>
+  <div class="tq"><strong>T2 (5 min):</strong> Write Python code to detect outliers in a revenue column using the IQR method.</div>
+  <div class="tq"><strong>T3 (6 min):</strong> Explain p-value without using the word "probability of the null hypothesis". Give a BFSI example.</div>
+  <div class="tq"><strong>T4 (5 min):</strong> What is the difference between Type I and Type II errors? Which is more dangerous in a fraud detection system?</div>
+  <div class="tq"><strong>T5 (5 min):</strong> A bank wants to know if their new branch training program improved average customer satisfaction score. What statistical test do you use and why?</div>
+</div>
+
+
+<div class="lessons" style="margin-top:24px">
+  <h3>🎯 5 Things a Persistent Statistics Interviewer Expects</h3>
+  <ol>
+    <li><strong>Always connect stats to business decisions.</strong> "Standard deviation measures spread" is textbook. "I use standard deviation to set fraud alert thresholds at 3-sigma" is what gets you hired.</li>
+    <li><strong>p-value is NOT the probability H₀ is true.</strong> The single most common statistics misconception. p = P(data | H₀ true). Say this clearly and you stand out.</li>
+    <li><strong>Never remove outliers without investigating first.</strong> In BFSI, outliers are often real transactions, fraud signals, or data entry errors — each requiring a different response.</li>
+    <li><strong>Statistical significance ≠ practical significance.</strong> A 0.5% improvement in approval rate may be p &lt; 0.05 but not worth implementing. Always report effect size alongside p-value.</li>
+    <li><strong>Correlation ≠ causation.</strong> Say it proactively in any analysis. Shows maturity. Persistent clients (banks) make policy decisions based on data — spurious correlations are dangerous.</li>
+  </ol>
+</div>
+
+
+<h2><span class="tag t3">Checkpoint</span> Day 8 — Before Day 9 (Power BI)</h2>
+<div class="ck-wrap">
+  <div style="font-weight:700;font-size:13px;color:#1a7f37;margin-bottom:10px">✅ Answer YES to all 8</div>
+  <div class="ck-row"><div class="ck-num">1</div><div>Can explain mean vs median with a BFSI example — and say which one to report for loan data</div></div>
+  <div class="ck-row"><div class="ck-num">2</div><div>Can write IQR outlier detection Python code from memory (Q1, Q3, IQR, fences)</div></div>
+  <div class="ck-row"><div class="ck-num">3</div><div>Can explain p-value correctly — without saying "probability null hypothesis is true"</div></div>
+  <div class="ck-row"><div class="ck-num">4</div><div>Know the difference between Type I and Type II errors — and which is worse in fraud detection</div></div>
+  <div class="ck-row"><div class="ck-num">5</div><div>Can run a t-test in Python using scipy.stats and interpret the output</div></div>
+  <div class="ck-row"><div class="ck-num">6</div><div>Know all 6 steps of A/B testing — from hypothesis to business decision</div></div>
+  <div class="ck-row"><div class="ck-num">7</div><div>Can explain correlation vs causation with a BFSI example</div></div>
+  <div class="ck-row"><div class="ck-num">8</div><div>Know the 68-95-99.7 rule and how to apply it for fraud threshold setting</div></div>
+</div>
+
+<div style="background:#f5f0ff;border:1px solid #7c5cd8;border-radius:8px;padding:14px 18px;margin-top:20px">
+  <div style="font-weight:700;font-size:13px;color:#7c5cd8;margin-bottom:5px">📅 Day 9 — Sept 26, 2026 · Power BI + Power Query + Modeling + Relationships</div>
+  <p style="font-size:12px;color:#1f2328">Star schema · fact vs dimension tables · Measures vs Calculated Columns · filter context · CALCULATE + ALL · Power Query data shaping · building a BFSI dashboard · relationship setup</p>
+</div>
+
+<div class="footer">
+  <p>Persistent Systems · Data Analyst Interview Prep · Day 8 of 15 · Sept 25, 2026</p>
+  <p style="margin-top:6px">Made with IBM Bob</p>
+</div>
+</div>
+</body>
+</html>

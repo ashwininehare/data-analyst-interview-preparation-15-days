@@ -1,0 +1,699 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Day 9 — Power BI · Persistent Systems</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:13px;line-height:1.6;color:#1f2328;background:#fff;padding:0 0 56px}
+.page{max-width:780px;margin:0 auto;padding:28px 16px}
+
+/* Header */
+.hdr{background:#1f2328;color:#fff;border-radius:10px;padding:22px 26px;margin-bottom:26px}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px}
+.hdr h1{font-size:20px;font-weight:700}
+.date-badge{background:#d4622a;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.hdr p{color:#8b949e;font-size:12px;margin-top:4px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.badge{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;color:#fff}
+.b1{background:#d4622a}.b2{background:#7c5cd8}.b3{background:#1a7f37}.b4{background:#3b82d4}
+
+/* Section */
+h2{font-size:14px;font-weight:700;border-bottom:2px solid #d4622a;padding-bottom:5px;margin:28px 0 14px;display:flex;align-items:center;gap:8px}
+.tag{color:#fff;border-radius:4px;font-size:11px;padding:2px 8px;font-weight:600;flex-shrink:0}
+.t1{background:#d4622a}.t2{background:#7c5cd8}.t3{background:#1a7f37}.t4{background:#3b82d4}.t5{background:#1f2328}
+
+/* Code */
+pre{background:#1f2328;color:#e6edf3;padding:12px 14px;border-radius:7px;font-size:11px;font-family:"Cascadia Code","Consolas",monospace;overflow-x:auto;margin:8px 0;line-height:1.8;white-space:pre}
+code{background:#f0f0f0;color:#c0392b;padding:1px 5px;border-radius:3px;font-size:11px;font-family:"Consolas",monospace}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+th{background:#f7f8fa;border:1px solid #e5e7eb;padding:7px 10px;text-align:left;font-weight:600}
+td{border:1px solid #e5e7eb;padding:6px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#fafafa}
+
+/* Alerts */
+.note{background:#f0f6ff;border-left:3px solid #3b82d4;border-radius:0 6px 6px 0;padding:9px 13px;font-size:12px;margin:8px 0}
+.warn{background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+.ok{background:#d1e7dd;border:1px solid #1a7f37;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+.err{background:#f8d7da;border:1px solid #dc3545;border-radius:6px;padding:9px 13px;font-size:12px;margin:8px 0}
+
+/* Q&A */
+.qa{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px;overflow:hidden}
+.qa-q{background:#f7f8fa;padding:9px 13px;font-weight:600;font-size:13px;border-bottom:1px solid #e5e7eb}
+.qa-q .qn{color:#d4622a;margin-right:6px}
+.qa-body{padding:11px 13px}
+.qa-a{background:#fff5f0;border-left:3px solid #d4622a;border-radius:0 4px 4px 0;padding:8px 11px;font-size:12px;font-style:italic;margin-bottom:8px}
+.meta-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.mt{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.mt-why{background:#fff3cd;color:#856404}
+.mt-trap{background:#f8d7da;color:#842029}
+.mt-kw{background:#d1e7dd;color:#0a3622}
+
+/* Tasks */
+.task{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden}
+.task-hd{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:#f7f8fa;border-bottom:1px solid #e5e7eb}
+.task-title{font-weight:700;font-size:13px}
+.task-tags{display:flex;gap:7px;align-items:center}
+.diff{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.easy{background:#d1e7dd;color:#0a3622}.med{background:#fff3cd;color:#856404}.hard{background:#f8d7da;color:#842029}
+.ttime{font-size:11px;color:#57606a;padding:2px 8px;background:#f0f0f0;border-radius:4px}
+.task-body{padding:12px 13px}
+
+/* Steps */
+.steps{list-style:none;padding:0;counter-reset:st}
+.steps li{counter-increment:st;display:flex;gap:10px;margin-bottom:11px;align-items:flex-start}
+.steps li::before{content:counter(st);background:#d4622a;color:#fff;border-radius:50%;width:21px;height:21px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.st-title{font-weight:700;font-size:12px}
+.st-desc{font-size:11px;color:#57606a;margin-top:2px}
+
+/* Flowchart nodes */
+.fc-box{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:600;line-height:1.4}
+.fc-start{background:#1f2328;color:#fff;border-radius:22px}
+.fc-q{background:#d4622a;color:#fff}
+.fc-yes{background:#d1e7dd;color:#0a3622;border:1px solid #1a7f37}
+.fc-no{background:#f8d7da;color:#842029;border:1px solid #dc3545}
+.fc-act{background:#7c5cd8;color:#fff}
+.fc-ok{background:#1a7f37;color:#fff;border-radius:22px}
+.arr{width:2px;height:20px;background:#57606a;margin:0 auto;position:relative;flex-shrink:0}
+.arr::after{content:'';position:absolute;bottom:-5px;left:-4px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #57606a}
+.arr-g{background:#1a7f37}.arr-g::after{border-top-color:#1a7f37}
+.arr-r{background:#d4622a}.arr-r::after{border-top-color:#d4622a}
+.two-br{display:flex;justify-content:center;gap:16px;width:100%}
+.br-col{display:flex;flex-direction:column;align-items:center;flex:1;max-width:220px}
+.br-lbl{font-size:10px;font-weight:700;margin-bottom:4px}
+.lbl-y{color:#1a7f37}.lbl-n{color:#d4622a}
+
+/* Star schema */
+.star{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:8px;margin:12px 0}
+.star-fact{grid-column:2;grid-row:2;background:#d4622a;color:#fff;border-radius:8px;padding:12px;text-align:center}
+.star-dim{background:#f7f8fa;border:2px solid #e5e7eb;border-radius:8px;padding:10px;text-align:center;font-size:11px}
+.star-dim.active{border-color:#d4622a}
+.star-title{font-weight:700;font-size:12px;margin-bottom:4px}
+.star-cols{font-size:10px;color:#57606a;line-height:1.7}
+.connector{display:flex;align-items:center;justify-content:center;font-size:16px;color:#d4622a;font-weight:700}
+
+/* Cheat sheet grid */
+.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cs-box{border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;background:#f7f8fa}
+.cs-title{font-weight:700;font-size:12px;margin-bottom:8px}
+.cs-title.pbi{color:#d4622a}
+.cs-title.dax{color:#7c5cd8}
+.cs-title.pq{color:#1a7f37}
+.cs-title.mod{color:#3b82d4}
+
+/* Compare grid */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.cmp-box{border-radius:8px;padding:12px;font-size:12px}
+.cmp-l{background:#fff5f0;border:1px solid #d4622a}
+.cmp-r{background:#f0fff4;border:1px solid #1a7f37}
+.cmp-title{font-weight:700;font-size:12px;margin-bottom:6px}
+
+/* Checkpoint */
+.ck-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+.ck-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:12px}
+.ck-num{background:#d4622a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* Exec strip */
+.exec-strip{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.ex{padding:5px 10px;border-radius:4px;font-size:11px;font-weight:700;color:#fff}
+.ex-arr{align-self:center;color:#57606a;font-size:13px}
+
+/* Timed test */
+.test-card{background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:14px 16px;margin-bottom:12px}
+.tq{font-size:12px;margin-bottom:8px;padding-left:12px;border-left:3px solid #ffc107}
+
+.lessons{background:#f7f8fa;border-left:4px solid #7c5cd8;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:20px}
+.lessons h3{font-size:13px;font-weight:700;color:#7c5cd8;margin-bottom:10px}
+.lessons ol{padding-left:18px}
+.lessons li{margin-bottom:7px;font-size:12px}
+
+hr{border:none;border-top:2px solid #e5e7eb;margin:28px 0}
+.footer{margin-top:44px;padding-top:14px;border-top:1px solid #e5e7eb;text-align:center;font-size:12px;color:#57606a}
+</style>
+</head>
+<body>
+<div class="page">
+
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div><h1>📅 Day 9 — Power BI · Power Query · Modeling · Relationships</h1>
+    <p>Persistent Systems · Data Analyst Interview Prep · Sept 26, 2026</p></div>
+    <span class="date-badge">📆 Sept 26, 2026 · Friday</span>
+  </div>
+  <div class="badges">
+    <span class="badge b1">Power BI Desktop</span>
+    <span class="badge b2">DAX Measures</span>
+    <span class="badge b3">Star Schema</span>
+    <span class="badge b4">Power Query</span>
+  </div>
+</div>
+
+
+<h2><span class="tag t1">Recruiter Lens</span> Why Persistent Tests Power BI Hard</h2>
+<table>
+  <tr><th>What They Check</th><th>Why It Matters</th></tr>
+  <tr><td>Star schema vs flat table</td><td>Wrong model = wrong numbers in every visual for every BFSI client</td></tr>
+  <tr><td>Relationships + filter direction</td><td>Slicer doesn't work = broken dashboard shipped to client</td></tr>
+  <tr><td>Measures vs Calculated Columns</td><td>Wrong choice = performance disaster on 1M+ row banking datasets</td></tr>
+  <tr><td>Power Query data shaping</td><td>Dirty data in = wrong dashboard out — real BFSI data is always messy</td></tr>
+  <tr><td>DAX CALCULATE + ALL</td><td>No DAX knowledge = junior level — Persistent expects production DAX</td></tr>
+  <tr><td>Storytelling / business insight</td><td>Dashboard is useless if analyst can't explain what it means to a CFO</td></tr>
+</table>
+
+
+<h2><span class="tag t1">Concept</span> Star Schema — The Foundation</h2>
+<div class="star">
+  <div class="star-dim active" style="grid-column:2;grid-row:1">
+    <div class="star-title" style="color:#d4622a">dim_reps</div>
+    <div class="star-cols">rep_name (PK)<br />team · hire_date · target</div>
+  </div>
+  <div class="star-dim" style="grid-column:1;grid-row:2">
+    <div class="star-title" style="color:#3b82d4">dim_regions</div>
+    <div class="star-cols">region (PK)<br />zone · manager</div>
+  </div>
+  <div class="star-fact">
+    <div class="star-title" style="color:#fff;font-size:13px">⭐ fact_sales</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.8);line-height:1.8;margin-top:4px">sale_id (PK)<br />region (FK)<br />product (FK)<br />rep_name (FK)<br />revenue · sale_date</div>
+  </div>
+  <div class="star-dim" style="grid-column:3;grid-row:2">
+    <div class="star-title" style="color:#7c5cd8">dim_products</div>
+    <div class="star-cols">product (PK)<br />category · price_tier</div>
+  </div>
+  <div class="star-dim" style="grid-column:2;grid-row:3">
+    <div class="star-title" style="color:#1a7f37">dim_date</div>
+    <div class="star-cols">date (PK)<br />month · quarter · year</div>
+  </div>
+</div>
+<table>
+  <tr><th>Table Type</th><th>Contains</th><th>Example</th><th>Has numbers?</th></tr>
+  <tr><td><strong style="color:#d4622a">Fact Table</strong></td><td>Transactions / events + foreign keys</td><td>sales: revenue, sale_date</td><td>✅ Yes (metrics)</td></tr>
+  <tr><td><strong style="color:#3b82d4">Dimension Table</strong></td><td>Descriptive context — who, what, where</td><td>reps: team, target</td><td>Usually no</td></tr>
+</table>
+<div class="note"><strong>Why star schema?</strong> Filters flow dimension → fact automatically. Slicers work cleanly. DAX is simpler. Performance is faster than a flat table on millions of rows.</div>
+
+
+<h2><span class="tag t2">Concept</span> Measures vs Calculated Columns</h2>
+<div class="cmp">
+  <div class="cmp-box cmp-l">
+    <div class="cmp-title" style="color:#d4622a">📐 Measure</div>
+    <table style="font-size:11px">
+      <tr><td>Computed</td><td>At query time (dynamic)</td></tr>
+      <tr><td>Responds to slicers</td><td style="color:#1a7f37;font-weight:700">✅ YES</td></tr>
+      <tr><td>Stored in table</td><td style="color:#d4622a">❌ No</td></tr>
+      <tr><td>Performance</td><td style="color:#1a7f37">✅ Fast on large data</td></tr>
+      <tr><td>Use for</td><td>KPIs, totals, %, running sums</td></tr>
+    </table>
+    <pre style="font-size:10px;padding:5px 8px;margin-top:6px">Total Revenue =
+SUM(sales[revenue])</pre>
+  </div>
+  <div class="cmp-box cmp-r">
+    <div class="cmp-title" style="color:#1a7f37">📋 Calculated Column</div>
+    <table style="font-size:11px">
+      <tr><td>Computed</td><td>When data loads (static)</td></tr>
+      <tr><td>Responds to slicers</td><td style="color:#d4622a;font-weight:700">❌ NO</td></tr>
+      <tr><td>Stored in table</td><td style="color:#1a7f37">✅ Yes (adds to file size)</td></tr>
+      <tr><td>Performance</td><td style="color:#d4622a">⚠️ Slow on large data</td></tr>
+      <tr><td>Use for</td><td>Row-level labels, tiers, flags</td></tr>
+    </table>
+    <pre style="font-size:10px;padding:5px 8px;margin-top:6px">Tier =
+IF(sales[revenue]&gt;=15000,
+"HIGH","LOW")</pre>
+  </div>
+</div>
+<div class="err"><strong>❌ Rejection trap:</strong> "I use calculated columns for everything." — signals you don't understand DAX performance. On 1M row banking datasets, calculated columns bloat file size and slow refresh.</div>
+
+
+<h2><span class="tag t2">Concept</span> Filter Context — Most Important DAX Concept</h2>
+<div style="background:#fff5f0;border:1px solid #d4622a;border-radius:8px;padding:14px 16px;margin:10px 0">
+  <div style="font-weight:700;font-size:13px;color:#d4622a;margin-bottom:8px">What is Filter Context?</div>
+  <p style="font-size:12px;margin-bottom:10px">The set of filters active when a DAX expression is evaluated. The SAME measure returns DIFFERENT values depending on what filters are active.</p>
+  <table>
+    <tr><th>Situation</th><th>SUM(sales[revenue]) returns</th></tr>
+    <tr><td>No slicer selected</td><td style="font-weight:700">₹63,201.50 (all rows)</td></tr>
+    <tr><td>User clicks "North" on region slicer</td><td style="font-weight:700">₹21,800.00 (North only)</td></tr>
+    <tr><td>User clicks "Enterprise" on team slicer</td><td style="font-weight:700">₹27,300.00 (Enterprise reps only)</td></tr>
+  </table>
+  <div class="note" style="margin-top:8px"><strong>CALCULATE</strong> = the function that lets you MODIFY or OVERRIDE filter context. It is the most important DAX function. No CALCULATE = can't build % of total, YoY, team-specific KPIs.</div>
+</div>
+
+
+<h2><span class="tag t2">Interview Q&amp;A</span> 10 Questions — MNC Level</h2>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q1</span> What is a star schema and why do you use it in Power BI?</div>
+  <div class="qa-body">
+    <div class="qa-a">"A star schema has one central fact table with metrics and foreign keys, surrounded by dimension tables with descriptive attributes. I use it because it gives clean, predictable filter flow — slicers on dimensions automatically filter the fact table. It also improves query performance and makes DAX simpler. A flat denormalized table creates data redundancy, inflated file size, and complex DAX."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: data modeling fundamentals</span>
+      <span class="mt mt-trap">Trap: "I load everything into one table" — instant red flag</span>
+      <span class="mt mt-kw">Keywords: fact · dimension · filter flow · performance · normalized</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q2</span> Difference between Measure and Calculated Column?</div>
+  <div class="qa-body">
+    <div class="qa-a">"A measure is computed at query time and responds to filter context — slicers affect it. A calculated column is computed once at load and stored statically — slicers don't affect it. For KPIs: always measures. For row labels like tier or category: calculated column. The key reason is performance — measures scale to millions of rows efficiently, calculated columns bloat file size."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: most asked Power BI question in every MNC</span>
+      <span class="mt mt-trap">Trap: using calculated columns for revenue totals — performance disaster on BFSI data</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q3</span> What does CALCULATE do in DAX?</div>
+  <div class="qa-body">
+    <div class="qa-a">"CALCULATE evaluates a DAX expression inside a modified filter context. It takes an expression and filter arguments that override or add to the existing context. For example, CALCULATE(SUM(sales[revenue]), sales[region] = 'North') always returns North's revenue regardless of slicer selection. Without CALCULATE you can't override filter context — so you can't build % of total, same-period-last-year, or team-specific KPIs."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: CALCULATE is the most important DAX function — tested 100% of interviews</span>
+      <span class="mt mt-trap">Trap: Confusing CALCULATE with FILTER — FILTER returns a table, CALCULATE evaluates an expression</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q4</span> What is ALL() and when do you use it?</div>
+  <div class="qa-body">
+    <div class="qa-a">"ALL() removes all filters from a table or column, returning unfiltered results regardless of slicers. Most common use: % of total — DIVIDE(SUM(revenue), CALCULATE(SUM(revenue), ALL(sales))). Without ALL(), the denominator is also filtered and every row shows 100%. ALLSELECTED() is the variant that keeps slicer selections — used when you want % within the user's filtered view."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: ALL vs ALLSELECTED is a Persistent favourite follow-up</span>
+      <span class="mt mt-trap">Trap: Using ALL() when ALLSELECTED() is the business requirement</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q5</span> How do you set up relationships in Power BI?</div>
+  <div class="qa-body">
+    <div class="qa-a">"In Model view, drag primary key from dimension to foreign key in fact table. I verify three things: cardinality is One-to-Many (dimension to fact), cross-filter direction is Single (filters flow one way), and relationship is Active. I never use bidirectional filtering unless there's a specific reason — it creates ambiguous filter paths in complex models."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: real modeling experience not just UI clicking</span>
+      <span class="mt mt-trap">Trap: bidirectional filtering on everything — signals amateur modeling</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q6</span> What is Power Query used for?</div>
+  <div class="qa-body">
+    <div class="qa-a">"Power Query is the transformation layer — runs before data loads into the model. I use it to fix data types, remove duplicates, rename columns to business-friendly names, filter nulls, unpivot columns, and merge sources. Anything fixable in Power Query I fix there — not in DAX. Clean data in means simpler measures and fewer errors. This matters especially for BFSI data which is always dirty."</div>
+    <div class="meta-row">
+      <span class="mt mt-trap">Trap: "I fix data issues in DAX" — Power Query transforms are more efficient and transparent</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q7</span> Write the DAX for Revenue % of Total.</div>
+  <div class="qa-body">
+    <pre>Revenue % of Total =
+VAR current_rev = SUM(sales[revenue])
+VAR total_rev   = CALCULATE(SUM(sales[revenue]), ALL(sales))
+RETURN DIVIDE(current_rev, total_rev, 0) * 100</pre>
+    <div class="qa-a">"I use VAR to store each part — avoids computing SUM twice, faster on large models. DIVIDE handles division by zero gracefully with 0 as fallback. ALL(sales) removes all filters so denominator is always grand total."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: exact measure asked in almost every Power BI interview</span>
+      <span class="mt mt-trap">Trap: Not using VAR (computes SUM twice) · Not using DIVIDE (crashes on empty data)</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q8</span> ALL() vs ALLSELECTED() — difference?</div>
+  <div class="qa-body">
+    <table>
+      <tr><th></th><th>ALL()</th><th>ALLSELECTED()</th></tr>
+      <tr><td>Removes slicer filters</td><td style="color:#1a7f37;font-weight:700">✅ Yes</td><td style="color:#d4622a;font-weight:700">❌ No — keeps them</td></tr>
+      <tr><td>Use case</td><td>% of grand total (always fixed)</td><td>% within user's selection</td></tr>
+      <tr><td>% adds up to</td><td>May not total 100% in selection</td><td>Always 100% within selection</td></tr>
+    </table>
+    <div class="qa-a">"If user filters to North and I want North's % of ALL regions — use ALL(). If I want North's % only within user's selected regions — use ALLSELECTED(). Business context decides which is correct."</div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q9</span> A slicer is not filtering a visual — how do you debug?</div>
+  <div class="qa-body">
+    <div class="qa-a">"Three places to check: First, is the relationship active between the slicer table and the visual's table? Go to Model view and verify. Second, is the cross-filter direction correct — does it flow from the slicer table toward the visual table? Third, is there a visual-level filter overriding the slicer? Check the visual's filter pane. If the relationship is inactive I'll use USERELATIONSHIP() in a CALCULATE measure to activate it for that specific calculation."</div>
+    <div class="meta-row">
+      <span class="mt mt-why">Tests: real troubleshooting experience</span>
+      <span class="mt mt-kw">Keywords: relationship · filter direction · USERELATIONSHIP · visual filter</span>
+    </div>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qn">Q10</span> Star schema vs Snowflake schema — difference?</div>
+  <div class="qa-body">
+    <table>
+      <tr><th></th><th>Star Schema</th><th>Snowflake Schema</th></tr>
+      <tr><td>Dimension tables</td><td>Denormalized (flat)</td><td>Normalized (split further)</td></tr>
+      <tr><td>Joins</td><td>Fewer — faster queries</td><td>More — slower queries</td></tr>
+      <tr><td>Storage</td><td>More redundancy</td><td>Less redundancy</td></tr>
+      <tr><td>Power BI preference</td><td style="color:#1a7f37;font-weight:700">✅ Recommended</td><td style="color:#d4622a">⚠️ Avoid if possible</td></tr>
+    </table>
+    <div class="qa-a">"In Power BI I always prefer star schema — fewer hops, simpler DAX, faster visuals. Snowflake adds unnecessary joins and slows filter propagation. For BFSI dashboards that need sub-second response, star schema is the standard."</div>
+  </div>
+</div>
+
+
+<h2><span class="tag t3">Tasks</span> 4 Hands-On Tasks</h2>
+
+<div class="task">
+  <div class="task-hd"><span class="task-title">Task 1 — Load + Transform in Power Query</span>
+    <div class="task-tags"><span class="diff easy">Easy</span><span class="ttime">15 min</span></div></div>
+  <div class="task-body">
+    <ol class="steps">
+      <li><div><div class="st-title">Home → Get Data → Text/CSV → load sales.csv</div></div></li>
+      <li><div><div class="st-title">Transform Data opens Power Query Editor</div><div class="st-desc">revenue column → right-click → Change Type → Decimal Number</div></div></li>
+      <li><div><div class="st-title">sale_date column → Change Type → Date</div></div></li>
+      <li><div><div class="st-title">Add Column → Custom Column → Name: days_since_hire</div><div class="st-desc">Formula: <code>= Duration.Days(DateTime.LocalNow() - [hire_date])</code></div></div></li>
+      <li><div><div class="st-title">Close &amp; Apply → repeat for reps.csv and regions.csv</div></div></li>
+    </ol>
+    <div class="warn"><strong>⚠️ Common issues:</strong> Revenue loaded as text (fix: change type). Dates loaded as text (fix: change type to Date). Always verify types in Applied Steps panel before closing.</div>
+  </div>
+</div>
+
+<div class="task">
+  <div class="task-hd"><span class="task-title">Task 2 — Build the Star Schema</span>
+    <div class="task-tags"><span class="diff med">Medium</span><span class="ttime">15 min</span></div></div>
+  <div class="task-body">
+    <ol class="steps">
+      <li><div><div class="st-title">Go to Model view (left sidebar — 3-box icon)</div></div></li>
+      <li><div><div class="st-title">Drag reps[rep_name] → drop on sales[rep_name]</div><div class="st-desc">Relationship created. Verify: One (reps) to Many (sales) · Single direction</div></div></li>
+      <li><div><div class="st-title">Drag regions[region] → drop on sales[region]</div><div class="st-desc">Verify same settings</div></div></li>
+      <li><div><div class="st-title">Double-click each relationship line to verify settings</div></div></li>
+    </ol>
+    <div class="ok"><strong>Fact table = sales</strong> (has revenue metrics + all foreign keys). <strong>Dimensions = reps, regions</strong> (descriptive context). Filters flow FROM dimensions TO sales — never reverse.</div>
+  </div>
+</div>
+
+<div class="task">
+  <div class="task-hd"><span class="task-title">Task 3 — 5 Core DAX Measures</span>
+    <div class="task-tags"><span class="diff med">Medium</span><span class="ttime">20 min</span></div></div>
+  <div class="task-body">
+    <pre>-- Measure 1: Total Revenue
+Total Revenue = SUM(sales[revenue])
+
+-- Measure 2: Target Total
+Target Total = SUM(reps[target])
+
+-- Measure 3: Achievement %
+Achievement % =
+DIVIDE([Total Revenue], [Target Total], 0) * 100
+
+-- Measure 4: Revenue % of Total (production-grade)
+Revenue % of Total =
+VAR current_rev = SUM(sales[revenue])
+VAR total_rev   = CALCULATE(SUM(sales[revenue]), ALL(sales))
+RETURN DIVIDE(current_rev, total_rev, 0) * 100
+
+-- Measure 5: Deals Count
+Deals Count = COUNT(sales[sale_id])</pre>
+    <div class="warn"><strong>⚠️ Create measures in the sales table</strong> (right-click sales → New Measure). Target Total goes in reps table. Always name measures clearly — interviewers check this.</div>
+  </div>
+</div>
+
+<div class="task">
+  <div class="task-hd"><span class="task-title">Task 4 — Build the Dashboard</span>
+    <div class="task-tags"><span class="diff hard">Hard</span><span class="ttime">25 min</span></div></div>
+  <div class="task-body">
+    <table>
+      <tr><th>Visual</th><th>Type</th><th>Fields</th></tr>
+      <tr><td>Total Revenue</td><td>Card</td><td>[Total Revenue]</td></tr>
+      <tr><td>Achievement %</td><td>Card</td><td>[Achievement %]</td></tr>
+      <tr><td>Revenue by Region</td><td>Bar Chart</td><td>X: region · Y: [Total Revenue]</td></tr>
+      <tr><td>Rep Performance</td><td>Clustered Bar</td><td>X: rep_name · Y: [Total Revenue] + [Target Total]</td></tr>
+      <tr><td>Revenue % Share</td><td>Donut Chart</td><td>Legend: product · Values: [Revenue % of Total]</td></tr>
+    </table>
+    <div style="margin-top:10px;font-weight:700;font-size:12px">Add slicers:</div>
+    <pre>Slicer 1: reps[team]     → Enterprise / SMB
+Slicer 2: regions[zone]  → filter by geographic zone</pre>
+    <div class="ok" style="margin-top:8px"><strong>Business story to tell:</strong> "Widget A drives 43% of revenue. Alice (Enterprise) is our highest performer at HIGH tier. The West region is underperforming — only ₹6,200. SMB team is below target — needs attention."</div>
+  </div>
+</div>
+
+<hr />
+
+
+<h2><span class="tag t5">Flowcharts</span> Day 9 — Decision Guides</h2>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#d4622a;margin-top:0;font-size:13px"><span class="tag t1">FC 1</span> Measure or Calculated Column?</h2>
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="fc-box fc-start" style="width:260px">I need to create a new value in Power BI</div>
+    <div class="arr"></div>
+    <div class="fc-box fc-q" style="width:380px">Does it aggregate data or respond to slicers?</div>
+    <div class="two-br">
+      <div class="br-col">
+        <div class="br-lbl lbl-y">YES — dynamic KPI</div>
+        <div class="arr arr-g"></div>
+        <div class="fc-box fc-yes" style="width:170px">Use MEASURE</div>
+        <div style="background:#d1e7dd;border:1px solid #1a7f37;border-radius:8px;padding:9px;width:185px;margin-top:8px">
+          <div style="font-weight:700;font-size:11px;color:#0a3622;margin-bottom:4px">Measure examples</div>
+          <div style="font-size:11px;color:#0a3622;line-height:1.8">Total Revenue<br />Achievement %<br />Revenue % of Total<br />Deals Count<br />Running Total</div>
+        </div>
+      </div>
+      <div class="br-col">
+        <div class="br-lbl lbl-n">NO — row-level label</div>
+        <div class="arr arr-r"></div>
+        <div class="fc-box fc-no" style="width:170px">Use CALCULATED COLUMN</div>
+        <div style="background:#f8d7da;border:1px solid #dc3545;border-radius:8px;padding:9px;width:185px;margin-top:8px">
+          <div style="font-weight:700;font-size:11px;color:#842029;margin-bottom:4px">Calc column examples</div>
+          <div style="font-size:11px;color:#842029;line-height:1.8">Performance tier<br />Age bucket<br />Region category<br />Full name concat<br />Date label</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#7c5cd8;margin-top:0;font-size:13px"><span class="tag t2">FC 2</span> How to Set Up a Relationship Correctly</h2>
+  <ol class="steps">
+    <li><div><div class="st-title">Identify the ONE side — the dimension table</div><div class="st-desc">reps has each rep_name ONCE → ONE side</div></div></li>
+    <li><div><div class="st-title">Identify the MANY side — the fact table</div><div class="st-desc">sales has rep_name repeated → MANY side</div></div></li>
+    <li><div><div class="st-title">Drag from dimension (ONE) → fact (MANY)</div><div class="st-desc">Model view → drag reps[rep_name] onto sales[rep_name]</div></div></li>
+    <li><div><div class="st-title">Verify settings in relationship dialog</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px">
+        <div style="background:#d1e7dd;border:1px solid #1a7f37;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;color:#0a3622">✅ Cardinality: One-to-Many</div>
+        <div style="background:#d1e7dd;border:1px solid #1a7f37;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;color:#0a3622">✅ Direction: Single</div>
+        <div style="background:#d1e7dd;border:1px solid #1a7f37;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;color:#0a3622">✅ Active: Yes</div>
+        <div style="background:#f8d7da;border:1px solid #dc3545;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;color:#842029">❌ Bidirectional: Avoid</div>
+      </div>
+    </div></li>
+    <li><div><div class="st-title">Test: add a slicer on the dimension → does it filter the fact visual?</div><div class="st-desc">If not: check filter direction and active status</div></div></li>
+  </ol>
+</div>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#3b82d4;margin-top:0;font-size:13px"><span class="tag t4">FC 3</span> CALCULATE — When and How to Use It</h2>
+  <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:12px">
+    <div class="fc-box fc-start" style="width:260px">I need a DAX measure</div>
+    <div class="arr"></div>
+    <div class="fc-box fc-q" style="width:380px">Does it need to override or ignore filter context?</div>
+    <div class="two-br">
+      <div class="br-col">
+        <div class="br-lbl lbl-n">NO — just SUM/COUNT</div>
+        <div class="arr arr-r"></div>
+        <div class="fc-box" style="background:#3b82d4;color:#fff;width:160px">Simple aggregate</div>
+        <pre style="font-size:10px;padding:5px 8px;margin-top:6px;width:185px">Total Revenue =
+SUM(sales[revenue])</pre>
+      </div>
+      <div class="br-col">
+        <div class="br-lbl lbl-y">YES — override context</div>
+        <div class="arr arr-g"></div>
+        <div class="fc-box fc-yes" style="width:160px">Use CALCULATE</div>
+        <div style="background:#d1e7dd;border:1px solid #1a7f37;border-radius:8px;padding:9px;width:185px;margin-top:8px">
+          <div style="font-weight:700;font-size:11px;color:#0a3622;margin-bottom:4px">When to use CALCULATE</div>
+          <div style="font-size:11px;color:#0a3622;line-height:1.8">% of total (ALL)<br />Fixed region filter<br />Year-over-year<br />Team-specific KPI<br />Remove slicer effect</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <pre>-- Pattern 1: Fixed filter
+North Revenue = CALCULATE(SUM(sales[revenue]), sales[region]="North")
+
+-- Pattern 2: Remove all filters (grand total)
+Grand Total = CALCULATE(SUM(sales[revenue]), ALL(sales))
+
+-- Pattern 3: % of total (full production pattern)
+Revenue % of Total =
+VAR curr = SUM(sales[revenue])
+VAR total = CALCULATE(SUM(sales[revenue]), ALL(sales))
+RETURN DIVIDE(curr, total, 0) * 100
+
+-- Pattern 4: Team filter using related table
+Enterprise Rev = CALCULATE(SUM(sales[revenue]),
+                 FILTER(reps, reps[team]="Enterprise"))</pre>
+</div>
+
+
+<div style="margin-bottom:24px">
+  <h2 style="border-color:#1a7f37;margin-top:0;font-size:13px"><span class="tag t3">FC 4</span> Power Query — Data Cleaning Order</h2>
+  <div class="exec-strip">
+    <span class="ex" style="background:#3b82d4">1. Load CSV</span><span class="ex-arr">→</span>
+    <span class="ex" style="background:#3b82d4">2. Fix data types</span><span class="ex-arr">→</span>
+    <span class="ex" style="background:#7c5cd8">3. Remove nulls/dupes</span><span class="ex-arr">→</span>
+    <span class="ex" style="background:#7c5cd8">4. Rename columns</span><span class="ex-arr">→</span>
+    <span class="ex" style="background:#1a7f37">5. Add custom columns</span><span class="ex-arr">→</span>
+    <span class="ex" style="background:#1a7f37">6. Close &amp; Apply</span>
+  </div>
+  <table style="margin-top:10px">
+    <tr><th>Fix in Power Query</th><th>Not in DAX</th></tr>
+    <tr><td>revenue text → Decimal Number</td><td>Calculated column for type fix is inefficient</td></tr>
+    <tr><td>Remove duplicate rows</td><td>DISTINCTCOUNT in DAX doesn't remove from model</td></tr>
+    <tr><td>Rename columns to business names</td><td>Aliases in DAX confuse future developers</td></tr>
+    <tr><td>Filter test/null rows</td><td>Null handling in every DAX measure is fragile</td></tr>
+  </table>
+</div>
+
+<hr />
+
+
+<h2><span class="tag t5">Cheat Sheet</span> Power BI Day 9 — Quick Reference</h2>
+<div class="cs-grid">
+  <div class="cs-box">
+    <div class="cs-title pbi">⚡ Core DAX Measures</div>
+    <pre style="font-size:10px;padding:8px 10px">Total Revenue =
+  SUM(sales[revenue])
+
+Target Total =
+  SUM(reps[target])
+
+Achievement % =
+  DIVIDE([Total Revenue],
+         [Target Total], 0) * 100
+
+Deals Count =
+  COUNT(sales[sale_id])
+
+Unique Reps =
+  DISTINCTCOUNT(sales[rep_name])</pre>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title dax">🔧 CALCULATE Patterns</div>
+    <pre style="font-size:10px;padding:8px 10px">-- % of total
+Rev% =
+VAR c = SUM(sales[revenue])
+VAR t = CALCULATE(
+  SUM(sales[revenue]),ALL(sales))
+RETURN DIVIDE(c,t,0)*100
+
+-- Fixed filter
+North =
+CALCULATE(SUM(sales[revenue]),
+  sales[region]="North")
+
+-- Team filter
+EntRev =
+CALCULATE(SUM(sales[revenue]),
+  FILTER(reps,reps[team]="Enterprise"))</pre>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title pq">📋 Power Query Steps</div>
+    <table style="font-size:11px">
+      <tr><th>Action</th><th>Where</th></tr>
+      <tr><td>Fix data type</td><td>Right-click column header</td></tr>
+      <tr><td>Remove duplicates</td><td>Home → Remove Rows</td></tr>
+      <tr><td>Add custom column</td><td>Add Column → Custom Column</td></tr>
+      <tr><td>Filter nulls</td><td>Column dropdown → uncheck null</td></tr>
+      <tr><td>Rename column</td><td>Double-click header</td></tr>
+      <tr><td>Unpivot columns</td><td>Select cols → Transform → Unpivot</td></tr>
+    </table>
+  </div>
+  <div class="cs-box">
+    <div class="cs-title mod">🔗 Relationship Rules</div>
+    <table style="font-size:11px">
+      <tr><th>Setting</th><th>Use</th></tr>
+      <tr><td>One-to-Many</td><td>Dimension → Fact ✅</td></tr>
+      <tr><td>Single direction</td><td>Always (default) ✅</td></tr>
+      <tr><td>Bidirectional</td><td>Avoid unless specific need ⚠️</td></tr>
+      <tr><td>Active</td><td>Yes — or use USERELATIONSHIP()</td></tr>
+      <tr><td>Many-to-Many</td><td>Use bridge table ✅</td></tr>
+    </table>
+    <div style="font-size:11px;color:#57606a;margin-top:6px">Filters always flow: Dimension → Fact</div>
+  </div>
+</div>
+
+
+<table style="margin-top:4px">
+  <tr><th>Function</th><th>Removes slicer?</th><th>Use case</th><th>Example</th></tr>
+  <tr><td><code>ALL(table)</code></td><td style="color:#1a7f37;font-weight:700">Yes</td><td>% of grand total always</td><td>Revenue % of Total</td></tr>
+  <tr><td><code>ALL(column)</code></td><td style="color:#1a7f37;font-weight:700">Yes (that column only)</td><td>Remove one specific filter</td><td>Remove product filter only</td></tr>
+  <tr><td><code>ALLSELECTED()</code></td><td style="color:#d4622a;font-weight:700">No — keeps slicers</td><td>% within user's selection</td><td>% within filtered period</td></tr>
+  <tr><td><code>FILTER()</code></td><td>N/A</td><td>Returns filtered table for CALCULATE</td><td>FILTER(reps, team="Enterprise")</td></tr>
+</table>
+
+
+<h2><span class="tag t4">Case Study</span> Revenue Discrepancy Scenario</h2>
+<div style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-bottom:12px">
+  <div style="font-weight:700;font-size:13px;margin-bottom:8px">📋 Scenario</div>
+  <p style="font-size:13px;margin-bottom:10px"><em>"North region manager claims 108% target achievement. Your Power BI dashboard shows 87%. Manager is furious. Find the discrepancy."</em></p>
+  <ol class="steps">
+    <li><div><div class="st-title">Check the measure definition</div><div class="st-desc">Is Achievement % using the correct tables? Is target coming from reps or a different source?</div></div></li>
+    <li><div><div class="st-title">Check the relationship between reps and sales</div><div class="st-desc">Is the One-to-Many relationship active? Is filter direction correct?</div></div></li>
+    <li><div><div class="st-title">Check the date range</div><div class="st-desc">Is the dashboard filtered to August only? Manager may be including September. Check slicer settings.</div></div></li>
+    <li><div><div class="st-title">Cross-validate against SQL</div><div class="st-desc">Run the same aggregation in MySQL — if SQL shows 108% and Power BI shows 87%, the model has a data issue</div></div></li>
+    <li><div><div class="st-title">Check if Eve (no sales) is included in Target Total</div><div class="st-desc">Eve's ₹16,000 target is included in denominator — inflating the total target, deflating the % achievement</div></div></li>
+    <li><div><div class="st-title">Present findings with evidence</div><div class="st-desc">Show the query output, measure code, and relationship screenshot — not just a number</div></div></li>
+  </ol>
+</div>
+
+
+<h2><span class="tag t4">Timed Test</span> ⏱️ 25 Minutes · No Hints</h2>
+<div class="test-card">
+  <div style="font-weight:700;font-size:13px;color:#856404;margin-bottom:10px">Rules: Answer from memory. No Power BI open. Graded like real Persistent interview.</div>
+  <div class="tq"><strong>T1 (4 min):</strong> What is the difference between a star schema and snowflake schema? Which does Power BI prefer and why?</div>
+  <div class="tq"><strong>T2 (5 min):</strong> Write the DAX measure for Revenue % of Total. Use VAR, DIVIDE, ALL(). No looking up.</div>
+  <div class="tq"><strong>T3 (6 min):</strong> A slicer on reps[team] is not filtering the sales bar chart. Name 3 possible reasons and how you fix each.</div>
+  <div class="tq"><strong>T4 (5 min):</strong> What is filter context? Give one example of how CALCULATE changes it.</div>
+  <div class="tq"><strong>T5 (5 min):</strong> Should you use a Measure or Calculated Column for: a) Total revenue per region · b) Performance tier per rep · c) Revenue % of total — justify each.</div>
+</div>
+
+
+<div class="lessons">
+  <h3>🎯 5 Things a Persistent Power BI Interviewer Expects</h3>
+  <ol>
+    <li><strong>Star schema model — not flat table.</strong> Every BFSI dashboard at Persistent uses star schema. If you say "I put everything in one table" the interview ends.</li>
+    <li><strong>Measures for KPIs, Calculated Columns for row labels.</strong> No exceptions. Calculated columns for revenue = instant junior signal.</li>
+    <li><strong>CALCULATE + ALL for % of total — from memory.</strong> This exact measure is asked in every Power BI interview. Write it with VAR + DIVIDE — no shortcuts.</li>
+    <li><strong>Single-direction relationships only</strong> unless specifically justified. Bidirectional = ambiguous filter path = wrong numbers for client.</li>
+    <li><strong>Power Query for cleaning, not DAX.</strong> Fix data types, nulls, duplicates in Power Query. Clean data in = simpler DAX = fewer dashboard errors.</li>
+  </ol>
+</div>
+
+
+<h2><span class="tag t3">Checkpoint</span> Day 9 — Before Day 10 (DAX Deep Dive)</h2>
+<div class="ck-wrap">
+  <div style="font-weight:700;font-size:13px;color:#1a7f37;margin-bottom:10px">✅ Answer YES to all 8</div>
+  <div class="ck-row"><div class="ck-num">1</div><div>3 CSV files loaded into Power BI with correct data types (Decimal, Date)</div></div>
+  <div class="ck-row"><div class="ck-num">2</div><div>Star schema model built — 2 relationships with correct cardinality and single direction</div></div>
+  <div class="ck-row"><div class="ck-num">3</div><div>All 5 DAX measures created and returning correct values when tested</div></div>
+  <div class="ck-row"><div class="ck-num">4</div><div>Can explain filter context without looking it up — with a slicer example</div></div>
+  <div class="ck-row"><div class="ck-num">5</div><div>Dashboard has 5 visuals + 2 slicers + slicers actually filter the visuals</div></div>
+  <div class="ck-row"><div class="ck-num">6</div><div>Can explain Measure vs Calculated Column with a performance reason</div></div>
+  <div class="ck-row"><div class="ck-num">7</div><div>Can explain ALL() vs ALLSELECTED() with a BFSI business example</div></div>
+  <div class="ck-row"><div class="ck-num">8</div><div>Can write Revenue % of Total DAX from memory: VAR + CALCULATE + ALL + DIVIDE</div></div>
+</div>
+
+<div style="background:#fff5f0;border:1px solid #d4622a;border-radius:8px;padding:14px 18px;margin-top:20px">
+  <div style="font-weight:700;font-size:13px;color:#d4622a;margin-bottom:5px">📅 Day 10 — Sept 27, 2026 · DAX Deep Dive + KPIs + Dashboard Storytelling</div>
+  <p style="font-size:12px;color:#1f2328">CALCULATE advanced · FILTER · SUMX · AVERAGEX · time intelligence (DATEADD · SAMEPERIODLASTYEAR) · KPI cards · bookmarks · drill-through · tooltips · presenting a dashboard to a CFO</p>
+</div>
+
+<div class="footer">
+  <p>Persistent Systems · Data Analyst Interview Prep · Day 9 of 15 · Sept 26, 2026</p>
+  <p style="margin-top:6px">Made with IBM Bob</p>
+</div>
+</div>
+</body>
+</html>

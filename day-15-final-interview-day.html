@@ -1,0 +1,810 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 15 — Final Interview · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px;border-left:5px solid #f59e0b}
+.header h1{font-size:23px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#7f1d1d;color:#fecaca}
+.b2{background:#1e3a8a;color:#bfdbfe}
+.b3{background:#14532d;color:#bbf7d0}
+.b4{background:#4c1d95;color:#ddd6fe}
+.b5{background:#0c4a6e;color:#bae6fd}
+.b6{background:#78350f;color:#fde68a}
+.b7{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#b91c1c;border-bottom:2px solid #b91c1c;padding-bottom:4px;margin-bottom:14px}
+.sec-title.blue{color:#1e40af;border-color:#1e40af}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.sky{color:#0369a1;border-color:#0369a1}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.gold{color:#b45309;border-color:#f59e0b}
+.sec-title.dark{color:#1f2328;border-color:#1f2328}
+
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+.card.warn{background:#fffbeb;border-color:#fde68a}
+.card.success{background:#f0fdf4;border-color:#86efac}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.sql{background:#dbeafe;color:#1e40af}
+.tag.py{background:#dcfce7;color:#166534}
+.tag.pbi{background:#ede9fe;color:#5b21b6}
+.tag.ai{background:#e0f2fe;color:#0c4a6e}
+.tag.hr{background:#fef9c3;color:#854d0e}
+.tag.bfsi{background:#fee2e2;color:#991b1b}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.str{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}.hl{color:#e3b341}
+
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.green{color:#166534}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell h4.gold{color:#b45309}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+
+.qa{border-left:3px solid #1e40af;padding:10px 14px;background:#f0f6ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#1e3a5f}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#1e40af}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}
+.qa.green .q{color:#14532d}.qa.green .a strong{color:#1a7f4b}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}
+.qa.purple .q{color:#4c1d95}.qa.purple .a strong{color:#7c5cd8}
+.qa.gold{border-color:#d97706;background:#fffbeb}
+.qa.gold .q{color:#78350f}.qa.gold .a strong{color:#b45309}
+.qa.red{border-color:#b91c1c;background:#fff5f5}
+.qa.red .q{color:#7f1d1d}.qa.red .a strong{color:#b91c1c}
+
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166534;border:2px solid #86efac}
+.today{background:#fef9c3;color:#854d0e;border:2px solid #f59e0b}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+
+.star-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.star-box{border-radius:7px;padding:12px 14px;border:1px solid #e5e7eb;background:#f7f8fa}
+.star-box .label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;color:#57606a}
+.star-box .content{font-size:12.5px;color:#1f2328}
+
+.round-bar{display:flex;gap:0;margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb}
+.r-seg{flex:1;padding:9px 6px;text-align:center;font-size:11px;font-weight:700}
+.r-seg .mins{display:block;font-size:15px;font-weight:800;margin-bottom:1px}
+.t-intro{background:#f0f2f5;color:#374151}
+.t-tech{background:#dbeafe;color:#1e3a8a}
+.t-case{background:#dcfce7;color:#14532d}
+.t-hr{background:#fef9c3;color:#854d0e}
+.t-close{background:#1f2328;color:#e6edf3}
+
+.final-box{background:linear-gradient(135deg,#1f2328 0%,#1e3a8a 100%);color:#e6edf3;border-radius:10px;padding:20px 24px;margin-bottom:12px;text-align:center}
+.final-box h2{font-size:18px;font-weight:800;margin-bottom:6px;color:#fff}
+.final-box p{font-size:13px;color:#93c5fd;margin-bottom:0}
+
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>🏆 Day 15 — Final Interview Day</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 4.5 Hours · The Real Thing</p>
+  <div class="badge-row">
+    <span class="badge b2">Technical Round</span>
+    <span class="badge b3">Live Case Study</span>
+    <span class="badge b4">BFSI Domain</span>
+    <span class="badge b5">AI + watsonx</span>
+    <span class="badge b6">HR + Behavioral</span>
+    <span class="badge b7">Full Interview Simulation</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">🎯 15-Day Journey — You Made It</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div><div class="day-dot done">2</div><div class="day-dot done">3</div>
+    <div class="day-dot done">4</div><div class="day-dot done">5</div><div class="day-dot done">6</div>
+    <div class="day-dot done">7</div><div class="day-dot done">8</div><div class="day-dot done">9</div>
+    <div class="day-dot done">10</div><div class="day-dot done">11</div><div class="day-dot done">12</div>
+    <div class="day-dot done">13</div><div class="day-dot done">14</div><div class="day-dot today">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–14 complete · 🟡 Day 15: <strong>FINAL INTERVIEW — This is it.</strong></p>
+</div>
+
+
+<div class="final-box">
+  <h2>15 Days. 4 Tools. 1 Goal. Today You Interview.</h2>
+  <p>SQL · Python · Excel · Power BI · BFSI Domain · AI · Responsible AI · HR — all in one day. You have prepared for this. Trust the work.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title blue">📋 Final Interview Schedule — 4.5 Hours</div>
+  <div class="round-bar">
+    <div class="r-seg t-intro"><span class="mins">15</span>Intro</div>
+    <div class="r-seg t-tech"><span class="mins">90</span>Technical</div>
+    <div class="r-seg t-case"><span class="mins">45</span>Case Study</div>
+    <div class="r-seg t-hr"><span class="mins">45</span>HR Round</div>
+    <div class="r-seg t-close"><span class="mins">15</span>Close</div>
+  </div>
+  <table>
+    <thead><tr><th>Time</th><th>Round</th><th>What Happens</th><th>Max Points</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:15</td><td>Intro</td><td>"Tell me about yourself" · Walk me through a project · Why Persistent?</td><td>10 pts</td></tr>
+      <tr><td>0:15–1:00</td><td><span class="tag sql">SQL</span> Technical</td><td>2 queries live: Window function + CTE combo · NPA flag</td><td>25 pts</td></tr>
+      <tr><td>1:00–1:45</td><td><span class="tag py">Python</span> Technical</td><td>EDA on sales+reps · 3 business insights · outlier flag</td><td>25 pts</td></tr>
+      <tr><td>1:45–2:15</td><td><span class="tag pbi">Power BI</span> Technical</td><td>Explain 2 DAX measures + fix a broken dashboard</td><td>20 pts</td></tr>
+      <tr><td>2:15–2:30</td><td><span class="tag ai">AI + BFSI</span></td><td>Rapid-fire: 4 questions on GenAI/BFSI domain</td><td>20 pts</td></tr>
+      <tr><td>2:30–3:15</td><td>Case Study</td><td>Open-ended BFSI business case — verbal + whiteboard</td><td>Bonus</td></tr>
+      <tr><td>3:15–4:00</td><td><span class="tag hr">HR Round</span></td><td>STAR behavioral questions · salary negotiation · team fit</td><td>Qualifying</td></tr>
+      <tr><td>4:00–4:15</td><td>Closing</td><td>Your questions for the panel · next steps · impression</td><td>Impression</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">🎤 Round 1 — Intro (15 min)</div>
+
+  <div class="card warn">
+    <h3 style="color:#854d0e">⚡ First 60 seconds sets the entire tone. Practise this until it's automatic.</h3>
+  </div>
+
+  <div class="qa gold">
+    <div class="q">"Tell me about yourself."</div>
+    <div class="a">
+      <strong>Formula:</strong> WHO + WHAT + ACHIEVEMENT + WHY PERSISTENT — exactly 90 seconds.<br /><br />
+      <strong>Template:</strong> "I'm [Name], a data analyst with [X] years in banking and financial services. I specialize in SQL-based portfolio analytics, Python EDA, and Power BI dashboards — I've delivered everything from NPA segmentation reports to churn dashboards for banking operations teams. Most recently, [one quantified achievement — e.g., 'I reduced monthly reporting time from 3 days to 4 hours by building an automated SQL + Power BI pipeline']. I'm excited about Persistent specifically because your banking analytics practice on IBM watsonx is exactly where I want to grow — enterprise-scale BFSI AI is the intersection of my domain expertise and where the industry is heading."
+    </div>
+  </div>
+
+  <div class="qa gold">
+    <div class="q">"Walk me through a project you're proud of."</div>
+    <div class="a">
+      <strong>STAR format — 2 minutes:</strong><br />
+      <strong>Situation:</strong> "Our bank's NPA reporting was manual — 3 analysts, 3 days, error-prone Excel."<br />
+      <strong>Task:</strong> "I was asked to automate the monthly NPA portfolio report."<br />
+      <strong>Action:</strong> "I wrote SQL queries to segment loans by DPD bucket (0–30, 31–60, 61–90, 90+), built a Python cleanup script for NULL handling and data validation, and connected it to a Power BI dashboard with a region slicer and conditional formatting for risk flags."<br />
+      <strong>Result:</strong> "Report time: 3 days → 4 hours. Zero manual errors. Risk Manager now runs it herself every Monday morning."
+    </div>
+  </div>
+
+  <div class="qa gold">
+    <div class="q">"Why Persistent Systems specifically?"</div>
+    <div class="a">
+      <strong>3 specific reasons — never say "great company":</strong><br />
+      1. "Persistent's Banking Analytics CoE works directly with Tier-1 banks on AI-driven risk and compliance — that's exactly the problem space I've been working in."<br />
+      2. "Persistent is an IBM Platinum Partner — watsonx deployments for banking clients is a natural extension of my BFSI analytics experience."<br />
+      3. "The role involves both technical delivery and client-facing storytelling — that combination of SQL/Python and business communication is where I'm strongest."
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title blue">⚡ Round 2 — SQL Technical (45 min · 25 pts)</div>
+
+  <div class="card warn">
+    <h3 style="color:#854d0e">Rules: No notes. No hints unless you say so. State your approach BEFORE writing code.</h3>
+  </div>
+
+  <div class="qa">
+    <div class="q">SQL Final Q1 — NPA Segmentation + Rep Risk Summary (Hard · 15 pts)</div>
+    <div class="a">
+      <strong>Question:</strong> "Write one SQL query using a CTE that: (1) calculates DPD per sale, (2) buckets each sale into Standard/Watchlist/Sub-Standard/NPA, (3) shows per-rep: total revenue, NPA revenue, NPA rate %, and an overall status — 'High Risk' if NPA rate &gt; 30%, else 'Acceptable'."
+    </div>
+    <pre><span class="kw">WITH</span> dpd_buckets <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        rep_name,
+        revenue,
+        <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date)           <span class="kw">AS</span> dpd,
+        <span class="kw">CASE</span>
+            <span class="kw">WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date) &gt; <span class="num">270</span> <span class="kw">THEN</span> <span class="str">'NPA'</span>
+            <span class="kw">WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date) &gt; <span class="num">180</span> <span class="kw">THEN</span> <span class="str">'Sub-Standard'</span>
+            <span class="kw">WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date) &gt; <span class="num">90</span>  <span class="kw">THEN</span> <span class="str">'Watchlist'</span>
+            <span class="kw">ELSE</span>                                          <span class="str">'Standard'</span>
+        <span class="kw">END</span>                                           <span class="kw">AS</span> dpd_bucket
+    <span class="kw">FROM</span> sales
+),
+rep_risk <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        rep_name,
+        <span class="fn">SUM</span>(revenue)                                  <span class="kw">AS</span> total_revenue,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> dpd_bucket = <span class="str">'NPA'</span>
+                 <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)           <span class="kw">AS</span> npa_revenue,
+        <span class="fn">ROUND</span>(
+            <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> dpd_bucket = <span class="str">'NPA'</span>
+                     <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)
+            * <span class="num">100.0</span> / <span class="fn">SUM</span>(revenue), <span class="num">1</span>)             <span class="kw">AS</span> npa_rate_pct
+    <span class="kw">FROM</span> dpd_buckets
+    <span class="kw">GROUP BY</span> rep_name
+)
+<span class="kw">SELECT</span>
+    r.rep_name,
+    rk.total_revenue,
+    <span class="fn">COALESCE</span>(rk.npa_revenue, <span class="num">0</span>)                   <span class="kw">AS</span> npa_revenue,
+    <span class="fn">COALESCE</span>(rk.npa_rate_pct, <span class="num">0</span>)                  <span class="kw">AS</span> npa_rate_pct,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">COALESCE</span>(rk.npa_rate_pct, <span class="num">0</span>) &gt; <span class="num">30</span> <span class="kw">THEN</span> <span class="str">'High Risk'</span>
+        <span class="kw">ELSE</span>                                        <span class="str">'Acceptable'</span>
+    <span class="kw">END</span>                                            <span class="kw">AS</span> risk_status
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> rep_risk rk <span class="kw">ON</span> r.rep_name = rk.rep_name
+<span class="kw">ORDER BY</span> npa_rate_pct <span class="kw">DESC</span>;
+
+<span class="cm">-- Eve: no sales → LEFT JOIN keeps her → COALESCE fills 0 → 'Acceptable'
+-- Business: Risk Manager gets 1 query → full rep risk ladder</span></pre>
+
+  <div class="qa" style="margin-top:10px">
+    <div class="q">SQL Final Q2 — Month-over-Month Revenue Change (Window · 10 pts)</div>
+    <div class="a">
+      <strong>Question:</strong> "Write a SQL query showing each month's total revenue, previous month's revenue (LAG), and the % change month-over-month. Flag months where revenue dropped as 'Decline', increased as 'Growth'."
+    </div>
+    <pre><span class="kw">WITH</span> monthly <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>)  <span class="kw">AS</span> month,
+        <span class="fn">SUM</span>(revenue)                    <span class="kw">AS</span> monthly_revenue
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>)
+)
+<span class="kw">SELECT</span>
+    month,
+    monthly_revenue,
+    <span class="fn">LAG</span>(monthly_revenue) <span class="kw">OVER</span>
+        (<span class="kw">ORDER BY</span> month)            <span class="kw">AS</span> prev_month_revenue,
+    <span class="fn">ROUND</span>(
+        (monthly_revenue -
+         <span class="fn">LAG</span>(monthly_revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month))
+        * <span class="num">100.0</span> /
+        <span class="fn">NULLIF</span>(<span class="fn">LAG</span>(monthly_revenue)
+                 <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month), <span class="num">0</span>),
+    <span class="num">1</span>)                              <span class="kw">AS</span> mom_change_pct,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> monthly_revenue &gt;
+             <span class="fn">LAG</span>(monthly_revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">THEN</span> <span class="str">'Growth'</span>
+        <span class="kw">WHEN</span> monthly_revenue &lt;
+             <span class="fn">LAG</span>(monthly_revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">THEN</span> <span class="str">'Decline'</span>
+        <span class="kw">ELSE</span> <span class="str">'First Month'</span>
+    <span class="kw">END</span>                             <span class="kw">AS</span> trend_flag
+<span class="kw">FROM</span> monthly
+<span class="kw">ORDER BY</span> month;
+
+<span class="cm">-- NULLIF prevents divide-by-zero on first row
+-- Business: CFO sees month-by-month acceleration or deceleration</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">⚡ Round 3 — Python Technical (45 min · 25 pts)</div>
+
+  <div class="qa green">
+    <div class="q">Python Final Task — Full EDA + Rep Scorecard + Insight Narrative</div>
+    <div class="a"><strong>Question:</strong> "Load sales.csv and reps.csv. Produce a complete rep scorecard (target vs actual, % achievement, status). Find the product with best risk-adjusted value. Write 3 business insights the Regional Head should act on."</div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Load + Validate ─────────────────────────────────────────────</span>
+sales = pd.read_csv(<span class="str">'sales.csv'</span>)
+reps  = pd.read_csv(<span class="str">'reps.csv'</span>)
+sales[<span class="str">'sale_date'</span>] = pd.to_datetime(sales[<span class="str">'sale_date'</span>])
+
+<span class="kw">assert</span> sales.shape == (<span class="num">6</span>, <span class="num">6</span>),  <span class="str">"Sales row count mismatch"</span>
+<span class="kw">assert</span> reps.shape  == (<span class="num">5</span>, <span class="num">4</span>),  <span class="str">"Reps row count mismatch"</span>
+<span class="kw">assert</span> sales[<span class="str">'revenue'</span>].sum() == <span class="num">545000</span>, <span class="str">"Revenue total mismatch"</span>
+<span class="fn">print</span>(<span class="str">"✅ All validation gates passed"</span>)
+
+<span class="cm"># ── Rep Scorecard ───────────────────────────────────────────────</span>
+actual = sales.groupby(<span class="str">'rep_name'</span>)[<span class="str">'revenue'</span>].sum().reset_index()
+actual.columns = [<span class="str">'rep_name'</span>, <span class="str">'actual_revenue'</span>]
+scorecard = reps.merge(actual, on=<span class="str">'rep_name'</span>, how=<span class="str">'left'</span>)
+scorecard[<span class="str">'actual_revenue'</span>] = scorecard[<span class="str">'actual_revenue'</span>].fillna(<span class="num">0</span>)
+scorecard[<span class="str">'variance'</span>]       = scorecard[<span class="str">'actual_revenue'</span>] - scorecard[<span class="str">'target'</span>]
+scorecard[<span class="str">'pct_target'</span>]     = (scorecard[<span class="str">'actual_revenue'</span>]
+                                 / scorecard[<span class="str">'target'</span>] * <span class="num">100</span>).round(<span class="num">1</span>)
+scorecard[<span class="str">'status'</span>] = scorecard[<span class="str">'pct_target'</span>].apply(
+    <span class="kw">lambda</span> x: <span class="str">'🟢 On Track'</span>   <span class="kw">if</span> x &gt;= <span class="num">100</span> <span class="kw">else</span>
+              (<span class="str">'🟡 At Risk'</span>    <span class="kw">if</span> x &gt;= <span class="num">80</span>  <span class="kw">else</span>
+               <span class="str">'🔴 Underperforming'</span>))
+<span class="fn">print</span>(<span class="str">"\n── Rep Scorecard ──"</span>)
+<span class="fn">print</span>(scorecard[[<span class="str">'rep_name'</span>,<span class="str">'team'</span>,<span class="str">'target'</span>,
+                 <span class="str">'actual_revenue'</span>,<span class="str">'variance'</span>,<span class="str">'pct_target'</span>,<span class="str">'status'</span>]])
+
+<span class="cm"># ── Product Risk-Adjusted Value ─────────────────────────────────</span>
+prod = sales.groupby(<span class="str">'product'</span>)[<span class="str">'revenue'</span>]\
+            .agg([<span class="str">'sum'</span>,<span class="str">'mean'</span>,<span class="str">'std'</span>,<span class="str">'count'</span>]).reset_index()
+prod.columns = [<span class="str">'product'</span>,<span class="str">'total'</span>,<span class="str">'avg'</span>,<span class="str">'std_dev'</span>,<span class="str">'deals'</span>]
+prod[<span class="str">'cv'</span>] = (prod[<span class="str">'std_dev'</span>] / prod[<span class="str">'avg'</span>]).round(<span class="num">3</span>)  <span class="cm"># coeff of variation</span>
+prod[<span class="str">'pct'</span>] = (prod[<span class="str">'total'</span>] / prod[<span class="str">'total'</span>].sum() * <span class="num">100</span>).round(<span class="num">1</span>)
+<span class="fn">print</span>(<span class="str">"\n── Product Risk-Adjusted Value (lower CV = more consistent) ──"</span>)
+<span class="fn">print</span>(prod.sort_values(<span class="str">'cv'</span>))
+
+<span class="cm"># ── 3 Business Insights ─────────────────────────────────────────</span>
+top = scorecard.loc[scorecard[<span class="str">'actual_revenue'</span>].idxmax()]
+under_count = (scorecard[<span class="str">'status'</span>].str.contains(<span class="str">'Under'</span>)).sum()
+best_prod = prod.sort_values(<span class="str">'cv'</span>).iloc[<span class="num">0</span>]
+<span class="fn">print</span>(<span class="str">f"""
+── 3 Business Insights for Regional Head ────────────────
+INSIGHT 1 — Key-Person Risk:
+  {top['rep_name']} contributes {top['actual_revenue']/545000*100:.1f}% of total revenue.
+  Action: Cross-train a backup. One resignation = revenue cliff.
+
+INSIGHT 2 — Team Health:
+  {under_count}/5 reps are underperforming (&lt;80% of target).
+  Action: Immediate 1:1 performance review + incentive review.
+
+INSIGHT 3 — Best Product (Risk-Adjusted):
+  {best_prod['product']} has lowest revenue variability (CV={best_prod['cv']:.3f}).
+  Action: Push {best_prod['product']} as primary product — predictable revenue,
+  lower credit risk vs Loan-heavy portfolio.
+"""</span>)</pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">⚡ Round 4 — Power BI (30 min · 20 pts)</div>
+
+  <div class="qa purple">
+    <div class="q">"Explain your % of Target DAX measure. Why DIVIDE() and not just revenue/target?"</div>
+    <div class="a">
+      <strong>Hired answer:</strong> "Eve has 0 sales — her revenue = 0 — but her <em>target</em> is 100,000. If I use <code>SUM(sales[revenue]) / SUM(reps[target])</code>, when the region filter excludes all sales for a rep, the denominator can become 0 and DAX returns an ERROR that breaks every visual it touches. <strong>DIVIDE(numerator, denominator, 0)</strong> safely returns 0 instead of ERROR when the denominator is 0 or blank. In a live dashboard presented to a Regional Head, a broken visual is a career-ending moment — DIVIDE() prevents that."
+    </div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">"The slicer is filtering by region but the rep performance bar chart is NOT updating. What's the problem and how do you fix it?"</div>
+    <div class="a">
+      <strong>Hired answer (3-step diagnosis):</strong><br />
+      "(1) Check Model View — is the relationship between sales and regions actually created? If the line is missing, drag region from regions table to sales table — 1-to-Many.<br />
+      (2) Check relationship direction — it must be single-direction from regions (1-side) to sales (many-side). Bi-directional can cause circular dependency.<br />
+      (3) Check the slicer field — it must use <code>regions[region]</code>, not <code>sales[region]</code>. If the slicer is on the sales table's region column, it filters only that table; if it's on the regions dimension table, it propagates through the relationship and filters all connected visuals. Fix: change slicer field to <code>regions[region]</code>."
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title sky">⚡ Round 5 — AI + BFSI Rapid Fire (15 min · 20 pts · 4 Qs)</div>
+
+  <div class="qa">
+    <div class="q">RF1. What is the DPDP Act 2023 and how does it affect a data analyst working on customer data?</div>
+    <div class="a"><strong>Hired (60 sec):</strong> "Digital Personal Data Protection Act 2023 — India's first comprehensive data privacy law. For a data analyst: (1) Customer data (name, Aadhaar, PAN, transaction history) can only be processed for the purpose it was collected — you can't repurpose loan application data for a marketing campaign without fresh consent. (2) Data must not be sent to foreign servers without RBI/DPDP compliance clearance — this means <strong>never pasting real customer data into ChatGPT</strong>. (3) Right to erasure — if a customer requests deletion, you need a data lineage map to know every table where their record exists. As an analyst, I maintain a PII inventory and always mask data before any AI tool interaction."</div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">RF2. Difference between RANK(), DENSE_RANK(), and ROW_NUMBER() — give a BFSI use case for each.</div>
+    <div class="a"><strong>Hired (60 sec):</strong>
+    "<strong>RANK()</strong> — skips numbers after ties. Use: ranking loan officers by revenue — if two are tied at ₹1L, both get rank 1, next gets rank 3. Shows true competition parity.<br />
+    <strong>DENSE_RANK()</strong> — doesn't skip. Both get rank 1, next gets rank 2. Use: tiering customers into Platinum/Gold/Silver — no gaps in tiers.<br />
+    <strong>ROW_NUMBER()</strong> — unique sequential number regardless of ties. Use: pagination in a report API — 'fetch rows 1–50' of the NPA ledger. Ties broken arbitrarily, so only use when uniqueness is required, not ranking."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">RF3. What is model drift and why does it matter for a deployed churn prediction model at a bank?</div>
+    <div class="a"><strong>Hired (60 sec):</strong> "Model drift is when a deployed ML model's accuracy degrades over time because the real-world data distribution has shifted away from the training data. For a bank's churn model: if the model was trained on 2022 customer behaviour (pre-inflation spike), by 2026 customers' withdrawal patterns have changed — the model starts missing churn signals it would have caught before. <strong>Why it matters:</strong> the bank is making retention spend decisions based on a stale model — wasting ₹ on customers who weren't actually at risk, and missing real churners. Fix: monitor prediction accuracy monthly, retrain quarterly. <strong>watsonx.governance</strong> automates drift detection and alerts the team when accuracy drops below a threshold."</div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">RF4. You find a 20% discrepancy between the Power BI revenue figure and the SQL SUM. Walk me through your diagnosis in 90 seconds.</div>
+    <div class="a"><strong>Hired (structured):</strong> "Step 1 — SQL ground truth: <code>SELECT SUM(revenue) FROM sales</code> = 545,000. Step 2 — Power BI measure: open the measure definition — is it <code>SUM(sales[revenue])</code> or has a CALCULATE with an unintended filter been added? Step 3 — Check relationships: is there a many-to-many or an inactive relationship causing double-counting? Step 4 — Check filters: is there a report-level filter hiding rows? Step 5 — Check data refresh: is Power BI connected to an older version of the CSV? The 20% gap is almost always one of: wrong DAX filter context, double-counted rows due to bad relationship, or stale data. I'd fix at the earliest step that explains the gap and re-validate all three tools agree."</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">💼 Round 6 — Live Case Study (45 min · Bonus)</div>
+
+  <div class="card">
+    <h3>The Case — "Project Resolve": Loan Revenue Drop + Rising NPA</h3>
+    <p style="font-size:13px;margin-top:4px">Persistent's banking client (a mid-sized private bank) reports: Q2 2026 loan disbursements dropped 22% vs Q1. Simultaneously, NPA rate crossed 6% (RBI watchlist threshold is 5%). The board has called an emergency review in 72 hours. You are the senior data analyst. Deliver your plan.</p>
+  </div>
+
+  <div class="card success">
+    <h3 style="color:#166534">Hired Framework — "DECIDE" Model</h3>
+    <table>
+      <thead><tr><th>Step</th><th>Action</th><th>Tool</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td><strong>D — Define</strong></td><td>Confirm definitions with stakeholders. Is 6% gross NPA or net NPA? Which loan book — retail or SME? What period?</td><td>Conversation</td><td>Scoped problem statement</td></tr>
+        <tr><td><strong>E — Extract</strong></td><td>SQL: DPD buckets by product, region, vintage. LAG() for MoM disbursement trend. LEFT JOIN reps to include inactive ones.</td><td>SQL</td><td>3 CSVs: dpd_report, disbursement_trend, rep_activity</td></tr>
+        <tr><td><strong>C — Clean</strong></td><td>Python: audit NULLs, fix date formats, handle reps with 0 disbursements via fillna(0). Assert totals match SQL SUM.</td><td>Python</td><td>Validated clean dataset</td></tr>
+        <tr><td><strong>I — Identify</strong></td><td>Python: which region/product/vintage has highest NPA rate? Cohort analysis — is it new disbursements or old loans defaulting?</td><td>Python</td><td>Root cause: product × region × vintage matrix</td></tr>
+        <tr><td><strong>D — Display</strong></td><td>Power BI: NPA waterfall (Q1→Q2), DPD bucket stacked bar by region, disbursement trend line, rep activity heatmap. Conditional format: red if NPA &gt;5%.</td><td>Power BI</td><td>Board-ready dashboard (3 visuals)</td></tr>
+        <tr><td><strong>E — Engage</strong></td><td>Executive narrative: "NPA concentrated in South region, Loan product, disbursed Jan–Feb 2026 (vintage 5–6 months). Revenue drop caused by credit team pausing disbursements after NPA signal. Recommendation: tighten CIBIL floor to 730 for new Loan applications in South. Expected NPA improvement: 2pp in 90 days."</td><td>PowerPoint</td><td>Board presentation</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title gold">🤝 Round 7 — HR Behavioral Round (45 min)</div>
+
+  <div class="card warn">
+    <h3 style="color:#854d0e">Every answer must follow STAR: Situation → Task → Action → Result. No vague answers. Quantify everything.</h3>
+  </div>
+
+  <div class="qa gold">
+    <div class="q">HR Q1. "Tell me about a time you had to present complex data to a non-technical audience."</div>
+    <div class="a">
+      <strong>STAR:</strong><br />
+      <strong>S:</strong> "Our CFO needed to understand why our NPA rate had increased — but had no SQL or data background."<br />
+      <strong>T:</strong> "I had 15 minutes in a board meeting to explain a complex, multi-dimensional analysis."<br />
+      <strong>A:</strong> "I built a 3-visual Power BI dashboard — a traffic-light KPI card (red = NPA &gt;5%), a bar chart showing NPA by region (South = worst), and a trend line showing the deterioration over 6 months. I used analogies: 'Think of DPD as a loan's fever chart — when temperature crosses 90 days, it becomes a legal problem for us.'"<br />
+      <strong>R:</strong> "CFO approved the collections budget for South region in that meeting. NPA rate fell 1.5pp in the next quarter."
+    </div>
+  </div>
+
+  <div class="qa gold">
+    <div class="q">HR Q2. "Describe a situation where you found an error in your own analysis. What did you do?"</div>
+    <div class="a">
+      <strong>STAR:</strong><br />
+      <strong>S:</strong> "I had submitted a monthly revenue report showing ₹12Cr for Q1. A junior analyst noticed the total in SQL was ₹10Cr."<br />
+      <strong>T:</strong> "I needed to find the error, fix it, and rebuild trust with the team before the report went to the board."<br />
+      <strong>A:</strong> "I traced back through all 3 tools: SQL (correct), Python (correct), Power BI — found a CALCULATE measure with an incorrect ALL() that was over-counting rows across a many-to-many relationship. Fixed the DAX, revalidated all three outputs matched, re-submitted with a change note."<br />
+      <strong>R:</strong> "Board report corrected before submission. I then created a standard validation checklist — SQL total = Python total = Power BI total — now mandatory for all reports in the team."
+    </div>
+  </div>
+
+  <div class="qa gold">
+    <div class="q">HR Q3. "Where do you see yourself in 3 years?"</div>
+    <div class="a">
+      <strong>Answer (specific + ambitious + grounded):</strong><br />
+      "In 3 years, I want to be a Senior Data Analyst or Analytics Manager, leading a team that delivers AI-augmented analytics for Persistent's banking clients. Specifically, I want to be involved in end-to-end deployments — from SQL data pipelines through to watsonx.ai-powered dashboards — and eventually take ownership of a client account's analytics CoE. The path I see: Year 1 — master Persistent's internal frameworks and deliver 2–3 high-impact client projects. Year 2 — mentor junior analysts. Year 3 — lead a workstream on a major BFSI transformation engagement."
+    </div>
+  </div>
+
+  <div class="qa gold">
+    <div class="q">HR Q4. "Do you have any questions for us?" (Never say No.)</div>
+    <div class="a">
+      <strong>3 smart questions — ask 2 of these:</strong><br />
+      1. "What does the first 90-day ramp look like for this role — is it client-facing immediately or internal projects first?"<br />
+      2. "Which of Persistent's banking clients are currently using watsonx for analytics — and would this role be involved in that work?"<br />
+      3. "How does the analytics team collaborate with the data engineering and AI/ML teams — is it integrated or siloed?"
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title gold">💰 Salary Negotiation — Never Leave This to Chance</div>
+  <div class="card">
+    <h3>3 Rules for Salary Discussion</h3>
+    <table>
+      <thead><tr><th>Rule</th><th>What to Say</th><th>What NOT to Say</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Name a range, not a point</strong></td><td>"Based on my 6+ years in BFSI analytics and the scope of this role, I'm targeting ₹[X–Y LPA]."</td><td>"Whatever you think is fair" — leaves ₹ on the table</td></tr>
+        <tr><td><strong>2. Justify with market data</strong></td><td>"Market data for senior BFSI analysts with Power BI + SQL + Python in [city] is ₹[X–Y LPA] — I'm aligned to that range."</td><td>Never mention personal financial needs</td></tr>
+        <tr><td><strong>3. Always negotiate once</strong></td><td>"I'm very excited about this role. If there's any flexibility to move to ₹[upper end], I'd be ready to accept immediately."</td><td>"I'll accept anything" — signals desperation</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Final Interview Flowchart — Complete Day 15 Flow</div>
+  <div class="flow-wrap">
+    <svg width="700" height="620" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 15 — Final Interview Complete Flow</text>
+
+      
+      <rect x="210" y="34" width="280" height="36" rx="8" fill="#f59e0b"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#1f2328" font-weight="800">🏆 Final Interview Begins</text>
+      <text x="350" y="63" text-anchor="middle" fill="#78350f" font-size="11">15 Days of prep. Trust the work.</text>
+      <line x1="350" y1="70" x2="350" y2="88" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="88" width="380" height="44" rx="7" fill="#f0f2f5" stroke="#d1d5db"></rect>
+      <text x="350" y="106" text-anchor="middle" fill="#1f2328" font-weight="700">R1 — Intro (15 min)</text>
+      <text x="350" y="120" text-anchor="middle" fill="#57606a" font-size="11">WHO + WHAT + ACHIEVEMENT + WHY PERSISTENT · 90 seconds</text>
+      <text x="350" y="130" text-anchor="middle" fill="#57606a" font-size="10">STAR story · No rambling · End with "I'd love to contribute to Persistent's banking practice"</text>
+      <line x1="350" y1="132" x2="350" y2="150" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="150" width="380" height="44" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="350" y="168" text-anchor="middle" fill="#1e3a8a" font-weight="700">R2 — SQL Technical (45 min · 25 pts)</text>
+      <text x="350" y="182" text-anchor="middle" fill="#1e40af" font-size="11">Q1: CTE + DPD + NPA flag · Q2: LAG() MoM % change</text>
+      <text x="350" y="192" text-anchor="middle" fill="#3b82f6" font-size="10">State approach BEFORE writing · LEFT JOIN always · NULLIF for divide-by-zero</text>
+      <line x1="350" y1="194" x2="350" y2="212" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="212" width="380" height="44" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="350" y="230" text-anchor="middle" fill="#14532d" font-weight="700">R3 — Python EDA (45 min · 25 pts)</text>
+      <text x="350" y="244" text-anchor="middle" fill="#166534" font-size="11">Load → 3 assert gates → Scorecard → CV outlier → 3 Insights</text>
+      <text x="350" y="254" text-anchor="middle" fill="#22c55e" font-size="10">Business commentary is mandatory · AI cannot write this · It's YOUR value</text>
+      <line x1="350" y1="256" x2="350" y2="274" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="274" width="380" height="44" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="350" y="292" text-anchor="middle" fill="#4c1d95" font-weight="700">R4 — Power BI (30 min · 20 pts)</text>
+      <text x="350" y="306" text-anchor="middle" fill="#5b21b6" font-size="11">Explain DIVIDE() reason · Fix broken slicer (relationship issue)</text>
+      <text x="350" y="316" text-anchor="middle" fill="#7c3aed" font-size="10">Star schema: regions[region] on slicer, not sales[region]</text>
+      <line x1="350" y1="318" x2="350" y2="336" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="336" width="380" height="44" rx="7" fill="#e0f2fe" stroke="#7dd3fc"></rect>
+      <text x="350" y="354" text-anchor="middle" fill="#0c4a6e" font-weight="700">R5 — AI + BFSI Rapid Fire (15 min · 20 pts)</text>
+      <text x="350" y="368" text-anchor="middle" fill="#0369a1" font-size="11">DPDP Act · RANK vs DENSE_RANK · Model Drift · Discrepancy diagnosis</text>
+      <text x="350" y="378" text-anchor="middle" fill="#0ea5e9" font-size="10">watsonx.governance = bias + drift + RBI compliance. Say it unprompted.</text>
+      <line x1="350" y1="380" x2="350" y2="398" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="398" width="380" height="44" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="350" y="416" text-anchor="middle" fill="#14532d" font-weight="700">R6 — Case Study (45 min · Bonus)</text>
+      <text x="350" y="430" text-anchor="middle" fill="#166534" font-size="11">DECIDE model: Define → Extract → Clean → Identify → Display → Engage</text>
+      <text x="350" y="440" text-anchor="middle" fill="#22c55e" font-size="10">Always quantify: ₹ impact + specific action + expected timeline</text>
+      <line x1="350" y1="442" x2="350" y2="460" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="460" width="380" height="44" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="478" text-anchor="middle" fill="#78350f" font-weight="700">R7 — HR Behavioral (45 min)</text>
+      <text x="350" y="492" text-anchor="middle" fill="#854d0e" font-size="11">STAR for every answer · Error story → validation checklist created</text>
+      <text x="350" y="502" text-anchor="middle" fill="#a16207" font-size="10">3-year plan: Senior Analyst → Manager → Analytics CoE Lead at Persistent</text>
+      <line x1="350" y1="504" x2="350" y2="522" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="180" y="522" width="340" height="44" rx="8" fill="#f59e0b"></rect>
+      <text x="350" y="540" text-anchor="middle" fill="#1f2328" font-weight="800">Closing — Your 2 Smart Questions</text>
+      <text x="350" y="554" text-anchor="middle" fill="#78350f" font-size="11">"90-day ramp?" · "watsonx client projects?" · "Team collaboration model?"</text>
+      <line x1="350" y1="566" x2="350" y2="584" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="200" y="584" width="300" height="30" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="599" text-anchor="middle" fill="#e6edf3" font-weight="800" font-size="13">✅ Interview Complete — Follow Up in 24h</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📄 Day 15 Final Cheat Sheet — Everything in 4 Boxes</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="blue">🗄 SQL — Final 2 Patterns</h4>
+      <pre><span class="cm">-- CTE + DPD + NPA flag</span>
+<span class="kw">WITH</span> dpd <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> rep_name, revenue,
+    <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(),sale_date) <span class="kw">AS</span> d,
+    <span class="kw">CASE WHEN</span> <span class="fn">DATEDIFF</span>(...)&gt;<span class="num">270</span>
+         <span class="kw">THEN</span> <span class="str">'NPA'</span> <span class="kw">ELSE</span> <span class="str">'OK'</span> <span class="kw">END</span> <span class="kw">AS</span> bucket
+  <span class="kw">FROM</span> sales)
+<span class="kw">SELECT</span> rep_name,
+  <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> bucket=<span class="str">'NPA'</span>
+       <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> npa_rev,
+  <span class="fn">ROUND</span>(npa_rev/<span class="fn">SUM</span>(rev)*<span class="num">100</span>,<span class="num">1</span>) <span class="kw">AS</span> npa_pct
+<span class="kw">FROM</span> dpd <span class="kw">GROUP BY</span> rep_name;
+
+<span class="cm">-- LAG for MoM change</span>
+<span class="fn">LAG</span>(monthly_rev) <span class="kw">OVER</span>
+  (<span class="kw">ORDER BY</span> month)
+(rev - prev)*<span class="num">100</span>/
+<span class="fn">NULLIF</span>(prev,<span class="num">0</span>) <span class="kw">AS</span> mom_pct</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">🐍 Python — Final Scorecard</h4>
+      <pre><span class="cm"># 3 Validation gates (always)</span>
+<span class="kw">assert</span> sales.shape==(<span class="num">6</span>,<span class="num">6</span>)
+<span class="kw">assert</span> sales[<span class="str">'revenue'</span>].sum()==<span class="num">545000</span>
+<span class="kw">assert</span> sales.isnull().sum().sum()==<span class="num">0</span>
+
+<span class="cm"># Merge + scorecard</span>
+m = reps.merge(
+  sales.groupby(<span class="str">'rep_name'</span>)[<span class="str">'revenue'</span>]
+       .sum().reset_index(),
+  on=<span class="str">'rep_name'</span>, how=<span class="str">'left'</span>)
+m[<span class="str">'revenue'</span>].fillna(<span class="num">0</span>, inplace=<span class="kw">True</span>)
+m[<span class="str">'pct'</span>] = m[<span class="str">'revenue'</span>]/m[<span class="str">'target'</span>]*<span class="num">100</span>
+
+<span class="cm"># CV = std/mean (risk-adjusted)</span>
+cv = df.groupby(<span class="str">'product'</span>)[<span class="str">'revenue'</span>]\
+       .agg([<span class="str">'mean'</span>,<span class="str">'std'</span>])
+cv[<span class="str">'cv'</span>] = cv[<span class="str">'std'</span>]/cv[<span class="str">'mean'</span>]
+<span class="cm"># Lower CV = more consistent product</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">📊 Power BI — Final DAX + Fix</h4>
+      <pre><span class="cm">-- % of Target (safe)</span>
+<span class="var">% Target</span> = <span class="fn">DIVIDE</span>(
+  <span class="fn">SUM</span>(sales[revenue]),
+  <span class="fn">SUM</span>(reps[target]), <span class="num">0</span>)
+<span class="cm">-- DIVIDE() handles Eve's 0 target</span>
+<span class="cm">-- "/" returns ERROR not 0</span>
+
+<span class="cm">-- MoM via DAX (Time Intelligence)</span>
+<span class="var">Prev Month Rev</span> =
+<span class="fn">CALCULATE</span>([<span class="var">Total Revenue</span>],
+  <span class="fn">DATEADD</span>(sales[sale_date],<span class="num">-1</span>,<span class="fn">MONTH</span>))
+
+<span class="cm">-- Slicer broken? Checklist:</span>
+<span class="cm">1. Model View: line exists?</span>
+<span class="cm">2. Direction: 1→many correct?</span>
+<span class="cm">3. Slicer field: regions[region]</span>
+<span class="cm">   NOT sales[region]</span>
+
+<span class="cm">-- NPA conditional colour</span>
+<span class="var">NPA Colour</span> = <span class="fn">SWITCH</span>(<span class="kw">TRUE</span>(),
+  [<span class="var">NPA Rate</span>]&gt;<span class="num">0.05</span>,<span class="str">"#ef4444"</span>,
+  [<span class="var">NPA Rate</span>]&gt;<span class="num">0.03</span>,<span class="str">"#f59e0b"</span>,
+  <span class="str">"#22c55e"</span>)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="gold">🤝 HR + Domain Quick-Fire</h4>
+      <pre><span class="cm">STAR formula:
+S: Context (1 sentence)
+T: Your responsibility
+A: Specific steps YOU took
+R: Quantified result</span>
+
+<span class="cm">3-year plan:
+Yr1: Deliver 2-3 client projects
+Yr2: Mentor juniors
+Yr3: Lead analytics CoE workstream</span>
+
+<span class="cm">DPDP Act 2023:
+- No PII to public AI (ChatGPT)
+- Purpose limitation
+- Right to erasure</span>
+
+<span class="cm">RANK vs DENSE_RANK vs ROW_NUMBER:
+- RANK: skips (1,1,3)  → competition
+- DENSE_RANK: no skip (1,1,2) → tiers
+- ROW_NUMBER: unique (1,2,3) → pagination</span>
+
+<span class="cm">Model Drift fix:
+Monitor monthly → retrain quarterly
+watsonx.governance alerts on drift</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ Final Day — HIRED vs REJECTED</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected — These Kill Offers</h4>
+      <ul>
+        <li>Intro runs 4+ minutes — no structure, no achievement, no "why Persistent"</li>
+        <li>SQL: INNER JOIN — Eve disappears — interviewer spots it immediately</li>
+        <li>SQL: Double quotes for strings — syntax error on first query</li>
+        <li>Python: No validation gates — submits wrong totals without checking</li>
+        <li>Python: Numbers without insights — "revenue is ₹545K" with no action</li>
+        <li>Power BI: "/" instead of DIVIDE() — KPI card shows ERROR for Eve</li>
+        <li>AI round: "I don't know what watsonx is" — Persistent is an IBM partner</li>
+        <li>HR: No STAR structure — vague stories, no quantified results</li>
+        <li>"I don't have any questions" — signals no genuine interest</li>
+        <li>Panic-visible when stuck — goes silent instead of thinking aloud</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired — These Win Offers</h4>
+      <ul>
+        <li>Intro: 90 sec, 4 sentences, 1 achievement, specific watsonx mention</li>
+        <li>SQL: States "I'll use LEFT JOIN to include Eve" before writing</li>
+        <li>SQL: NULLIF() in LAG MoM to prevent divide-by-zero on first row</li>
+        <li>Python: 3 asserts before any analysis — says them aloud</li>
+        <li>Python: 3 business insights — Concentration risk · Underperformers · CV analysis</li>
+        <li>Power BI: DIVIDE() explained proactively — "Eve has 0 target, this prevents ERROR"</li>
+        <li>Case: Uses DECIDE model — Define before querying, quantifies every recommendation</li>
+        <li>HR: STAR for every answer — specific situation, specific numbers</li>
+        <li>Asks 2 smart questions — 90-day ramp + watsonx client projects</li>
+        <li>Thinks aloud when stuck — "Let me approach this from the business angle first"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 15 Final Simulation</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:5px solid #f59e0b;white-space:pre-wrap">You are a senior Persistent Systems hiring panel — 3 interviewers:
+  - Technical Lead (15 yrs SQL + Python + Power BI)
+  - BFSI Domain Expert (ex-banker, 12 yrs)
+  - HR Business Partner
+
+Today is DAY 15 — the FINAL interview simulation.
+Candidate: MBA Finance, 6+ years BFSI experience.
+
+Run a FULL interview simulation in this exact order:
+  Round 1: Intro (15 min)
+  Round 2: SQL Technical — 2 live queries (45 min)
+  Round 3: Python EDA — live coding (45 min)
+  Round 4: Power BI — explain + debug (30 min)
+  Round 5: AI + BFSI rapid fire — 4 questions (15 min)
+  Round 6: Live case study — BFSI scenario (45 min)
+  Round 7: HR Behavioral — STAR questions (45 min)
+  Closing: Candidate asks questions (15 min)
+
+Rules:
+  - Grade harshly. Real interview pressure.
+  - Do NOT give hints unless candidate types HINT.
+  - Score each round as it ends.
+  - Final debrief: overall score, offer/no-offer decision, 3 things done well, 3 things to fix.
+
+Database: persistence_analytics (sales 6 rows, reps 5 rows, regions 4 rows)
+
+BEGIN FINAL INTERVIEW NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into a new chat → interview begins immediately. Good luck — you've earned this.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title gold">🏆 15-Day Journey — What You've Built</div>
+  <table>
+    <thead><tr><th>Day</th><th>Topic</th><th>Key Skill Unlocked</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>SQL Basics</td><td>SELECT · WHERE · GROUP BY · HAVING · CASE WHEN</td></tr>
+      <tr><td>2</td><td>SQL JOINs + CTEs</td><td>LEFT JOIN · Subqueries · WITH clause · Eve-trap instinct</td></tr>
+      <tr><td>3</td><td>Window Functions + Date/NULL</td><td>RANK · DENSE_RANK · LAG · LEAD · NULLIF · COALESCE</td></tr>
+      <tr><td>4</td><td>SQL Assessment</td><td>Speed + accuracy under pressure · Timed query delivery</td></tr>
+      <tr><td>5</td><td>Advanced Excel</td><td>XLOOKUP · IFS · SUMIF · Pivot · Power Query</td></tr>
+      <tr><td>6</td><td>Python + NumPy + Pandas</td><td>DataFrames · dtypes · describe · vectorised operations</td></tr>
+      <tr><td>7</td><td>EDA + GroupBy + Insights</td><td>groupby · merge · fillna · business commentary layer</td></tr>
+      <tr><td>8</td><td>Statistics + Hypothesis Testing</td><td>Mean · std · Z-score · p-value · A/B test interpretation</td></tr>
+      <tr><td>9</td><td>Power BI + Data Modeling</td><td>Star schema · relationships · Power Query transforms</td></tr>
+      <tr><td>10</td><td>DAX + KPIs + Storytelling</td><td>DIVIDE · CALCULATE · FILTER · RANKX · conditional format</td></tr>
+      <tr><td>11</td><td>End-to-End Case Study</td><td>SQL→Python→Excel→PBI pipeline · data reconciliation</td></tr>
+      <tr><td>12</td><td>BFSI Analytics</td><td>NPA · DPD · Churn · Cohort · LTV · Risk segmentation</td></tr>
+      <tr><td>13</td><td>AI for Analysts</td><td>Prompt engineering · Hallucination validation · watsonx · DPDP</td></tr>
+      <tr><td>14</td><td>Full Technical Mock</td><td>Speed · pressure · self-scoring · error log discipline</td></tr>
+      <tr><td>15</td><td>Final Interview</td><td>Everything combined — technical + domain + behavioral + AI</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–14 ✅  | 
+  <strong style="color:#b45309">🏆 Day 15: FINAL INTERVIEW — GO GET IT.</strong>
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</div></body>
+</html>

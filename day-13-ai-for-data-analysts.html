@@ -1,0 +1,832 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 13 — AI for Data Analysts · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#0c4a6e;color:#bae6fd}
+.b2{background:#4c1d95;color:#ddd6fe}
+.b3{background:#14532d;color:#bbf7d0}
+.b4{background:#7f1d1d;color:#fecaca}
+.b5{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#0c4a6e;border-bottom:2px solid #0c4a6e;padding-bottom:4px;margin-bottom:14px}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.ai{background:#dbeafe;color:#1e40af}
+.tag.sql{background:#dcfce7;color:#166534}
+.tag.py{background:#ede9fe;color:#5b21b6}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.str{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}.hl{color:#e3b341}
+
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.green{color:#166534}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+
+.qa{border-left:3px solid #0c4a6e;padding:10px 14px;background:#f0f9ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#0c4a6e}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#0369a1}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}
+.qa.purple .q{color:#4c1d95}
+.qa.purple .a strong{color:#7c5cd8}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}
+.qa.green .q{color:#14532d}
+.qa.green .a strong{color:#1a7f4b}
+.qa.red{border-color:#b91c1c;background:#fff5f5}
+.qa.red .q{color:#7f1d1d}
+.qa.red .a strong{color:#b91c1c}
+
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166534;border:2px solid #86efac}
+.today{background:#dbeafe;color:#1e40af;border:2px dotted #3b82d4}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+
+.term-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.term{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px}
+.term .name{font-size:11px;font-weight:800;text-transform:uppercase;color:#0c4a6e;letter-spacing:.04em;margin-bottom:3px}
+.term .def{font-size:12px;color:#1f2328}
+.term .eg{font-size:11px;color:#57606a;margin-top:4px;font-style:italic}
+
+.prompt-box{background:#0c4a6e;color:#e0f2fe;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.7;border-radius:6px;padding:14px 16px;white-space:pre-wrap;margin:8px 0;border-left:4px solid #38bdf8}
+.prompt-box .lbl{color:#7dd3fc;font-weight:700}
+.prompt-box .val{color:#e0f2fe}
+.prompt-box .bad{color:#f87171}
+.prompt-box .good{color:#86efac}
+
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>🤖 Day 13 — AI for Data Analysts</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 4 Hours</p>
+  <div class="badge-row">
+    <span class="badge b1">GenAI Fundamentals</span>
+    <span class="badge b2">Prompt Engineering</span>
+    <span class="badge b3">AI-Assisted SQL/Python</span>
+    <span class="badge b4">Responsible AI · Validation</span>
+    <span class="badge b5">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div><div class="day-dot done">2</div><div class="day-dot done">3</div>
+    <div class="day-dot done">4</div><div class="day-dot done">5</div><div class="day-dot done">6</div>
+    <div class="day-dot done">7</div><div class="day-dot done">8</div><div class="day-dot done">9</div>
+    <div class="day-dot done">10</div><div class="day-dot done">11</div><div class="day-dot done">12</div>
+    <div class="day-dot today">13</div><div class="day-dot future">14</div><div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–12 complete · 🔵 Today: Day 13 · ⬜ Days 14–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎯 Why AI for Analysts Is a Persistent Interview Priority in 2026</div>
+  <div class="card">
+    <h3>Persistent Systems' AI Angle — What They Actually Test</h3>
+    <table>
+      <thead><tr><th>What They Ask</th><th>What They Want to Hear</th><th>Wrong Answer</th></tr></thead>
+      <tbody>
+        <tr><td>"How do you use AI in your daily work?"</td><td>Specific tools + validation habit + output checking</td><td>"I use ChatGPT to write code"</td></tr>
+        <tr><td>"What is hallucination? How do you handle it?"</td><td>AI can generate wrong SQL/data — always cross-check against source</td><td>"I just trust the output"</td></tr>
+        <tr><td>"Can AI replace a data analyst?"</td><td>AI accelerates, analyst validates + adds business context</td><td>"Yes" or "No" with no nuance</td></tr>
+        <tr><td>"What is responsible AI?"</td><td>Bias, transparency, explainability, data privacy</td><td>Can't define it at all</td></tr>
+        <tr><td>"Write a prompt to generate a churn SQL query"</td><td>Structured prompt with role + context + constraints + output format</td><td>Vague prompt → bad output</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📖 AI Glossary — 12 Terms Every Analyst Must Know in 2026</div>
+  <div class="term-grid">
+    <div class="term">
+      <div class="name">GenAI</div>
+      <div class="def">Generative AI. Creates new content (text, code, images) from patterns learned during training.</div>
+      <div class="eg">e.g. ChatGPT generates SQL; Copilot generates Python</div>
+    </div>
+    <div class="term">
+      <div class="name">LLM</div>
+      <div class="def">Large Language Model. Neural network trained on massive text data to predict next tokens.</div>
+      <div class="eg">e.g. GPT-4, Claude, Gemini, IBM Granite</div>
+    </div>
+    <div class="term">
+      <div class="name">Hallucination</div>
+      <div class="def">AI confidently produces incorrect or fabricated output — wrong SQL, fake column names.</div>
+      <div class="eg">Fix: always run generated SQL on real data and verify row counts</div>
+    </div>
+    <div class="term">
+      <div class="name">Prompt</div>
+      <div class="def">The instruction you give an AI model. Quality of prompt directly determines quality of output.</div>
+      <div class="eg">Role + Context + Task + Constraints + Output Format</div>
+    </div>
+    <div class="term">
+      <div class="name">RAG</div>
+      <div class="def">Retrieval-Augmented Generation. AI retrieves relevant documents before generating a response.</div>
+      <div class="eg">Bank chatbot fetches loan policy PDF, then answers customer</div>
+    </div>
+    <div class="term">
+      <div class="name">Fine-tuning</div>
+      <div class="def">Re-training a pre-trained model on domain-specific data to improve accuracy in that area.</div>
+      <div class="eg">Fine-tune LLM on bank's internal documents for compliance Q&amp;A</div>
+    </div>
+    <div class="term">
+      <div class="name">Embedding</div>
+      <div class="def">Converting text/data into a numerical vector that captures semantic meaning.</div>
+      <div class="eg">Customer complaint → vector → find similar past complaints</div>
+    </div>
+    <div class="term">
+      <div class="name">Token</div>
+      <div class="def">Unit of text an LLM processes. ~0.75 words. Long prompts = more tokens = higher cost.</div>
+      <div class="eg">GPT-4: 8K–128K token context window</div>
+    </div>
+    <div class="term">
+      <div class="name">Bias</div>
+      <div class="def">AI model produces systematically unfair outputs due to biased training data.</div>
+      <div class="eg">Loan approval model rejects more women if trained on historical biased data</div>
+    </div>
+    <div class="term">
+      <div class="name">Explainability (XAI)</div>
+      <div class="def">Ability to explain why an AI model made a specific decision in human-readable terms.</div>
+      <div class="eg">RBI requires explainability for AI-based loan rejection decisions</div>
+    </div>
+    <div class="term">
+      <div class="name">Copilot</div>
+      <div class="def">AI assistant embedded in a tool (Excel, Power BI, GitHub) that suggests next actions.</div>
+      <div class="eg">Power BI Copilot generates DAX measures from natural language</div>
+    </div>
+    <div class="term">
+      <div class="name">watsonx</div>
+      <div class="def">IBM's AI &amp; data platform. Persistent is an IBM partner — this gets asked directly.</div>
+      <div class="eg">watsonx.ai (models) · watsonx.data (data lakehouse) · watsonx.governance</div>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 13 Agenda — 4 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Topic</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:20</td><td>Theory Blitz</td><td>GenAI vs ML · LLM anatomy · AI stack for analysts</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:20–0:50</td><td>Q&amp;A Round (5 Qs)</td><td>GenAI concepts + responsible AI interview questions</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:50–1:35</td><td>Task 1 — Prompt Engineering</td><td>Write 4 structured prompts for analyst use cases</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>1:35–2:15</td><td>Task 2 — AI-Assisted SQL</td><td>Prompt → SQL → Validate → Fix hallucination</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:15–2:55</td><td>Task 3 — AI-Assisted Python</td><td>Prompt → EDA code → Validate → Document</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:55–3:40</td><td>Task 4 — Responsible AI Audit</td><td>Bias check · Explainability · Data privacy checklist</td><td><span class="tag med">Medium</span></td></tr>
+      <tr><td>3:40–4:00</td><td>Debrief</td><td>Score card + mistakes + Day 14 (Full Mock) prep</td><td><span class="tag easy">Review</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎓 Theory Q&amp;A — 5 AI Interview Questions</div>
+
+  <div class="qa">
+    <div class="q">Q1. What is the difference between Traditional ML and Generative AI? Give one banking example of each.</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>Traditional ML</strong> learns patterns from labelled data to make predictions — e.g., a loan default prediction model trained on historical repayment data outputs "default probability = 78%". <strong>Generative AI</strong> learns to generate new content — e.g., a GenAI model reads a customer's transaction history and generates a personalised financial advice summary in plain English. Key difference: ML predicts a label or number; GenAI creates new text, code, or content. In BFSI, both are used together — ML for risk scoring, GenAI for customer-facing explanations.</div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">Q2. An AI tool generates a SQL query for your NPA analysis. What are the FIRST 3 things you do before using it in a report?</div>
+    <div class="a"><strong>Hired answer:</strong> (1) <strong>Run it on actual data</strong> — check if the row count matches your expectation. If you have 6 loans and the query returns 9, there's a JOIN issue or hallucinated table name. (2) <strong>Check column names</strong> — AI often hallucinates column names that don't exist in your schema. Cross-check every column against the actual table DDL. (3) <strong>Sense-check the result</strong> — does SUM(revenue) = 545,000 as it does in your raw data? If not, the logic has a bug. Rule: <strong>AI generates, analyst validates — never the other way around.</strong></div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q3. What is Responsible AI? Name 3 principles and give one BFSI example for each.</div>
+    <div class="a"><strong>Hired answer:</strong><br />
+    (1) <strong>Fairness</strong> — AI loan approval model must not reject more applicants of a specific gender, religion, or caste. Test: run approval rates across demographic groups — any statistically significant gap = bias issue, reportable to RBI.<br />
+    (2) <strong>Explainability</strong> — If AI rejects a loan, the customer has a right to know why. RBI's 2023 guidelines require banks to provide human-readable explanations for AI decisions. SHAP values / LIME are the standard tools.<br />
+    (3) <strong>Data Privacy</strong> — Customer PAN, Aadhaar, account number must never be passed as raw text into a public AI model (like ChatGPT). Always mask/anonymise before using any AI tool on real customer data.</div>
+  </div>
+
+  <div class="qa red">
+    <div class="q">Q4. Can GenAI replace a Data Analyst? Answer as if you are in a Persistent Systems panel interview.</div>
+    <div class="a"><strong>Hired answer:</strong> No — and here's the precise reason: GenAI is a <strong>productivity multiplier</strong>, not a replacement. It can generate SQL drafts, write boilerplate Python, and summarise a report in seconds. But it cannot: (1) understand the <em>business context</em> of why a metric moved — an analyst who knows the BFSI domain knows NPA spiked because of Q4 monsoon stress in a region; (2) take accountability for decisions — a bank cannot submit an AI-generated risk report to RBI without a named analyst signing off; (3) handle novel data quality issues that weren't in the training data. The analyst who uses AI well is 3× more productive and therefore more hireable — not replaced.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5. Persistent Systems is an IBM partner. What is watsonx and how would a data analyst use it?</div>
+    <div class="a"><strong>Hired answer:</strong> watsonx is IBM's enterprise AI and data platform with three components: <strong>watsonx.ai</strong> — foundation model studio where analysts can prompt, fine-tune, and deploy LLMs on bank data without sending data to a public cloud; <strong>watsonx.data</strong> — open lakehouse for querying structured + unstructured data at scale; <strong>watsonx.governance</strong> — AI lifecycle monitoring for bias detection, drift alerts, and regulatory compliance. As a data analyst at Persistent, I would use watsonx.ai to generate SQL/Python drafts from natural language, validate outputs with my domain knowledge, and use watsonx.governance to ensure the churn model we deployed isn't drifting or producing biased outputs over time.</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">Task 1 — Prompt Engineering (45 min)</div>
+  <div class="card">
+    <h3>🎯 The Anatomy of a Good Analyst Prompt — 5 Elements</h3>
+    <table>
+      <thead><tr><th>Element</th><th>What It Does</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Role</strong></td><td>Sets the AI's persona and expertise</td><td>"You are a senior SQL developer for a BFSI company"</td></tr>
+        <tr><td><strong>Context</strong></td><td>Gives database schema / business background</td><td>"Table: sales(sale_id, region, product, revenue, sale_date, rep_name)"</td></tr>
+        <tr><td><strong>Task</strong></td><td>Specific instruction — what to produce</td><td>"Write a SQL query that calculates churn rate by region"</td></tr>
+        <tr><td><strong>Constraints</strong></td><td>Rules the output must follow</td><td>"Use only MySQL syntax. No CTEs. Use aliases."</td></tr>
+        <tr><td><strong>Output Format</strong></td><td>How the response should be structured</td><td>"Return only the SQL query in a code block. No explanation."</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Prompt 1A — Bad Prompt vs Good Prompt for SQL</h3>
+    <div class="prompt-box"><span class="bad">❌ BAD PROMPT (vague, no context):</span>
+<span class="bad">Write SQL to find churned customers.</span>
+
+<span class="good">✅ GOOD PROMPT (structured, specific):</span>
+<span class="lbl">Role:</span> <span class="val">You are a senior MySQL developer for a BFSI analytics team.</span>
+
+<span class="lbl">Context:</span> <span class="val">Database: persistence_analytics
+Table: sales (sale_id INT, region VARCHAR, product VARCHAR,
+              revenue DECIMAL, sale_date DATE, rep_name VARCHAR)
+Table: reps  (rep_name VARCHAR, team VARCHAR, hire_date DATE, target DECIMAL)</span>
+
+<span class="lbl">Task:</span> <span class="val">Write a SQL query that identifies reps who are "churned"
+(no sales in the last 90 days relative to the most recent sale_date)
+and calculates the churn rate per team.</span>
+
+<span class="lbl">Constraints:</span> <span class="val">- MySQL 8.0 syntax only
+- Use LEFT JOIN to include reps with no sales (like Eve)
+- Use COALESCE to handle NULL revenue
+- Include: rep_name, team, last_sale_date, days_inactive, churn_status, team_churn_rate</span>
+
+<span class="lbl">Output Format:</span> <span class="val">SQL query only. No explanation. Use aliases.</span></div>
+  </div>
+
+  <div class="card">
+    <h3>Prompt 1B — Python EDA Prompt</h3>
+    <div class="prompt-box"><span class="lbl">Role:</span> <span class="val">You are a senior Python data analyst using pandas and numpy.</span>
+
+<span class="lbl">Context:</span> <span class="val">I have a CSV file called 'sales.csv' with columns:
+sale_id, region, product, revenue (float), sale_date (YYYY-MM-DD), rep_name.</span>
+
+<span class="lbl">Task:</span> <span class="val">Write Python code that:
+1. Loads the CSV and audits data quality (nulls, dtypes, shape)
+2. Calculates total revenue and avg revenue by product
+3. Identifies the top 2 reps by revenue
+4. Flags any revenue value above 2 standard deviations as an outlier
+5. Prints 3 business insights in plain English</span>
+
+<span class="lbl">Constraints:</span> <span class="val">- pandas + numpy only (no sklearn, no matplotlib)
+- Include comments explaining each step
+- Handle potential NaN values explicitly</span>
+
+<span class="lbl">Output:</span> <span class="val">Python code block only. No explanation outside the comments.</span></div>
+  </div>
+
+  <div class="card">
+    <h3>Prompt 1C — Power BI DAX Prompt</h3>
+    <div class="prompt-box"><span class="lbl">Role:</span> <span class="val">You are a Power BI DAX expert for a banking analytics team.</span>
+
+<span class="lbl">Context:</span> <span class="val">Table: sales (columns: revenue, sale_date, rep_name, product, region)
+Table: reps  (columns: rep_name, team, target)</span>
+
+<span class="lbl">Task:</span> <span class="val">Write 3 DAX measures:
+1. % of Target achieved per rep (handle divide by zero)
+2. Running total revenue ordered by sale_date
+3. Revenue rank across all reps (1 = highest)</span>
+
+<span class="lbl">Constraints:</span> <span class="val">- Use DIVIDE() not /  for safe division
+- Use CALCULATE + FILTER for running total
+- Use RANKX(ALL(...)) for rank</span>
+
+<span class="lbl">Output:</span> <span class="val">3 DAX measures in separate code blocks. Name each measure clearly.</span></div>
+  </div>
+
+  <div class="card">
+    <h3>Prompt 1D — Business Insight Narrative Prompt</h3>
+    <div class="prompt-box"><span class="lbl">Role:</span> <span class="val">You are a BFSI data analyst presenting findings to a Regional Head.</span>
+
+<span class="lbl">Context:</span> <span class="val">SQL analysis results:
+- Total revenue: ₹545,000 (Q1 2026)
+- Top rep: Alice (₹230,000 — 115% of target)
+- Underperforming: Dave (₹60,000 — 50% of target), Eve (₹0 — 0%)
+- Loan = 54% of revenue, Insurance = 35%, Deposit = 11%
+- Retail team churn rate: 33% (Eve has no sales)</span>
+
+<span class="lbl">Task:</span> <span class="val">Write a 3-paragraph executive summary for the Regional Head.
+Para 1: Overall performance. Para 2: Risk flags. Para 3: Recommendations.</span>
+
+<span class="lbl">Constraints:</span> <span class="val">- Max 150 words total
+- Use ₹ figures. No jargon. Decision-maker audience.
+- End each paragraph with one concrete action item.</span>
+
+<span class="lbl">Output:</span> <span class="val">3 paragraphs only. No bullet points.</span></div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 2 — AI-Assisted SQL: Generate → Validate → Fix (40 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask: Use AI to generate a churn + NPA combined SQL query, then audit it for hallucinations.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Step 2A — AI-Generated Query (typical output with hallucination)</h3>
+    <pre><span class="cm">-- ⚠ AI GENERATED — contains 3 bugs, find them before running!</span>
+<span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    r.target,
+    <span class="fn">SUM</span>(s.revenue)                  <span class="kw">AS</span> total_revenue,
+    s.last_activity_date,           <span class="cm">-- ❌ BUG 1: column doesn't exist!</span>
+    s.credit_score,                 <span class="cm">-- ❌ BUG 2: column doesn't exist!</span>
+    <span class="fn">DATEDIFF</span>(NOW(), s.sale_date)    <span class="kw">AS</span> days_inactive,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">SUM</span>(s.revenue) = <span class="num">0</span> <span class="kw">THEN</span> <span class="str">"Churned"</span>  <span class="cm">-- ❌ BUG 3: double quotes!</span>
+        <span class="kw">ELSE</span> <span class="str">"Active"</span>
+    <span class="kw">END</span> <span class="kw">AS</span> status
+<span class="kw">FROM</span> reps r
+<span class="kw">INNER JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name  <span class="cm">-- ❌ BUG 4: INNER misses Eve!</span>
+<span class="kw">GROUP BY</span> r.rep_name, r.team, r.target
+<span class="kw">ORDER BY</span> total_revenue;</pre>
+  </div>
+
+  <div class="card" style="background:#f0fdf4;border-color:#86efac">
+    <h3 style="color:#166534">Step 2B — Validated &amp; Fixed Query (your job as analyst)</h3>
+    <pre><span class="cm">-- ✅ FIXED after validation — 4 bugs corrected</span>
+<span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    r.target,
+    <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)       <span class="kw">AS</span> total_revenue,
+    <span class="fn">MAX</span>(s.sale_date)                    <span class="kw">AS</span> last_sale_date,       <span class="cm">-- fix BUG 1</span>
+    <span class="fn">COALESCE</span>(
+        <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), <span class="fn">MAX</span>(s.sale_date)),
+        <span class="num">9999</span>
+    )                                   <span class="kw">AS</span> days_inactive,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">MAX</span>(s.sale_date) <span class="kw">IS NULL</span>
+          <span class="kw">OR</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), <span class="fn">MAX</span>(s.sale_date)) &gt; <span class="num">90</span>
+                                        <span class="kw">THEN</span> <span class="str">'Churned'</span>           <span class="cm">-- fix BUG 3</span>
+        <span class="kw">ELSE</span> <span class="str">'Active'</span>
+    <span class="kw">END</span>                                 <span class="kw">AS</span> churn_status
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name   <span class="cm">-- fix BUG 4: LEFT not INNER</span>
+<span class="kw">GROUP BY</span> r.rep_name, r.team, r.target           <span class="cm">-- removed hallucinated columns BUG 1+2</span>
+<span class="kw">ORDER BY</span> days_inactive <span class="kw">DESC</span>;
+
+<span class="cm">-- Validation check: result must have 5 rows (all reps including Eve)
+-- Eve's churn_status = 'Churned', days_inactive = 9999</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>🔍 AI Validation Checklist — Run Every Time</h3>
+    <table>
+      <thead><tr><th>#</th><th>Check</th><th>How to Verify</th><th>Common Hallucination</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Column names exist</td><td>Run DESC table_name in MySQL</td><td>AI invents columns: last_activity_date, credit_score</td></tr>
+        <tr><td>2</td><td>JOIN type is correct</td><td>Check row count: should = total reps (5)</td><td>INNER JOIN → Eve disappears</td></tr>
+        <tr><td>3</td><td>String quotes</td><td>MySQL needs single quotes, not double</td><td>AI uses double quotes → syntax error</td></tr>
+        <tr><td>4</td><td>NULL handling</td><td>Check isnull().sum() in Python on result</td><td>AI forgets COALESCE → NULL propagates</td></tr>
+        <tr><td>5</td><td>Sense-check totals</td><td>SUM(revenue) must = 545,000</td><td>Wrong GROUP BY → inflated totals</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 3 — AI-Assisted Python: Generate → Validate → Document (40 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask: Use AI to generate EDA code, validate all outputs, then add business commentary.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Step 3A — AI-Generated Python + Your Validation Layer</h3>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── STEP 1: Load (AI generated this — validate first) ─────────────</span>
+df = pd.read_csv(<span class="str">'sales.csv'</span>)
+df[<span class="str">'sale_date'</span>] = pd.to_datetime(df[<span class="str">'sale_date'</span>])
+
+<span class="cm"># ── VALIDATION GATE 1: Shape and schema ───────────────────────────</span>
+<span class="kw">assert</span> df.shape == (<span class="num">6</span>, <span class="num">6</span>), <span class="str">f"Expected 6 rows, 6 cols — got {df.shape}"</span>
+<span class="kw">assert</span> df[<span class="str">'revenue'</span>].dtype <span class="kw">in</span> [<span class="str">'float64'</span>, <span class="str">'int64'</span>], <span class="str">"Revenue must be numeric"</span>
+<span class="kw">assert</span> df.isnull().sum().sum() == <span class="num">0</span>, <span class="str">"No NULLs expected in sales table"</span>
+<span class="fn">print</span>(<span class="str">"✅ Validation Gate 1 PASSED"</span>)
+
+<span class="cm"># ── STEP 2: Revenue by product (AI generated) ─────────────────────</span>
+prod_summary = df.groupby(<span class="str">'product'</span>)[<span class="str">'revenue'</span>]\
+                 .agg([<span class="str">'sum'</span>, <span class="str">'mean'</span>, <span class="str">'count'</span>]).reset_index()
+prod_summary.columns = [<span class="str">'product'</span>, <span class="str">'total_revenue'</span>, <span class="str">'avg_revenue'</span>, <span class="str">'num_deals'</span>]
+prod_summary[<span class="str">'pct_of_total'</span>] = (prod_summary[<span class="str">'total_revenue'</span>] /
+                                    prod_summary[<span class="str">'total_revenue'</span>].sum() * <span class="num">100</span>).round(<span class="num">1</span>)
+
+<span class="cm"># ── VALIDATION GATE 2: Total must = 545,000 ───────────────────────</span>
+<span class="kw">assert</span> prod_summary[<span class="str">'total_revenue'</span>].sum() == <span class="num">545000</span>, <span class="str">"Revenue total mismatch!"</span>
+<span class="fn">print</span>(<span class="str">"✅ Validation Gate 2 PASSED — revenue = 545,000"</span>)
+<span class="fn">print</span>(prod_summary)
+
+<span class="cm"># ── STEP 3: Outlier detection (AI generated) ──────────────────────</span>
+mean_rev = df[<span class="str">'revenue'</span>].mean()
+std_rev  = df[<span class="str">'revenue'</span>].std()
+df[<span class="str">'is_outlier'</span>] = (df[<span class="str">'revenue'</span>] - mean_rev).abs() &gt; <span class="num">2</span> * std_rev
+outliers = df[df[<span class="str">'is_outlier'</span>]]
+<span class="fn">print</span>(<span class="str">f"\nOutliers (&gt;2 std dev): {len(outliers)} found"</span>)
+<span class="fn">print</span>(outliers[[<span class="str">'rep_name'</span>, <span class="str">'product'</span>, <span class="str">'revenue'</span>]])
+
+<span class="cm"># ── BUSINESS COMMENTARY (YOU add this — AI cannot) ────────────────</span>
+loan_pct = prod_summary.loc[
+    prod_summary[<span class="str">'product'</span>]==<span class="str">'Loan'</span>, <span class="str">'pct_of_total'</span>].values[<span class="num">0</span>]
+<span class="fn">print</span>(<span class="str">f"""
+── 3 Business Insights ──────────────────────────────
+1. Loan dominates at {loan_pct:.1f}% of revenue — credit risk concentration.
+   Action: Diversify into Deposits + Insurance to reduce NPA exposure.
+2. Alice drives 42% of total revenue (₹230,000/₹545,000).
+   Action: Key-person risk — cross-train Bob as backup for North region.
+3. Average deal size: Loan ₹96,667 vs Deposit ₹60,000 — Loan is high value
+   but high risk. Insurance ₹97,500 — best risk-adjusted product.
+"""</span>)</pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 4 — Responsible AI Audit Checklist (45 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask: Before deploying any AI-assisted report or model at a bank, run this audit. This is what Persistent's BFSI clients require.</h3>
+  </div>
+
+  <div class="card">
+    <h3>The 5-Pillar Responsible AI Framework (BFSI Context)</h3>
+    <table>
+      <thead><tr><th>Pillar</th><th>What to Check</th><th>BFSI Example</th><th>Consequence if Missed</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Fairness</strong></td><td>Are approval/rejection rates equal across demographic groups?</td><td>Loan AI must not reject women or rural applicants at higher rates than comparable profiles</td><td>RBI regulatory action, reputational damage</td></tr>
+        <tr><td><strong>Explainability</strong></td><td>Can you explain every AI decision in plain English?</td><td>Churn model flags customer X — analyst must say WHY (low balance + 6 months no transaction)</td><td>Customer complaint, regulatory non-compliance</td></tr>
+        <tr><td><strong>Data Privacy</strong></td><td>Is PII masked before sending to AI tools?</td><td>Never send Aadhaar, PAN, account number to ChatGPT or any public API</td><td>Data breach, DPDP Act 2023 violation</td></tr>
+        <tr><td><strong>Accuracy</strong></td><td>Is AI output validated against ground truth?</td><td>AI-generated revenue total must match SQL SUM(revenue) exactly</td><td>Wrong report → wrong business decision → ₹ loss</td></tr>
+        <tr><td><strong>Transparency</strong></td><td>Is it documented that AI was used in this report?</td><td>"This summary was generated using AI and validated by [Analyst Name] on [Date]"</td><td>Audit failure, accountability gap</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>AI Audit Sign-Off Template — Use This in Every Report</h3>
+    <pre><span class="cm">## AI Usage Disclosure — Persistent Systems Analytics Report
+
+Report Title  : Q1 2026 Loan Portfolio Performance
+Prepared by   : [Your Name] · Data Analyst
+Date          : [Date]
+
+AI Tools Used : ChatGPT GPT-4 (SQL draft) · GitHub Copilot (Python boilerplate)
+Validation    : All SQL queries verified on persistence_analytics DB (6 rows)
+               Revenue total cross-checked: SQL SUM = Python .sum() = ₹545,000
+               No customer PII was shared with any external AI tool.
+
+Fairness Check: N/A (aggregate sales data — no individual customer records)
+Explainability: All DAX measures documented with business logic comments
+Data Privacy  : sales.csv used — no Aadhaar / PAN / account numbers present
+
+Analyst sign-off: All AI-generated outputs reviewed and validated before use.
+Confidence Level: HIGH — results verified across 3 tools (SQL + Python + PBI)</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 AI-Assisted Analyst Workflow Flowchart</div>
+  <div class="flow-wrap">
+    <svg width="700" height="580" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+
+      
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 13 — AI-Assisted Data Analyst Workflow</text>
+
+      
+      <rect x="225" y="36" width="250" height="38" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="52" text-anchor="middle" fill="#e6edf3" font-weight="700">Business Question Received</text>
+      <text x="350" y="67" text-anchor="middle" fill="#8b949e" font-size="11">e.g. "Which reps are churned? NPA rate?"</text>
+      <line x1="350" y1="74" x2="350" y2="94" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="94" width="380" height="54" rx="8" fill="#0c4a6e" stroke="#38bdf8" stroke-width="1.5"></rect>
+      <text x="350" y="113" text-anchor="middle" fill="#e0f2fe" font-weight="700" font-size="13">STEP 1 — Write a Structured Prompt</text>
+      <text x="350" y="129" text-anchor="middle" fill="#7dd3fc" font-size="11">Role + Context (schema) + Task + Constraints + Output Format</text>
+      <text x="350" y="143" text-anchor="middle" fill="#7dd3fc" font-size="11">Poor prompt = poor output. Spend 5 min here, save 30 min debugging.</text>
+      <line x1="350" y1="148" x2="350" y2="168" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="200" y="168" width="300" height="44" rx="8" fill="#4c1d95" stroke="#c4b5fd" stroke-width="1.5"></rect>
+      <text x="350" y="186" text-anchor="middle" fill="#e9d5ff" font-weight="700">STEP 2 — AI Generates Output</text>
+      <text x="350" y="202" text-anchor="middle" fill="#c4b5fd" font-size="11">SQL query / Python code / DAX measure / narrative</text>
+      <line x1="350" y1="212" x2="350" y2="232" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,232 480,268 350,304 220,268" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="263" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="12">Validation</text>
+      <text x="350" y="279" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="12">Gate</text>
+      <text x="165" y="260" text-anchor="middle" fill="#57606a" font-size="11">Bugs found?</text>
+      <text x="535" y="260" text-anchor="middle" fill="#57606a" font-size="11">All clear?</text>
+
+      
+      <line x1="220" y1="268" x2="120" y2="268" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="18" y="246" width="102" height="44" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="69" y="264" text-anchor="middle" fill="#7f1d1d" font-weight="700" font-size="11">Fix Bugs</text>
+      <text x="69" y="278" text-anchor="middle" fill="#991b1b" font-size="10">Columns · JOINs</text>
+      <text x="69" y="289" text-anchor="middle" fill="#991b1b" font-size="10">Quotes · NULLs</text>
+      
+      <line x1="69" y1="246" x2="69" y2="200" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="69" y1="200" x2="200" y2="200" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+      <text x="69" y="192" text-anchor="middle" fill="#9ca3af" font-size="10">Re-prompt</text>
+
+      
+      <line x1="480" y1="268" x2="580" y2="268" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="580" y="246" width="108" height="44" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="634" y="264" text-anchor="middle" fill="#14532d" font-weight="700" font-size="11">Validated ✅</text>
+      <text x="634" y="278" text-anchor="middle" fill="#166534" font-size="10">Row count ✓</text>
+      <text x="634" y="289" text-anchor="middle" fill="#166534" font-size="10">Totals match ✓</text>
+
+      
+      <line x1="634" y1="290" x2="634" y2="332" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="634" y1="332" x2="490" y2="332" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+      
+      <line x1="350" y1="304" x2="350" y2="332" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="332" width="380" height="54" rx="8" fill="#14532d" stroke="#86efac" stroke-width="1.5"></rect>
+      <text x="350" y="352" text-anchor="middle" fill="#bbf7d0" font-weight="700" font-size="13">STEP 4 — Add Business Context (YOU)</text>
+      <text x="350" y="368" text-anchor="middle" fill="#86efac" font-size="11">AI cannot do this. Your BFSI domain knowledge + MBA Finance = competitive advantage.</text>
+      <text x="350" y="382" text-anchor="middle" fill="#86efac" font-size="11">"Loan = 54% revenue → credit risk concentration → recommend diversification"</text>
+      <line x1="350" y1="386" x2="350" y2="406" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="160" y="406" width="380" height="54" rx="8" fill="#7f1d1d" stroke="#fca5a5" stroke-width="1.5"></rect>
+      <text x="350" y="426" text-anchor="middle" fill="#fecaca" font-weight="700" font-size="13">STEP 5 — Responsible AI Audit</text>
+      <text x="350" y="442" text-anchor="middle" fill="#fca5a5" font-size="11">Fairness · Explainability · Data Privacy · Accuracy · Transparency</text>
+      <text x="350" y="456" text-anchor="middle" fill="#fca5a5" font-size="11">No PII shared? Outputs explainable? AI usage disclosed in report?</text>
+      <line x1="350" y1="460" x2="350" y2="480" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="180" y="480" width="340" height="44" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="498" text-anchor="middle" fill="#e6edf3" font-weight="700">✅ AI-Augmented Report Delivered</text>
+      <text x="350" y="514" text-anchor="middle" fill="#8b949e" font-size="11">Faster with AI · Accurate because of you · Trustworthy via audit</text>
+
+      
+      <rect x="0" y="540" width="700" height="28" rx="0" fill="#f0f9ff"></rect>
+      <text x="350" y="558" text-anchor="middle" fill="#0369a1" font-size="11" font-weight="700">KEY RULE: AI Generates · Analyst Validates · Business Context = Your Value</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 13 Cheat Sheet — AI for Analysts</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="blue">🤖 Prompt Structure</h4>
+      <pre><span class="cm"># 5-Part Prompt Template</span>
+<span class="hl">Role:</span>
+You are a [MySQL / Python / DAX]
+expert for a BFSI company.
+
+<span class="hl">Context:</span>
+Table: sales(sale_id, region,
+  product, revenue, sale_date,
+  rep_name) — 6 rows
+
+<span class="hl">Task:</span>
+Write a query that calculates
+churn rate per team.
+
+<span class="hl">Constraints:</span>
+MySQL 8. LEFT JOIN. COALESCE.
+Single quotes. Aliases required.
+
+<span class="hl">Output Format:</span>
+SQL only. No explanation.</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="red">⚠ AI Hallucination — Fix Patterns</h4>
+      <pre><span class="cm"># BUG 1: Invented columns</span>
+<span class="bad">AI writes: s.last_activity_date</span>
+FIX: MAX(s.sale_date) AS last_sale
+
+<span class="cm"># BUG 2: Wrong JOIN</span>
+<span class="bad">AI writes: INNER JOIN reps</span>
+FIX: LEFT JOIN reps (keep Eve)
+
+<span class="cm"># BUG 3: Wrong quotes</span>
+<span class="bad">AI writes: THEN "Churned"</span>
+FIX: THEN 'Churned'
+
+<span class="cm"># BUG 4: No NULL handling</span>
+<span class="bad">AI omits COALESCE</span>
+FIX: COALESCE(SUM(rev), 0)
+
+<span class="cm"># ALWAYS validate:</span>
+Row count = expected?
+SUM = 545000? Nulls = 0?</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">🐍 Python Validation Gates</h4>
+      <pre><span class="cm"># Gate 1: Schema check</span>
+<span class="kw">assert</span> df.shape == (<span class="num">6</span>, <span class="num">6</span>)
+<span class="kw">assert</span> df[<span class="str">'revenue'</span>].dtype \
+       <span class="kw">in</span> [<span class="str">'float64'</span>,<span class="str">'int64'</span>]
+
+<span class="cm"># Gate 2: No nulls</span>
+<span class="kw">assert</span> df.isnull().sum().sum()==<span class="num">0</span>
+
+<span class="cm"># Gate 3: Total reconciliation</span>
+<span class="kw">assert</span> df[<span class="str">'revenue'</span>].sum()==<span class="num">545000</span>
+
+<span class="cm"># Gate 4: Outlier check</span>
+z = (df[<span class="str">'revenue'</span>] - df[<span class="str">'revenue'</span>]\
+     .mean()) / df[<span class="str">'revenue'</span>].std()
+outliers = df[z.abs() &gt; <span class="num">2</span>]
+
+<span class="cm"># Print gates</span>
+<span class="fn">print</span>(<span class="str">"✅ All gates passed"</span>)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">🏛 Responsible AI — 5 Pillars</h4>
+      <pre><span class="cm">Fairness:
+  Approval rates equal across
+  gender / region / demographics
+  Tool: bias_report.groupby('gender')
+
+Explainability:
+  Every AI decision explainable
+  Tools: SHAP, LIME, watsonx.gov
+
+Data Privacy:
+  NEVER send PII to public AI
+  Mask: Aadhaar, PAN, account no
+  India: DPDP Act 2023
+
+Accuracy:
+  AI output == SQL ground truth
+  Cross-check 3 tools always
+
+Transparency:
+  Disclose AI usage in all reports
+  "AI-assisted, analyst-validated"
+  watsonx.governance for audit trail</span></pre>
+    </div>
+
+  </div>
+
+  
+  <div class="card">
+    <h3>GenAI vs Traditional ML — Quick Comparison (Memorise This)</h3>
+    <table>
+      <thead><tr><th>Aspect</th><th>Traditional ML</th><th>Generative AI</th></tr></thead>
+      <tbody>
+        <tr><td>Output</td><td>Prediction / classification (number or label)</td><td>Generated content (text, code, image)</td></tr>
+        <tr><td>Training</td><td>Labelled dataset (supervised) or clusters (unsupervised)</td><td>Massive unlabelled text/code (self-supervised)</td></tr>
+        <tr><td>BFSI Example</td><td>Loan default model → "Default probability: 78%"</td><td>GPT generates customer financial advice summary</td></tr>
+        <tr><td>Analyst Use</td><td>Feature engineering, model validation, EDA</td><td>SQL generation, code drafting, report narration</td></tr>
+        <tr><td>Risk</td><td>Overfitting, data drift, biased labels</td><td>Hallucination, PII leakage, copyright issues</td></tr>
+        <tr><td>Regulation</td><td>RBI model risk guidelines (existing)</td><td>RBI GenAI policy (2024–), DPDP Act 2023</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 13</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>"I just use ChatGPT and copy the output" — no validation mentioned</li>
+        <li>Can't define hallucination or give an example</li>
+        <li>Writes a vague prompt — no role, no schema, no constraints</li>
+        <li>Doesn't know what watsonx is (Persistent is IBM partner!)</li>
+        <li>Sends customer PAN/Aadhaar to a public AI tool in the demo</li>
+        <li>Can't explain Responsible AI beyond "AI should be fair"</li>
+        <li>AI-generated SQL has INNER JOIN — doesn't catch it = wrong result</li>
+        <li>No validation gates in Python — just runs AI output blindly</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>Names 4 hallucination types: invented columns, wrong JOIN, wrong quotes, missing NULLs</li>
+        <li>Writes structured 5-part prompt (Role + Context + Task + Constraints + Format)</li>
+        <li>Validates AI SQL: row count + total reconciliation + schema check</li>
+        <li>Explains watsonx.ai / .data / .governance — Persistent's IBM angle</li>
+        <li>Quotes DPDP Act 2023 and RBI explainability requirement without being asked</li>
+        <li>Says: "AI generates 3× faster, I validate 100% accuracy — both are needed"</li>
+        <li>Adds business commentary AI cannot provide: domain insight + recommendation</li>
+        <li>Includes AI audit sign-off in every report</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 13 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #0ea5e9;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 13 of my 15-day Data Analyst prep.
+Topic: AI for Data Analysts — GenAI · Prompt Engineering · AI Validation · Responsible AI
+Tools: MySQL Workbench + Jupyter Notebook + Power BI Desktop + any AI tool
+Database: persistence_analytics (sales, reps, regions)
+Time available: 4 hours (20% theory, 80% hands-on)
+
+Key context: Persistent Systems is an IBM partner. IBM watsonx questions are
+likely. Grade me on domain knowledge AND responsible AI awareness.
+
+START DAY 13 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 13 → session starts.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 14 (Full Technical Mock)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>Re-run Days 1–4 SQL queries from memory (no notes)</td><td>Day 14 opens with a timed SQL round — 3 queries in 20 min</td></tr>
+      <tr><td>Re-run Days 6–7 Python EDA from memory</td><td>Live coding round — pandas + groupby + insight in 20 min</td></tr>
+      <tr><td>Memorise the 5 Responsible AI pillars</td><td>Day 14 mock panel fires these as rapid-fire in the last 10 min</td></tr>
+      <tr><td>Prepare a 2-min "tell me about yourself" answer</td><td>Day 14 starts like a real interview — first 5 min sets the tone</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–12 ✅  | 
+  <strong style="color:#1e40af">Day 13 🔵 TODAY</strong>  | 
+  Day 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

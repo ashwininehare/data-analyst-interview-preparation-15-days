@@ -1,0 +1,776 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 4 — SQL Assessment · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px;border-left:5px solid #f59e0b}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#7f1d1d;color:#fecaca}
+.b2{background:#1e3a8a;color:#bfdbfe}
+.b3{background:#14532d;color:#bbf7d0}
+.b4{background:#4c1d95;color:#ddd6fe}
+.b5{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#b91c1c;border-bottom:2px solid #b91c1c;padding-bottom:4px;margin-bottom:14px}
+.sec-title.blue{color:#1e40af;border-color:#1e40af}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.dark{color:#1f2328;border-color:#1f2328}
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+.card.warn{background:#fffbeb;border-color:#fde68a}
+.card.success{background:#f0fdf4;border-color:#86efac}
+.card.fire{background:#fff5f5;border-color:#fca5a5}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+.tag.d1{background:#dbeafe;color:#1e40af}
+.tag.d2{background:#dcfce7;color:#166534}
+.tag.d3{background:#ede9fe;color:#5b21b6}
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.str{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.green{color:#166634}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166634;border:2px solid #86efac}
+.today{background:#fef9c3;color:#854d0e;border:2px solid #f59e0b}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+.score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.score-box{border-radius:7px;padding:12px 8px;text-align:center;border:1px solid #e5e7eb}
+.score-box .spts{font-size:22px;font-weight:800}
+.score-box .slbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.score-box .sdesc{font-size:10px;color:#57606a;margin-top:3px}
+.s-easy{background:#dcfce7;border-color:#86efac}.s-easy .spts,.s-easy .slbl{color:#14532d}
+.s-med{background:#fef9c3;border-color:#fde047}.s-med .spts,.s-med .slbl{color:#854d0e}
+.s-hard{background:#fee2e2;border-color:#fca5a5}.s-hard .spts,.s-hard .slbl{color:#7f1d1d}
+.s-tot{background:#1f2328;border-color:#374151}.s-tot .spts,.s-tot .slbl{color:#e6edf3}.s-tot .sdesc{color:#8b949e}
+.timer{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;margin-bottom:14px}
+.t-seg{flex:1;padding:10px 6px;text-align:center;font-size:11px;font-weight:700}
+.t-seg .tm{display:block;font-size:17px;font-weight:800;margin-bottom:2px}
+.t-warm{background:#f0f2f5;color:#374151}
+.t-q1{background:#dcfce7;color:#14532d}
+.t-q2{background:#fef9c3;color:#854d0e}
+.t-q3{background:#fee2e2;color:#7f1d1d}
+.t-q4{background:#ede9fe;color:#4c1d95}
+.t-q5{background:#dbeafe;color:#1e3a8a}
+.t-dbr{background:#1f2328;color:#e6edf3}
+.q-block{border-radius:8px;padding:16px 18px;margin-bottom:14px;border:1px solid}
+.q-block.easy{background:#f0fdf4;border-color:#86efac}
+.q-block.med{background:#fffbeb;border-color:#fde68a}
+.q-block.hard{background:#fff5f5;border-color:#fca5a5}
+.q-block .qhdr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.q-block .qnum{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.q-block .qtitle{font-size:14px;font-weight:800;color:#1f2328}
+.q-block .qask{font-size:13px;color:#1f2328;margin-bottom:8px;padding:8px 12px;background:#fff;border-radius:5px;border:1px solid #e5e7eb}
+.q-block .qscore{font-size:11px;color:#57606a;margin-top:6px}
+.ans-toggle{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:5px;padding:8px 12px;margin-top:6px}
+.ans-toggle .albl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#57606a;margin-bottom:6px}
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>⏱ Day 4 — SQL Case Study Assessment</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 3.5 Hours · ALL Days 1–3 Combined</p>
+  <div class="badge-row">
+    <span class="badge b1">Timed — No Notes</span>
+    <span class="badge b2">Days 1–3 All Topics</span>
+    <span class="badge b3">5 Questions · 100 Points</span>
+    <span class="badge b4">Real Interview Conditions</span>
+    <span class="badge b5">Stop when timer rings</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div><div class="day-dot done">2</div><div class="day-dot done">3</div>
+    <div class="day-dot today">4</div>
+    <div class="day-dot future">5</div><div class="day-dot future">6</div><div class="day-dot future">7</div>
+    <div class="day-dot future">8</div><div class="day-dot future">9</div><div class="day-dot future">10</div>
+    <div class="day-dot future">11</div><div class="day-dot future">12</div><div class="day-dot future">13</div>
+    <div class="day-dot future">14</div><div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–3 (SQL Foundations, JOINs, Window Functions) · 🟡 Day 4: SQL Assessment · ⬜ Days 5–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎯 What Day 4 Tests — Everything from Days 1, 2, 3</div>
+  <div class="card">
+    <h3>Topic Map — Every Question Draws from Multiple Days</h3>
+    <table>
+      <thead><tr><th>Q#</th><th>Difficulty</th><th>Topics Tested</th><th>Days Covered</th><th>Points</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td><span class="tag easy">Easy</span></td><td>GROUP BY · HAVING · COUNT · SUM · CASE WHEN</td><td><span class="tag d1">Day 1</span></td><td>15 pts</td></tr>
+        <tr><td>Q2</td><td><span class="tag med">Medium</span></td><td>LEFT JOIN · COALESCE · subquery · % contribution</td><td><span class="tag d1">Day 1</span> <span class="tag d2">Day 2</span></td><td>20 pts</td></tr>
+        <tr><td>Q3</td><td><span class="tag med">Medium</span></td><td>CTE · Window RANK() · PARTITION BY</td><td><span class="tag d2">Day 2</span> <span class="tag d3">Day 3</span></td><td>20 pts</td></tr>
+        <tr><td>Q4</td><td><span class="tag hard">Hard</span></td><td>LAG() · MoM % change · NULLIF · CASE WHEN trend flag</td><td><span class="tag d3">Day 3</span></td><td>25 pts</td></tr>
+        <tr><td>Q5</td><td><span class="tag hard">Hard</span></td><td>Chained CTEs · LEFT JOIN · NULL handling · DPD flags · full business case</td><td><span class="tag d1">Day 1</span> <span class="tag d2">Day 2</span> <span class="tag d3">Day 3</span></td><td>20 pts</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📊 Scoring Rubric — Be Honest</div>
+  <div class="score-grid">
+    <div class="score-box s-easy"><div class="slbl">Q1 Easy</div><div class="spts">15</div><div class="sdesc">/ 15 pts</div></div>
+    <div class="score-box s-med"><div class="slbl">Q2+Q3 Med</div><div class="spts">40</div><div class="sdesc">/ 40 pts</div></div>
+    <div class="score-box s-hard"><div class="slbl">Q4+Q5 Hard</div><div class="spts">45</div><div class="sdesc">/ 45 pts</div></div>
+    <div class="score-box s-tot"><div class="slbl">Total</div><div class="spts">100</div><div class="sdesc">Pass = 70+</div></div>
+  </div>
+  <div class="card">
+    <h3>Grade Bands — Know Your Level Before Day 5</h3>
+    <table>
+      <thead><tr><th>Score</th><th>Grade</th><th>What It Means</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>85–100</td><td>🟢 Excellent</td><td>SQL is a strength — Day 5 Excel will be easy</td><td>Focus on business insight quality tomorrow</td></tr>
+        <tr><td>70–84</td><td>🟢 Pass</td><td>Solid foundation — minor gaps in syntax</td><td>Revisit the specific query type you dropped points on</td></tr>
+        <tr><td>55–69</td><td>🟡 Borderline</td><td>Basics good, advanced patterns need work</td><td>Re-run Q4 and Q5 from scratch tonight</td></tr>
+        <tr><td>&lt;55</td><td>🔴 Not Ready</td><td>Gaps in Days 1–3 fundamentals</td><td>Re-do Days 2–3 before proceeding to Day 5</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">⏱ Day 4 Timed Schedule — 3.5 Hours Strict</div>
+  <div class="timer">
+    <div class="t-seg t-warm"><span class="tm">10</span>Warm-up</div>
+    <div class="t-seg t-q1"><span class="tm">15</span>Q1</div>
+    <div class="t-seg t-q2"><span class="tm">20</span>Q2</div>
+    <div class="t-seg t-q3"><span class="tm">20</span>Q3</div>
+    <div class="t-seg t-q4"><span class="tm">25</span>Q4</div>
+    <div class="t-seg t-q5"><span class="tm">25</span>Q5</div>
+    <div class="t-seg t-dbr"><span class="tm">55</span>Debrief</div>
+  </div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">⚡ Assessment Rules — Non-Negotiable</h3>
+    <table>
+      <thead><tr><th>Rule</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Set a real timer. Stop when it rings — even mid-query.</td><td>Persistent's technical round is timed. Incomplete under pressure = real feedback.</td></tr>
+        <tr><td>No notes. No scrolling back to Days 1–3.</td><td>Interview is closed-book. Today measures what's in memory, not what you can look up.</td></tr>
+        <tr><td>State your approach in a comment before writing SQL.</td><td>Interviewers grade thinking process, not just final output.</td></tr>
+        <tr><td>Always add a business insight comment at the end of each query.</td><td>Technical correct + no insight = 80% score. Insight = 100%.</td></tr>
+        <tr><td>Type HINT only if you've been stuck for 3+ min.</td><td>Using HINT costs 20% of that question's points.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title blue">Q1 — Easy · 15 Points · 15 Minutes</div>
+  <div class="q-block easy">
+    <div class="qhdr">
+      <span class="tag d1">Day 1</span>
+      <span class="qtitle">Product Revenue Summary with Quality Flag</span>
+    </div>
+    <div class="qask">
+      Write a single SQL query that shows for each product: total revenue, number of deals, average deal size (rounded to 0 dp), and a quality flag — 'Premium' if avg deal size ≥ 90,000, 'Standard' if ≥ 70,000, else 'Budget'. Filter to only show products with at least 2 deals. Order by total revenue descending.
+    </div>
+    <div class="qscore">Scoring: GROUP BY (2) · COUNT + SUM + ROUND(AVG) (4) · CASE WHEN flag (4) · HAVING COUNT≥2 (3) · ORDER BY (1) · Business insight comment (1)</div>
+
+    <div class="ans-toggle">
+      <div class="albl">✅ Model Answer</div>
+      <pre><span class="kw">SELECT</span>
+    product,
+    <span class="fn">COUNT</span>(*)                   <span class="kw">AS</span> num_deals,
+    <span class="fn">SUM</span>(revenue)               <span class="kw">AS</span> total_revenue,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(revenue), <span class="num">0</span>)    <span class="kw">AS</span> avg_deal_size,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">AVG</span>(revenue) &gt;= <span class="num">90000</span> <span class="kw">THEN</span> <span class="str">'Premium'</span>
+        <span class="kw">WHEN</span> <span class="fn">AVG</span>(revenue) &gt;= <span class="num">70000</span> <span class="kw">THEN</span> <span class="str">'Standard'</span>
+        <span class="kw">ELSE</span>                           <span class="str">'Budget'</span>
+    <span class="kw">END</span>                        <span class="kw">AS</span> quality_flag
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> product
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= <span class="num">2</span>
+<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- Expected: Loan (3 deals,290K,Premium) · Insurance (2 deals,195K,Standard)
+-- Deposit excluded by HAVING (only 1 deal)
+-- Business: Loan is premium-tier product driving 53% revenue — prioritise in Q3 targets</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title blue">Q2 — Medium · 20 Points · 20 Minutes</div>
+  <div class="q-block med">
+    <div class="qhdr">
+      <span class="tag d1">Day 1</span><span class="tag d2">Day 2</span>
+      <span class="qtitle">Full Rep Performance Report (Including Eve)</span>
+    </div>
+    <div class="qask">
+      Write a SQL query that shows ALL 5 reps (including Eve who has no sales). For each rep show: rep_name, team, target, actual_revenue (0 if no sales), number of deals, % of target achieved (1 dp, 0 if no sales), and a status — 'On Track' if ≥100%, 'At Risk' if ≥80%, else 'Underperforming'. Order by % of target descending.
+    </div>
+    <div class="qscore">Scoring: LEFT JOIN from reps (3) · COALESCE on revenue (3) · COALESCE on deals (2) · % of target calculation (3) · CASE WHEN status (4) · All 5 rows present (3) · Business insight (2)</div>
+
+    <div class="ans-toggle">
+      <div class="albl">✅ Model Answer</div>
+      <pre><span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    r.target,
+    <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)          <span class="kw">AS</span> actual_revenue,
+    <span class="fn">COALESCE</span>(<span class="fn">COUNT</span>(s.sale_id), <span class="num">0</span>)          <span class="kw">AS</span> num_deals,
+    <span class="fn">ROUND</span>(
+        <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)
+        * <span class="num">100.0</span> / r.target,
+    <span class="num">1</span>)                                     <span class="kw">AS</span> pct_of_target,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue),<span class="num">0</span>) &gt;= r.target           <span class="kw">THEN</span> <span class="str">'On Track'</span>
+        <span class="kw">WHEN</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue),<span class="num">0</span>) &gt;= r.target * <span class="num">0.8</span>     <span class="kw">THEN</span> <span class="str">'At Risk'</span>
+        <span class="kw">ELSE</span>                                                         <span class="str">'Underperforming'</span>
+    <span class="kw">END</span>                                    <span class="kw">AS</span> status
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name
+<span class="kw">GROUP BY</span> r.rep_name, r.team, r.target
+<span class="kw">ORDER BY</span> pct_of_target <span class="kw">DESC</span>;
+
+<span class="cm">-- 5 rows: Alice 115% On Track · Bob 89% At Risk · Carol 63% Under · Dave 50% Under · Eve 0% Under
+-- Business: 3/5 reps underperforming — team-level review required before Q3</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title blue">Q3 — Medium · 20 Points · 20 Minutes</div>
+  <div class="q-block med">
+    <div class="qhdr">
+      <span class="tag d2">Day 2</span><span class="tag d3">Day 3</span>
+      <span class="qtitle">Revenue Rank Within Team Using CTE + Window Function</span>
+    </div>
+    <div class="qask">
+      Using a CTE, write a query that: (1) aggregates total revenue per rep, (2) ranks each rep within their team using DENSE_RANK() ordered by revenue descending, (3) in the final SELECT, shows rep_name, team, total_revenue, team_rank, and labels rank 1 as 'Team Star', rank 2 as 'Solid', else 'Needs Support'. Include all 5 reps (Eve must appear). Order by team, team_rank.
+    </div>
+    <div class="qscore">Scoring: CTE correct structure (3) · LEFT JOIN + COALESCE in CTE (3) · DENSE_RANK with PARTITION BY team (5) · CASE WHEN label (4) · 5 rows including Eve (3) · ORDER BY team + rank (2)</div>
+
+    <div class="ans-toggle">
+      <div class="albl">✅ Model Answer</div>
+      <pre><span class="kw">WITH</span> rep_totals <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        r.rep_name,
+        r.team,
+        <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>) <span class="kw">AS</span> total_revenue
+    <span class="kw">FROM</span> reps r
+    <span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name
+    <span class="kw">GROUP BY</span> r.rep_name, r.team
+)
+<span class="kw">SELECT</span>
+    rep_name,
+    team,
+    total_revenue,
+    <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (
+        <span class="kw">PARTITION BY</span> team
+        <span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>
+    )                                  <span class="kw">AS</span> team_rank,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (
+                 <span class="kw">PARTITION BY</span> team
+                 <span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>) = <span class="num">1</span> <span class="kw">THEN</span> <span class="str">'Team Star'</span>
+        <span class="kw">WHEN</span> <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (
+                 <span class="kw">PARTITION BY</span> team
+                 <span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>) = <span class="num">2</span> <span class="kw">THEN</span> <span class="str">'Solid'</span>
+        <span class="kw">ELSE</span>                                                <span class="str">'Needs Support'</span>
+    <span class="kw">END</span>                                <span class="kw">AS</span> performance_label
+<span class="kw">FROM</span> rep_totals
+<span class="kw">ORDER BY</span> team, team_rank;
+
+<span class="cm">-- Retail: Alice rank1 Team Star · Carol rank2 Solid · Eve rank3 Needs Support
+-- SME:    Bob rank1 Team Star · Dave rank2 Solid
+-- Business: Eve is rank 3/3 in Retail — HR escalation warranted</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Q4 — Hard · 25 Points · 25 Minutes</div>
+  <div class="q-block hard">
+    <div class="qhdr">
+      <span class="tag d3">Day 3</span>
+      <span class="qtitle">Month-over-Month Revenue with LAG + Trend Flag</span>
+    </div>
+    <div class="qask">
+      Write a SQL query that shows for each month (formatted as 'YYYY-MM'): total monthly revenue, the previous month's revenue using LAG(), the month-over-month % change (1 dp — handle the first month's NULL safely), a trend flag — 'Growth', 'Decline', or 'First Month', and a running cumulative total. Order by month ascending.
+    </div>
+    <div class="qscore">Scoring: DATE_FORMAT grouping (2) · LAG() syntax (4) · NULLIF for safe division (4) · MoM % calc correct (4) · CASE WHEN trend flag (4) · Running total ROWS BETWEEN (5) · Business insight (2)</div>
+
+    <div class="ans-toggle">
+      <div class="albl">✅ Model Answer</div>
+      <pre><span class="kw">WITH</span> monthly <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>) <span class="kw">AS</span> month,
+        <span class="fn">SUM</span>(revenue)                    <span class="kw">AS</span> monthly_revenue
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>)
+)
+<span class="kw">SELECT</span>
+    month,
+    monthly_revenue,
+    <span class="fn">LAG</span>(monthly_revenue, <span class="num">1</span>)
+        <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month)               <span class="kw">AS</span> prev_month_revenue,
+    <span class="fn">ROUND</span>(
+        (monthly_revenue -
+         <span class="fn">LAG</span>(monthly_revenue,<span class="num">1</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month))
+        * <span class="num">100.0</span> /
+        <span class="fn">NULLIF</span>(<span class="fn">LAG</span>(monthly_revenue,<span class="num">1</span>)
+                   <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month), <span class="num">0</span>),
+    <span class="num">1</span>)                                     <span class="kw">AS</span> mom_pct_change,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">LAG</span>(monthly_revenue,<span class="num">1</span>)
+                 <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> month) <span class="kw">IS NULL</span>  <span class="kw">THEN</span> <span class="str">'First Month'</span>
+        <span class="kw">WHEN</span> monthly_revenue &gt;
+             <span class="fn">LAG</span>(monthly_revenue,<span class="num">1</span>)
+                 <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> month)            <span class="kw">THEN</span> <span class="str">'Growth'</span>
+        <span class="kw">ELSE</span>                                        <span class="str">'Decline'</span>
+    <span class="kw">END</span>                                    <span class="kw">AS</span> trend_flag,
+    <span class="fn">SUM</span>(monthly_revenue) <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> month
+        <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>
+    )                                      <span class="kw">AS</span> cumulative_revenue
+<span class="kw">FROM</span> monthly
+<span class="kw">ORDER BY</span> month;
+
+<span class="cm">-- Jan: First Month · Feb: Decline (120K→85K, -29.2%) · Mar: Growth (95K, +11.8%)
+-- Apr: Decline (60K) · May: Growth (110K, +83.3%) · Jun: Decline (75K, -31.8%)
+-- Cumulative by Jun = 545,000
+-- Business: Revenue volatile — no sustained growth trend. May spike = Alice's Insurance deal.
+-- CFO needs a stabilisation plan for H2.</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Q5 — Hard · 20 Points · 25 Minutes</div>
+  <div class="q-block hard">
+    <div class="qhdr">
+      <span class="tag d1">Day 1</span><span class="tag d2">Day 2</span><span class="tag d3">Day 3</span>
+      <span class="qtitle">Full BFSI Case — Rep Risk + Activity Scorecard</span>
+    </div>
+    <div class="qask">
+      Write a query using 2 chained CTEs that produces a complete rep risk report: CTE 1 — aggregate actual revenue and last sale date per rep (from sales). CTE 2 — join CTE 1 to reps (LEFT JOIN so Eve appears), calculate days_inactive since last sale (NULL = 9999 for Eve), % of target, and assign a risk level — 'Critical' if days_inactive &gt; 60 OR pct_target &lt; 50%, 'Watch' if days_inactive &gt; 30 OR pct_target &lt; 80%, else 'Green'. Final SELECT: all columns + COALESCE last sale date to 'Never Sold'. Order by risk level, days_inactive desc.
+    </div>
+    <div class="qscore">Scoring: 2 correct CTEs (4) · LEFT JOIN in CTE 2 (2) · DATEDIFF for days_inactive (3) · COALESCE(9999) for Eve (2) · OR logic in CASE WHEN (4) · COALESCE last_sale (2) · ORDER BY (1) · Business insight (2)</div>
+
+    <div class="ans-toggle">
+      <div class="albl">✅ Model Answer</div>
+      <pre><span class="kw">WITH</span> rep_activity <span class="kw">AS</span> (
+    <span class="cm">-- CTE 1: Sales summary per rep</span>
+    <span class="kw">SELECT</span>
+        rep_name,
+        <span class="fn">SUM</span>(revenue)   <span class="kw">AS</span> actual_revenue,
+        <span class="fn">MAX</span>(sale_date)  <span class="kw">AS</span> last_sale_date,
+        <span class="fn">COUNT</span>(*)        <span class="kw">AS</span> num_deals
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> rep_name
+),
+rep_risk <span class="kw">AS</span> (
+    <span class="cm">-- CTE 2: Join to reps, calculate risk metrics</span>
+    <span class="kw">SELECT</span>
+        r.rep_name,
+        r.team,
+        r.target,
+        <span class="fn">COALESCE</span>(ra.actual_revenue, <span class="num">0</span>)     <span class="kw">AS</span> actual_revenue,
+        <span class="fn">COALESCE</span>(ra.num_deals, <span class="num">0</span>)           <span class="kw">AS</span> num_deals,
+        ra.last_sale_date,
+        <span class="fn">COALESCE</span>(
+            <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), ra.last_sale_date),
+            <span class="num">9999</span>
+        )                                    <span class="kw">AS</span> days_inactive,
+        <span class="fn">ROUND</span>(
+            <span class="fn">COALESCE</span>(ra.actual_revenue, <span class="num">0</span>)
+            * <span class="num">100.0</span> / r.target, <span class="num">1</span>)          <span class="kw">AS</span> pct_target
+    <span class="kw">FROM</span> reps r
+    <span class="kw">LEFT JOIN</span> rep_activity ra <span class="kw">ON</span> r.rep_name = ra.rep_name
+)
+<span class="kw">SELECT</span>
+    rep_name,
+    team,
+    target,
+    actual_revenue,
+    num_deals,
+    <span class="fn">COALESCE</span>(<span class="fn">CAST</span>(last_sale_date <span class="kw">AS</span> <span class="kw">CHAR</span>), <span class="str">'Never Sold'</span>) <span class="kw">AS</span> last_sale,
+    days_inactive,
+    pct_target,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> days_inactive &gt; <span class="num">60</span> <span class="kw">OR</span>  pct_target &lt; <span class="num">50</span>  <span class="kw">THEN</span> <span class="str">'🔴 Critical'</span>
+        <span class="kw">WHEN</span> days_inactive &gt; <span class="num">30</span> <span class="kw">OR</span>  pct_target &lt; <span class="num">80</span>  <span class="kw">THEN</span> <span class="str">'🟡 Watch'</span>
+        <span class="kw">ELSE</span>                                               <span class="str">'🟢 Green'</span>
+    <span class="kw">END</span>                                                    <span class="kw">AS</span> risk_level
+<span class="kw">FROM</span> rep_risk
+<span class="kw">ORDER BY</span>
+    <span class="kw">CASE</span> risk_level
+        <span class="kw">WHEN</span> <span class="str">'🔴 Critical'</span> <span class="kw">THEN</span> <span class="num">1</span>
+        <span class="kw">WHEN</span> <span class="str">'🟡 Watch'</span>    <span class="kw">THEN</span> <span class="num">2</span>
+        <span class="kw">ELSE</span>                    <span class="num">3</span>
+    <span class="kw">END</span>,
+    days_inactive <span class="kw">DESC</span>;
+
+<span class="cm">-- Eve: last_sale='Never Sold', days_inactive=9999, pct=0% → 🔴 Critical
+-- Dave: pct=50% → borderline, likely 🔴 Critical
+-- Carol: pct=63% → 🟡 Watch
+-- Bob: pct=89% → 🟡 Watch
+-- Alice: pct=115% → 🟢 Green
+-- Business: Risk Manager gets ranked action list — Eve + Dave need immediate intervention</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📝 Self-Debrief — Fill This After Your Assessment</div>
+  <div class="card">
+    <h3>Error Log — Write Your Mistakes Here</h3>
+    <table>
+      <thead><tr><th>Question</th><th>What I Got Wrong</th><th>Root Cause (Day 1/2/3 gap)</th><th>Fix Tonight</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>_______________</td><td>_______________</td><td>_______________</td></tr>
+        <tr><td>Q2</td><td>_______________</td><td>_______________</td><td>_______________</td></tr>
+        <tr><td>Q3</td><td>_______________</td><td>_______________</td><td>_______________</td></tr>
+        <tr><td>Q4</td><td>_______________</td><td>_______________</td><td>_______________</td></tr>
+        <tr><td>Q5</td><td>_______________</td><td>_______________</td><td>_______________</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Day 4 Flowchart — Assessment Strategy Decision Tree</div>
+  <div class="flow-wrap">
+    <svg width="700" height="530" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 4 — Assessment Strategy + Query-Building Mental Model</text>
+
+      
+      <rect x="215" y="34" width="270" height="36" rx="8" fill="#f59e0b"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#1f2328" font-weight="800">⏱ Timer Starts — Read Question</text>
+      <text x="350" y="63" text-anchor="middle" fill="#78350f" font-size="11">Read fully. Identify: topic, entities, output, edge cases.</text>
+      <line x1="350" y1="70" x2="350" y2="90" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="155" y="90" width="390" height="38" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="350" y="106" text-anchor="middle" fill="#1e3a8a" font-weight="700">Write Approach Comment FIRST (before any SQL)</text>
+      <text x="350" y="120" text-anchor="middle" fill="#1e40af" font-size="11">-- "LEFT JOIN from reps · COALESCE revenue · CASE WHEN status · 5 rows expected"</text>
+      <line x1="350" y1="128" x2="350" y2="148" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,148 462,178 350,208 238,178" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="173" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Multiple tables</text>
+      <text x="350" y="187" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">OR complex steps?</text>
+      <text x="183" y="175" text-anchor="middle" fill="#57606a" font-size="10">NO — single table</text>
+      <text x="517" y="175" text-anchor="middle" fill="#57606a" font-size="10">YES — CTE + JOIN</text>
+
+      
+      <line x1="238" y1="178" x2="120" y2="178" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="18" y="158" width="102" height="40" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="69" y="174" text-anchor="middle" fill="#14532d" font-weight="700">Direct Query</text>
+      <text x="69" y="186" text-anchor="middle" fill="#166534" font-size="10">FROM → WHERE →</text>
+      <text x="69" y="197" text-anchor="middle" fill="#166534" font-size="10">GROUP BY → SELECT</text>
+
+      
+      <line x1="462" y1="178" x2="568" y2="178" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="568" y="158" width="120" height="40" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="628" y="174" text-anchor="middle" fill="#4c1d95" font-weight="700">CTE Strategy</text>
+      <text x="628" y="186" text-anchor="middle" fill="#5b21b6" font-size="10">WITH cte AS (agg)</text>
+      <text x="628" y="197" text-anchor="middle" fill="#5b21b6" font-size="10">LEFT JOIN + COALESCE</text>
+
+      
+      <line x1="69" y1="198" x2="69" y2="238" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="628" y1="198" x2="628" y2="238" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="208" x2="350" y2="238" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="69" y1="238" x2="628" y2="238" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="238" x2="350" y2="258" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="140" y="258" width="420" height="38" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="350" y="274" text-anchor="middle" fill="#7f1d1d" font-weight="700">Eve Test — Must Pass Before Moving On</text>
+      <text x="350" y="287" text-anchor="middle" fill="#991b1b" font-size="11">Result rows = ALL reps (5)? Eve shows 0 revenue? COALESCE applied? IS NULL used?</text>
+      <line x1="350" y1="296" x2="350" y2="316" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,316 462,346 350,376 238,346" fill="#ede9fe" stroke="#c4b5fd" stroke-width="2"></polygon>
+      <text x="350" y="341" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">Window function</text>
+      <text x="350" y="355" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">needed?</text>
+      <text x="188" y="342" text-anchor="middle" fill="#57606a" font-size="10">NO</text>
+      <text x="512" y="342" text-anchor="middle" fill="#57606a" font-size="10">YES</text>
+
+      
+      <line x1="238" y1="346" x2="140" y2="346" stroke="#9ca3af" stroke-width="1.5"></line>
+      <rect x="38" y="328" width="102" height="36" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="89" y="344" text-anchor="middle" fill="#14532d" font-weight="700">CASE WHEN</text>
+      <text x="89" y="356" text-anchor="middle" fill="#166534" font-size="10">Label · Flag · Status</text>
+
+      
+      <line x1="462" y1="346" x2="560" y2="346" stroke="#9ca3af" stroke-width="1.5"></line>
+      <rect x="560" y="316" width="128" height="60" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="624" y="334" text-anchor="middle" fill="#1e3a8a" font-weight="700">Pick Window Type</text>
+      <text x="624" y="348" text-anchor="middle" fill="#1e40af" font-size="11">RANK/DENSE_RANK</text>
+      <text x="624" y="361" text-anchor="middle" fill="#1e40af" font-size="11">LAG()+NULLIF()</text>
+      <text x="624" y="374" text-anchor="middle" fill="#1e40af" font-size="11">SUM OVER() running</text>
+
+      
+      <line x1="89" y1="364" x2="89" y2="412" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="624" y1="376" x2="624" y2="412" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="376" x2="350" y2="412" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="89" y1="412" x2="624" y2="412" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="412" x2="350" y2="432" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="140" y="432" width="420" height="38" rx="7" fill="#1f2328"></rect>
+      <text x="350" y="448" text-anchor="middle" fill="#e6edf3" font-weight="700">Add Business Insight Comment — Mandatory</text>
+      <text x="350" y="462" text-anchor="middle" fill="#8b949e" font-size="11">What does this result mean? What action should the business take?</text>
+      <line x1="350" y1="470" x2="350" y2="490" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="200" y="490" width="300" height="32" rx="8" fill="#f59e0b"></rect>
+      <text x="350" y="511" text-anchor="middle" fill="#1f2328" font-weight="800">✅ Submit + Move to Next Question</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 4 Cheat Sheet — All 3 Days at a Glance</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="blue">📚 Day 1 — Core Patterns</h4>
+      <pre><span class="cm">-- Execution order</span>
+FROM → WHERE → GROUP BY
+→ HAVING → SELECT → ORDER BY
+
+<span class="cm">-- HAVING uses aggregate, not alias</span>
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(revenue) &gt; <span class="num">100000</span>  <span class="cm">✅</span>
+<span class="kw">HAVING</span> total_rev &gt; <span class="num">100000</span>     <span class="cm">❌</span>
+
+<span class="cm">-- CASE WHEN in SELECT</span>
+<span class="kw">CASE</span>
+  <span class="kw">WHEN</span> rev &gt;= <span class="num">100000</span> <span class="kw">THEN</span> <span class="str">'High'</span>
+  <span class="kw">WHEN</span> rev &gt;= <span class="num">75000</span>  <span class="kw">THEN</span> <span class="str">'Mid'</span>
+  <span class="kw">ELSE</span> <span class="str">'Low'</span>
+<span class="kw">END</span>
+
+<span class="cm">-- % contribution</span>
+<span class="fn">SUM</span>(rev) * <span class="num">100.0</span> /
+  (<span class="kw">SELECT</span> <span class="fn">SUM</span>(rev) <span class="kw">FROM</span> sales)
+
+<span class="cm">-- NULL: IS NULL · IS NOT NULL</span>
+<span class="cm">-- Strings: single quotes only</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">🔗 Day 2 — JOIN + CTE Patterns</h4>
+      <pre><span class="cm">-- LEFT JOIN from reps (Eve test)</span>
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s
+    <span class="kw">ON</span> r.rep_name = s.rep_name
+<span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)
+
+<span class="cm">-- Anti-JOIN (no sales reps)</span>
+<span class="kw">LEFT JOIN</span> sales s ON ...
+<span class="kw">WHERE</span> s.sale_id <span class="kw">IS NULL</span>
+
+<span class="cm">-- CTE template</span>
+<span class="kw">WITH</span> cte1 <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> ... <span class="kw">FROM</span> sales ...
+),
+cte2 <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> ...
+    <span class="kw">FROM</span> reps r
+    <span class="kw">LEFT JOIN</span> cte1 c
+        <span class="kw">ON</span> r.rep_name = c.rep_name
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> cte2;</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">🪟 Day 3 — Window Functions</h4>
+      <pre><span class="cm">-- RANK vs DENSE_RANK vs ROW_NUMBER</span>
+<span class="fn">RANK</span>()        <span class="cm">-- 1,1,3 (skip)</span>
+<span class="fn">DENSE_RANK</span>()  <span class="cm">-- 1,1,2 (no skip)</span>
+<span class="fn">ROW_NUMBER</span>()  <span class="cm">-- 1,2,3 (unique)</span>
+
+<span class="cm">-- PARTITION BY team (resets per group)</span>
+<span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> team
+    <span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span>)
+
+<span class="cm">-- LAG + NULLIF (MoM % change)</span>
+<span class="fn">LAG</span>(rev,<span class="num">1</span>) <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> month)
+(rev - prev)*<span class="num">100.0</span>/
+  <span class="fn">NULLIF</span>(prev,<span class="num">0</span>)
+
+<span class="cm">-- Running total</span>
+<span class="fn">SUM</span>(rev) <span class="kw">OVER</span>(
+  <span class="kw">ORDER BY</span> month
+  <span class="kw">ROWS BETWEEN</span>
+  UNBOUNDED PRECEDING
+  <span class="kw">AND CURRENT ROW</span>)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="red">⚡ Assessment Must-Knows</h4>
+      <pre><span class="cm">-- Top 5 errors in Day 4 assessments</span>
+<span class="cm">1. INNER JOIN → Eve disappears</span>
+<span class="cm">   Fix: LEFT JOIN from reps</span>
+
+<span class="cm">2. No COALESCE on revenue</span>
+<span class="cm">   Fix: COALESCE(SUM(rev), 0)</span>
+
+<span class="cm">3. LAG without NULLIF</span>
+<span class="cm">   Fix: NULLIF(LAG(rev,1)..., 0)</span>
+
+<span class="cm">4. HAVING alias instead of aggregate</span>
+<span class="cm">   Fix: HAVING SUM(revenue) &gt; N</span>
+
+<span class="cm">5. No business insight comment</span>
+<span class="cm">   Fix: Always add -- Business: ...</span>
+
+<span class="cm">-- DATEDIFF for days inactive</span>
+<span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), last_sale)
+<span class="fn">COALESCE</span>(..., <span class="num">9999</span>) <span class="cm">-- Eve's DPD</span>
+
+<span class="cm">-- CASE in ORDER BY</span>
+<span class="kw">ORDER BY</span>
+  <span class="kw">CASE</span> risk <span class="kw">WHEN</span> <span class="str">'Critical'</span>
+       <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">2</span> <span class="kw">END</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED in Day 4</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected Patterns</h4>
+      <ul>
+        <li>Q2: INNER JOIN → 4 rows not 5 → Eve missing → data incomplete report</li>
+        <li>Q1: HAVING total_rev &gt; X → alias in HAVING → query fails</li>
+        <li>Q3: ROW_NUMBER instead of DENSE_RANK → no ties handled correctly</li>
+        <li>Q4: No NULLIF in LAG division → #DIV/0 equivalent error</li>
+        <li>Q4: No ROWS BETWEEN in running total → wrong cumulative values</li>
+        <li>Q5: Single CTE instead of 2 chained → logic tangled, hard to read</li>
+        <li>Any Q: No business insight comment → technical pass, interview fail</li>
+        <li>Any Q: Double quotes for strings → silent wrong behaviour</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired Patterns</h4>
+      <ul>
+        <li>States approach in comment before first line of SQL — always</li>
+        <li>LEFT JOIN from reps is the FIRST instinct whenever reps is involved</li>
+        <li>COALESCE wraps every revenue and count from a LEFT JOIN — automatic</li>
+        <li>DENSE_RANK for ranking with ties, NULLIF for safe MoM division</li>
+        <li>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW from memory</li>
+        <li>2-CTE structure: CTE1 = aggregate, CTE2 = join + enrich, final = label</li>
+        <li>DATEDIFF + COALESCE(,9999) for Eve's inactive days — complete edge case</li>
+        <li>Every query ends with a business insight — "3/5 reps at risk — escalate"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 4 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #f59e0b;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 4 of my 15-day Data Analyst prep.
+This is a TIMED SQL ASSESSMENT covering Days 1, 2, and 3 combined.
+Topics: GROUP BY · HAVING · CASE WHEN · LEFT JOIN · CTEs · Window Functions
+        LAG · DENSE_RANK · PARTITION BY · NULL handling · DATEDIFF
+Tool: MySQL Workbench
+Database: persistence_analytics (sales, reps, regions)
+Time: 3.5 hours strict. No hints unless I type HINT (costs 20% of question points).
+
+Rules:
+- Fire each question one at a time. Wait for my answer before scoring.
+- Score immediately after each answer with detailed point breakdown.
+- Give me the model answer after scoring.
+- Final debrief: total score, grade, error log, what to fix tonight.
+
+START DAY 4 ASSESSMENT NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 4 → assessment begins immediately.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Fix Mistakes + Prep for Day 5 (Excel)</div>
+  <table>
+    <thead><tr><th>Action</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Re-run every question you dropped points on — from memory</td><td>The mistake you made today is the mistake you'll make in the real interview unless you fix it tonight</td></tr>
+      <tr><td>Write ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW 5 times</td><td>This clause is forgotten under pressure — make it automatic</td></tr>
+      <tr><td>Export sales data as sales.csv for tomorrow</td><td>Day 5 Excel loads this same data — continuity reinforces learning</td></tr>
+      <tr><td>Think about: "What is XLOOKUP vs VLOOKUP?"</td><td>Day 5 opens with this — most common Excel interview question</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–3 ✅  | 
+  <strong style="color:#b45309">Day 4 🟡 TODAY (Assessment)</strong>  | 
+  Day 5 · 6 · 7 · 8 · 9 · 10 · 11 · 12 · 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

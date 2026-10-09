@@ -1,0 +1,772 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 7 — EDA + GroupBy + Business Insights · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#0c4a6e;color:#bae6fd}
+.b2{background:#14532d;color:#bbf7d0}
+.b3{background:#4c1d95;color:#ddd6fe}
+.b4{background:#7f1d1d;color:#fecaca}
+.b5{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#0c4a6e;border-bottom:2px solid #0c4a6e;padding-bottom:4px;margin-bottom:14px}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.dark{color:#1f2328;border-color:#1f2328}
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+.card.warn{background:#fffbeb;border-color:#fde68a}
+.card.success{background:#f0fdf4;border-color:#86efac}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.st{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.blue{color:#0c4a6e}
+.cheat-cell h4.green{color:#166634}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+.qa{border-left:3px solid #0c4a6e;padding:10px 14px;background:#f0f9ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#0c4a6e}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#0369a1}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}.qa.green .q{color:#14532d}.qa.green .a strong{color:#1a7f4b}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}.qa.purple .q{color:#4c1d95}.qa.purple .a strong{color:#7c5cd8}
+.qa.red{border-color:#b91c1c;background:#fff5f5}.qa.red .q{color:#7f1d1d}.qa.red .a strong{color:#b91c1c}
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166634;border:2px solid #86efac}
+.today{background:#e0f2fe;color:#0c4a6e;border:2px dotted #0ea5e9}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+.insight-box{background:#0c4a6e;color:#e0f2fe;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.insight-box h3{font-size:13px;font-weight:700;color:#7dd3fc;margin-bottom:10px}
+.insight-box .ins{font-size:13px;margin-bottom:6px;border-left:3px solid #38bdf8;padding-left:10px}
+.insight-box .act{font-size:11px;color:#7dd3fc;margin-top:3px}
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>🔬 Day 7 — Data Cleaning · EDA · GroupBy · Insights</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 3.5 Hours</p>
+  <div class="badge-row">
+    <span class="badge b1">Data Cleaning · Missing Values</span>
+    <span class="badge b2">EDA — Exploratory Analysis</span>
+    <span class="badge b3">GroupBy + agg()</span>
+    <span class="badge b4">Business Insights — 3 Per Output</span>
+    <span class="badge b5">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div><div class="day-dot done">2</div><div class="day-dot done">3</div>
+    <div class="day-dot done">4</div><div class="day-dot done">5</div><div class="day-dot done">6</div>
+    <div class="day-dot today">7</div>
+    <div class="day-dot future">8</div><div class="day-dot future">9</div><div class="day-dot future">10</div>
+    <div class="day-dot future">11</div><div class="day-dot future">12</div><div class="day-dot future">13</div>
+    <div class="day-dot future">14</div><div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–6 complete · 🔵 Today: Day 7 EDA · ⬜ Days 8–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎯 Why EDA is the Most Important Analyst Skill at Persistent</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">What Persistent Actually Tests in EDA Rounds</h3>
+    <table>
+      <thead><tr><th>What They Ask</th><th>What They Want</th><th>Wrong Answer</th></tr></thead>
+      <tbody>
+        <tr><td>"Walk me through your EDA process"</td><td>Structured 5-step: Load → Audit → Clean → Explore → Insight</td><td>"I look at the data and find patterns"</td></tr>
+        <tr><td>"How do you handle missing values?"</td><td>Depends on context — fill with 0, mean, median, or drop</td><td>"I always drop NaN rows"</td></tr>
+        <tr><td>"What is groupby().agg()?"</td><td>Multiple aggregations in one call — more efficient than chaining</td><td>"It's the same as groupby().sum()"</td></tr>
+        <tr><td>"Give me 3 business insights from this data"</td><td>3 specific, quantified, actionable insights</td><td>Describing what the data shows without action</td></tr>
+        <tr><td>"What's the difference between transform() and agg()?"</td><td>agg() collapses rows · transform() keeps all rows (like SQL PARTITION BY)</td><td>Can't explain the difference</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 7 Agenda — 3.5 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Topic</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:20</td><td>Theory Blitz</td><td>EDA steps · cleaning strategies · agg() vs transform()</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:20–0:50</td><td>Q&amp;A Round (5 Qs)</td><td>EDA interview questions — graded</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:50–1:30</td><td>Task 1 — Data Cleaning</td><td>Missing values · duplicates · type fixing · outlier removal</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>1:30–2:10</td><td>Task 2 — GroupBy + agg()</td><td>Multi-aggregate · named agg · reset_index · pivot_table</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:10–2:50</td><td>Task 3 — EDA Deep Dive</td><td>Distributions · correlations · transform() · nlargest</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:50–3:20</td><td>Task 4 — Business Insights</td><td>Full analyst narrative — 5 insights from the dataset</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>3:20–3:30</td><td>Debrief</td><td>Score card · mistakes → fixes · Day 8 prep</td><td><span class="tag easy">Review</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎓 Theory Q&amp;A — 5 Interview Questions</div>
+
+  <div class="qa">
+    <div class="q">Q1. What are your 5 steps when you receive a new dataset for EDA?</div>
+    <div class="a"><strong>Hired answer:</strong>
+    (1) <strong>Load + Validate</strong> — read_csv, check shape, assert totals match expected values.<br />
+    (2) <strong>Schema Audit</strong> — df.info(), dtypes, fix dates and numerics to correct types.<br />
+    (3) <strong>Missing Value Audit</strong> — isnull().sum(), decide: fill with 0/mean/median, or drop.<br />
+    (4) <strong>Distribution + Outlier Check</strong> — describe(), value_counts(), Z-score or IQR outlier detection.<br />
+    (5) <strong>Business Insight Generation</strong> — groupby aggregations, correlations, top-N, % contributions. Always end with 3 actionable insights — not just numbers.<br />
+    <strong>BFSI context:</strong> For a loan portfolio CSV, step 3 is critical — a NULL in EMI amount or loan_amount is a data quality red flag, not just a code issue.</div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q2. What is the difference between groupby().agg() and groupby().transform()? When do you use each?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>agg()</strong> collapses the DataFrame — you get one row per group with the aggregated value. Like SQL GROUP BY. <strong>transform()</strong> keeps ALL original rows but fills each row with the group's aggregate value — like SQL window function (SUM() OVER (PARTITION BY)). Use <strong>agg()</strong> when you need a summary table. Use <strong>transform()</strong> when you need to add a group-level metric back to each row — e.g., adding "team_total_revenue" alongside each rep's individual sale row for % contribution calculations.</div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">Q3. You have a column with 15% missing values. What factors determine whether you fill or drop?</div>
+    <div class="a"><strong>Hired answer:</strong> Four factors: (1) <strong>% missing</strong> — &lt;5% = safe to fill; &gt;30% = question the data source. (2) <strong>Type of column</strong> — if it's the target variable (e.g., loan_amount), dropping is safer than imputing; for a demographic field, mean/mode fill is acceptable. (3) <strong>Business context</strong> — in BFSI, NULL in revenue means no transaction, so fillna(0) is correct. NULL in credit_score means unknown risk — filling with mean could mask high-risk customers. (4) <strong>Downstream use</strong> — if the column feeds a model, imputation strategy affects model bias. Always document which strategy you used and why.</div>
+  </div>
+
+  <div class="qa red">
+    <div class="q">Q4. What is the IQR method for outlier detection? How is it different from Z-score?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>IQR (Interquartile Range)</strong> = Q3 − Q1. Outlier bounds: lower = Q1 − 1.5×IQR, upper = Q3 + 1.5×IQR. Any value outside these bounds is flagged. <strong>Z-score</strong> = (value − mean) / std — values with |Z| &gt; 2 or 3 are flagged. <strong>Key difference:</strong> IQR is robust to outliers themselves — it uses medians, not means, so extreme values don't skew the detection threshold. Z-score uses mean and std which are both pulled by extreme values, making it less reliable when data is heavily skewed. <strong>BFSI rule:</strong> for revenue data (often right-skewed), prefer IQR. For normally distributed data like credit scores, Z-score is fine.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5. What does reset_index() do after groupby? What happens if you forget it?</div>
+    <div class="a"><strong>Hired answer:</strong> After <code>groupby().agg()</code>, the groupby column becomes the index — not a regular column. If you forget <code>reset_index()</code>: (1) you can't reference the groupby column in subsequent operations like merges or filters by column name; (2) chaining another operation like sort_values on that column fails or behaves unexpectedly; (3) when you print the result, the column appears as an index row, confusing stakeholders. <strong>Rule:</strong> always chain <code>.reset_index()</code> immediately after any groupby unless you explicitly need the index form. It converts the index back into a regular column, making the DataFrame behave like a normal table.</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">Task 1 — Data Cleaning (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: You receive a "dirty" version of sales data. Clean it completely before any analysis — types, nulls, duplicates, outliers.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Cell 1 — Simulate Dirty Data + Clean It</h3>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Load clean data (from Day 6) ─────────────────────────────────</span>
+sales = pd.read_csv(<span class="st">'sales.csv'</span>)
+reps  = pd.read_csv(<span class="st">'reps.csv'</span>)
+
+<span class="cm"># ── Simulate dirty data (as you'd get from a client) ────────────</span>
+dirty = sales.copy()
+dirty.loc[<span class="num">0</span>, <span class="st">'revenue'</span>]   = np.nan          <span class="cm"># missing revenue</span>
+dirty.loc[<span class="num">2</span>, <span class="st">'sale_date'</span>] = <span class="st">'bad-date'</span>       <span class="cm"># corrupt date</span>
+dirty.loc[<span class="num">4</span>, <span class="st">'rep_name'</span>]  = <span class="st">'  alice  '</span>      <span class="cm"># whitespace</span>
+dirty = pd.concat([dirty, dirty.iloc[<span class="num">0</span>:<span class="num">1</span>]])    <span class="cm"># duplicate row</span>
+dirty[<span class="st">'revenue'</span>] = dirty[<span class="st">'revenue'</span>].astype(<span class="st">'object'</span>)  <span class="cm"># wrong type</span>
+
+<span class="fn">print</span>(<span class="st">"Dirty shape:"</span>, dirty.shape)   <span class="cm"># (7, 6) — extra duplicate</span>
+<span class="fn">print</span>(dirty.isnull().<span class="fn">sum</span>())         <span class="cm"># revenue: 1 null</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Cell 2 — Full Cleaning Pipeline (Run in Sequence)</h3>
+    <pre>df = dirty.copy()
+
+<span class="cm"># ── STEP 1: Fix column types ──────────────────────────────────────</span>
+df[<span class="st">'revenue'</span>]   = pd.to_numeric(df[<span class="st">'revenue'</span>], errors=<span class="st">'coerce'</span>)
+<span class="cm"># errors='coerce' → non-numeric → NaN (not ValueError)</span>
+df[<span class="st">'sale_date'</span>] = pd.to_datetime(df[<span class="st">'sale_date'</span>], errors=<span class="st">'coerce'</span>)
+<span class="fn">print</span>(<span class="st">"After type fix:"</span>)
+<span class="fn">print</span>(df.dtypes)
+
+<span class="cm"># ── STEP 2: Strip whitespace from string columns ──────────────────</span>
+str_cols = [<span class="st">'region'</span>, <span class="st">'product'</span>, <span class="st">'rep_name'</span>]
+<span class="kw">for</span> col <span class="kw">in</span> str_cols:
+    df[col] = df[col].str.<span class="fn">strip</span>().str.<span class="fn">title</span>()
+<span class="cm"># '  alice  ' → 'Alice' ✅</span>
+
+<span class="cm"># ── STEP 3: Handle missing values ────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\nNulls before fill:"</span>)
+<span class="fn">print</span>(df.isnull().<span class="fn">sum</span>())
+
+<span class="cm"># Rows with NULL sale_date = corrupt → drop</span>
+df = df.dropna(subset=[<span class="st">'sale_date'</span>])
+
+<span class="cm"># NULL revenue = no transaction → fill 0</span>
+df[<span class="st">'revenue'</span>] = df[<span class="st">'revenue'</span>].fillna(<span class="num">0</span>)
+
+<span class="fn">print</span>(<span class="st">"\nNulls after fix:"</span>)
+<span class="fn">print</span>(df.isnull().<span class="fn">sum</span>())  <span class="cm"># all zeros</span>
+
+<span class="cm"># ── STEP 4: Remove duplicates ─────────────────────────────────────</span>
+before = <span class="fn">len</span>(df)
+df = df.drop_duplicates()
+<span class="fn">print</span>(<span class="st">f"\nDuplicates removed: {before - len(df)}"</span>)  <span class="cm"># 1</span>
+df = df.reset_index(drop=<span class="kw">True</span>)
+
+<span class="cm"># ── STEP 5: Outlier detection (IQR method) ───────────────────────</span>
+Q1 = df[<span class="st">'revenue'</span>].quantile(<span class="num">0.25</span>)
+Q3 = df[<span class="st">'revenue'</span>].quantile(<span class="num">0.75</span>)
+IQR = Q3 - Q1
+lower = Q1 - <span class="num">1.5</span> * IQR
+upper = Q3 + <span class="num">1.5</span> * IQR
+outliers = df[(df[<span class="st">'revenue'</span>] &lt; lower) | (df[<span class="st">'revenue'</span>] &gt; upper)]
+<span class="fn">print</span>(<span class="st">f"\nIQR bounds: ₹{lower:,.0f} – ₹{upper:,.0f}"</span>)
+<span class="fn">print</span>(<span class="st">f"Outliers found: {len(outliers)}"</span>)  <span class="cm"># 0 for this dataset</span>
+
+<span class="cm"># ── STEP 6: Final validation ──────────────────────────────────────</span>
+<span class="kw">assert</span> df.shape == (<span class="num">5</span>, <span class="num">6</span>), <span class="st">f"Expected 5 rows after cleaning, got {df.shape}"</span>
+<span class="kw">assert</span> df.isnull().<span class="fn">sum</span>().<span class="fn">sum</span>() == <span class="num">0</span>, <span class="st">"Nulls remain after cleaning!"</span>
+<span class="fn">print</span>(<span class="st">"\n✅ Data cleaning complete. Clean shape:"</span>, df.shape)</pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 2 — GroupBy + agg() (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Produce multi-aggregate summaries by region and product. Use named agg(). Build a pivot table. Add % contribution column.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Cell 3 — groupby().agg() — Multiple Aggregates in One Call</h3>
+    <pre><span class="cm"># ── Reload clean data for this task ──────────────────────────────</span>
+sales = pd.read_csv(<span class="st">'sales.csv'</span>)
+sales[<span class="st">'sale_date'</span>] = pd.to_datetime(sales[<span class="st">'sale_date'</span>])
+
+<span class="cm"># ── agg() with named outputs (pandas ≥0.25) ──────────────────────</span>
+region_summary = sales.groupby(<span class="st">'region'</span>).agg(
+    total_revenue  = (<span class="st">'revenue'</span>, <span class="st">'sum'</span>),
+    avg_revenue    = (<span class="st">'revenue'</span>, <span class="st">'mean'</span>),
+    max_revenue    = (<span class="st">'revenue'</span>, <span class="st">'max'</span>),
+    num_deals      = (<span class="st">'sale_id'</span>, <span class="st">'count'</span>),
+    latest_sale    = (<span class="st">'sale_date'</span>, <span class="st">'max'</span>)
+).reset_index()
+
+region_summary[<span class="st">'avg_revenue'</span>] = region_summary[<span class="st">'avg_revenue'</span>].<span class="fn">round</span>(<span class="num">0</span>)
+region_summary[<span class="st">'pct_of_total'</span>] = (
+    region_summary[<span class="st">'total_revenue'</span>]
+    / region_summary[<span class="st">'total_revenue'</span>].<span class="fn">sum</span>() * <span class="num">100</span>
+).<span class="fn">round</span>(<span class="num">1</span>)
+
+<span class="fn">print</span>(region_summary.sort_values(<span class="st">'total_revenue'</span>, ascending=<span class="kw">False</span>)
+                     .to_string(index=<span class="kw">False</span>))
+
+<span class="cm"># ── Product summary ──────────────────────────────────────────────</span>
+product_summary = sales.groupby(<span class="st">'product'</span>).agg(
+    total_revenue  = (<span class="st">'revenue'</span>, <span class="st">'sum'</span>),
+    avg_deal_size  = (<span class="st">'revenue'</span>, <span class="st">'mean'</span>),
+    num_deals      = (<span class="st">'sale_id'</span>, <span class="st">'count'</span>),
+    std_revenue    = (<span class="st">'revenue'</span>, <span class="st">'std'</span>)
+).reset_index()
+
+product_summary[<span class="st">'cv'</span>] = (
+    product_summary[<span class="st">'std_revenue'</span>] /
+    product_summary[<span class="st">'avg_deal_size'</span>]
+).<span class="fn">round</span>(<span class="num">3</span>)
+<span class="cm"># CV = coefficient of variation: lower = more consistent revenue</span>
+<span class="fn">print</span>(<span class="st">"\nProduct Summary:"</span>)
+<span class="fn">print</span>(product_summary.sort_values(<span class="st">'total_revenue'</span>, ascending=<span class="kw">False</span>)
+                      .to_string(index=<span class="kw">False</span>))</pre>
+  </div>
+
+  <div class="card">
+    <h3>Cell 4 — pivot_table() and transform()</h3>
+    <pre><span class="cm"># ── pivot_table: revenue by region AND product ───────────────────</span>
+pivot = sales.pivot_table(
+    values  = <span class="st">'revenue'</span>,
+    index   = <span class="st">'region'</span>,
+    columns = <span class="st">'product'</span>,
+    aggfunc = <span class="st">'sum'</span>,
+    fill_value = <span class="num">0</span>           <span class="cm"># fills NaN with 0 (no sale in that combo)</span>
+)
+<span class="fn">print</span>(<span class="st">"Revenue Pivot (Region × Product):"</span>)
+<span class="fn">print</span>(pivot)
+
+<span class="cm"># ── transform(): add group total to every row ────────────────────</span>
+<span class="cm"># Like SQL: SUM(revenue) OVER (PARTITION BY region)</span>
+sales[<span class="st">'region_total'</span>] = sales.groupby(<span class="st">'region'</span>)[<span class="st">'revenue'</span>]\
+                              .transform(<span class="st">'sum'</span>)
+sales[<span class="st">'pct_of_region'</span>] = (
+    sales[<span class="st">'revenue'</span>] / sales[<span class="st">'region_total'</span>] * <span class="num">100</span>
+).<span class="fn">round</span>(<span class="num">1</span>)
+
+<span class="fn">print</span>(<span class="st">"\nSales with region total + % share:"</span>)
+<span class="fn">print</span>(sales[[<span class="st">'rep_name'</span>,<span class="st">'region'</span>,<span class="st">'revenue'</span>,
+             <span class="st">'region_total'</span>,<span class="st">'pct_of_region'</span>]]
+      .to_string(index=<span class="kw">False</span>))
+<span class="cm"># transform keeps all 6 rows — each shows its region's total alongside individual revenue</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 3 — EDA Deep Dive (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Run a full EDA on the merged rep scorecard. Find distribution patterns, revenue concentration, team comparison, and monthly trend.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Cell 5 — Full EDA Pipeline</h3>
+    <pre><span class="cm"># ── Build full merged dataset ─────────────────────────────────────</span>
+rep_agg = sales.groupby(<span class="st">'rep_name'</span>).agg(
+    actual_revenue = (<span class="st">'revenue'</span>, <span class="st">'sum'</span>),
+    num_deals      = (<span class="st">'sale_id'</span>, <span class="st">'count'</span>),
+    avg_deal       = (<span class="st">'revenue'</span>, <span class="st">'mean'</span>),
+    last_sale      = (<span class="st">'sale_date'</span>, <span class="st">'max'</span>)
+).reset_index()
+
+full = reps.merge(rep_agg, on=<span class="st">'rep_name'</span>, how=<span class="st">'left'</span>)
+full[<span class="st">'actual_revenue'</span>] = full[<span class="st">'actual_revenue'</span>].fillna(<span class="num">0</span>)
+full[<span class="st">'num_deals'</span>]      = full[<span class="st">'num_deals'</span>].fillna(<span class="num">0</span>).astype(int)
+full[<span class="st">'pct_target'</span>]    = (full[<span class="st">'actual_revenue'</span>] / full[<span class="st">'target'</span>] * <span class="num">100</span>).<span class="fn">round</span>(<span class="num">1</span>)
+
+<span class="cm"># ── EDA 1: Revenue distribution stats ────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"── Revenue Distribution ──"</span>)
+<span class="fn">print</span>(full[<span class="st">'actual_revenue'</span>].describe().<span class="fn">round</span>(<span class="num">0</span>))
+
+<span class="cm"># ── EDA 2: Revenue concentration (Pareto) ────────────────────────</span>
+full_sorted = full.sort_values(<span class="st">'actual_revenue'</span>, ascending=<span class="kw">False</span>)
+total_rev = full[<span class="st">'actual_revenue'</span>].<span class="fn">sum</span>()
+top1_pct  = full_sorted.iloc[<span class="num">0</span>][<span class="st">'actual_revenue'</span>] / total_rev * <span class="num">100</span>
+top2_pct  = full_sorted.head(<span class="num">2</span>)[<span class="st">'actual_revenue'</span>].<span class="fn">sum</span>() / total_rev * <span class="num">100</span>
+<span class="fn">print</span>(<span class="st">f"\nTop 1 rep: {top1_pct:.1f}% of total revenue"</span>)   <span class="cm"># Alice: 42.2%</span>
+<span class="fn">print</span>(<span class="st">f"Top 2 reps: {top2_pct:.1f}% of total revenue"</span>)  <span class="cm"># Alice+Bob: 71.6%</span>
+
+<span class="cm"># ── EDA 3: Team comparison ────────────────────────────────────────</span>
+team_summary = full.groupby(<span class="st">'team'</span>).agg(
+    team_revenue  = (<span class="st">'actual_revenue'</span>, <span class="st">'sum'</span>),
+    avg_pct_target= (<span class="st">'pct_target'</span>, <span class="st">'mean'</span>),
+    headcount     = (<span class="st">'rep_name'</span>, <span class="st">'count'</span>)
+).reset_index()
+<span class="fn">print</span>(<span class="st">"\n── Team Comparison ──"</span>)
+<span class="fn">print</span>(team_summary.to_string(index=<span class="kw">False</span>))
+
+<span class="cm"># ── EDA 4: Monthly revenue trend ─────────────────────────────────</span>
+sales[<span class="st">'month'</span>] = sales[<span class="st">'sale_date'</span>].dt.to_period(<span class="st">'M'</span>)
+monthly = sales.groupby(<span class="st">'month'</span>)[<span class="st">'revenue'</span>].agg([<span class="st">'sum'</span>,<span class="st">'count'</span>]).reset_index()
+monthly.columns = [<span class="st">'month'</span>,<span class="st">'revenue'</span>,<span class="st">'deals'</span>]
+monthly[<span class="st">'mom_change'</span>] = monthly[<span class="st">'revenue'</span>].pct_change().<span class="fn">round</span>(<span class="num">3</span>) * <span class="num">100</span>
+<span class="fn">print</span>(<span class="st">"\n── Monthly Trend ──"</span>)
+<span class="fn">print</span>(monthly.to_string(index=<span class="kw">False</span>))
+
+<span class="cm"># ── EDA 5: nlargest / nsmallest ──────────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\n── Top 3 Deals ──"</span>)
+<span class="fn">print</span>(sales.nlargest(<span class="num">3</span>, <span class="st">'revenue'</span>)[[<span class="st">'rep_name'</span>,<span class="st">'product'</span>,<span class="st">'revenue'</span>,<span class="st">'region'</span>]]
+          .to_string(index=<span class="kw">False</span>))
+<span class="fn">print</span>(<span class="st">"\n── Bottom 2 Deals ──"</span>)
+<span class="fn">print</span>(sales.nsmallest(<span class="num">2</span>, <span class="st">'revenue'</span>)[[<span class="st">'rep_name'</span>,<span class="st">'product'</span>,<span class="st">'revenue'</span>]]
+          .to_string(index=<span class="kw">False</span>))</pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 4 — Business Insights Narrative (30 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 The most important task of Day 7. Every number must have an action. Write 5 insights that a Regional Head can act on immediately.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Cell 6 — Full Business Insight Generator</h3>
+    <pre><span class="fn">print</span>(<span class="st">"""
+╔══════════════════════════════════════════════════════════════╗
+║     PERSISTENCE ANALYTICS — H1 2026 REP PERFORMANCE REPORT  ║
+╚══════════════════════════════════════════════════════════════╝
+"""</span>)
+
+total    = full[<span class="st">'actual_revenue'</span>].<span class="fn">sum</span>()
+alice    = full[full[<span class="st">'rep_name'</span>]==<span class="st">'Alice'</span>][<span class="st">'actual_revenue'</span>].values[<span class="num">0</span>]
+under    = full[full[<span class="st">'pct_target'</span>] &lt; <span class="num">80</span>]
+on_track = full[full[<span class="st">'pct_target'</span>] &gt;= <span class="num">100</span>]
+
+<span class="fn">print</span>(<span class="st">f"""
+── INSIGHT 1: Revenue Concentration Risk (KEY-PERSON RISK) ──────
+  Alice drives ₹{alice:,.0f} = {alice/total*100:.1f}% of total ₹{total:,.0f} revenue.
+  Top 2 reps (Alice + Bob) = {full.nlargest(2,'actual_revenue')['actual_revenue'].sum()/total*100:.1f}%.
+  ⚠ ACTION: If Alice leaves, H1 revenue drops by 42%. Cross-train
+    Carol for the North Loan product immediately.
+
+── INSIGHT 2: Team Health — 3/5 Reps Underperforming ────────────
+  Underperforming (&lt;80% target): {', '.join(under['rep_name'].tolist())}
+  On Track (≥100%): {', '.join(on_track['rep_name'].tolist())}
+  ⚠ ACTION: Weekly 1:1 check-ins + incentive review for {', '.join(under['rep_name'].tolist())}.
+    Eve (0%) requires urgent HR escalation — onboarding failure.
+
+── INSIGHT 3: Product Mix — Loan Concentration ──────────────────
+  Loan revenue: ₹{sales[sales['product']=='Loan']['revenue'].sum():,.0f} = {sales[sales['product']=='Loan']['revenue'].sum()/total*100:.1f}% of total.
+  Insurance:    ₹{sales[sales['product']=='Insurance']['revenue'].sum():,.0f} = {sales[sales['product']=='Insurance']['revenue'].sum()/total*100:.1f}%
+  Deposit:      ₹{sales[sales['product']=='Deposit']['revenue'].sum():,.0f} = {sales[sales['product']=='Deposit']['revenue'].sum()/total*100:.1f}%
+  ⚠ ACTION: Loan dominance = credit risk. Push Insurance target +20%
+    in Q3 to diversify product mix.
+
+── INSIGHT 4: Monthly Volatility ────────────────────────────────
+  Revenue swings: {monthly['revenue'].min():,.0f} to {monthly['revenue'].max():,.0f} across 6 months.
+  Std deviation of monthly revenue: ₹{monthly['revenue'].std():,.0f}
+  ⚠ ACTION: No sustained growth trend. Implement monthly deal
+    pipeline tracking to reduce forecast variance.
+
+── INSIGHT 5: Geographic Opportunity ───────────────────────────
+  North = ₹{sales[sales['region']=='North']['revenue'].sum():,.0f} (best) · West = ₹{sales[sales['region']=='West']['revenue'].sum():,.0f} (weakest).
+  West has only 1 deal — Deposit product only.
+  ⚠ ACTION: Assign a second rep to West region for Loan outreach.
+    West potential = match South at ₹{sales[sales['region']=='South']['revenue'].sum():,.0f} with proper coverage.
+"""</span>)</pre>
+  </div>
+
+  <div class="insight-box">
+    <h3>✅ Expected Output — 5 Business Insights</h3>
+    <div class="ins">
+      <strong>Insight 1 — Key-Person Risk:</strong> Alice = 42.2% of ₹5,45,000 total. Top 2 reps = 71.6%.
+      <div class="act">Action: Cross-train Carol for North Loan product immediately.</div>
+    </div>
+    <div class="ins">
+      <strong>Insight 2 — Team Health:</strong> 3/5 reps underperforming (&lt;80% target). Eve = 0% — onboarding failure.
+      <div class="act">Action: Weekly 1:1 for Carol/Dave/Eve. HR escalation for Eve.</div>
+    </div>
+    <div class="ins">
+      <strong>Insight 3 — Product Mix:</strong> Loan = 53.2% of revenue — credit risk concentration.
+      <div class="act">Action: Push Insurance target +20% in Q3.</div>
+    </div>
+    <div class="ins">
+      <strong>Insight 4 — Monthly Volatility:</strong> Revenue swings ₹60K–₹120K with no sustained growth trend.
+      <div class="act">Action: Monthly pipeline tracking to reduce forecast variance.</div>
+    </div>
+    <div class="ins">
+      <strong>Insight 5 — Geographic Gap:</strong> West = ₹60K (1 deal only). North = ₹2,30,000 (best).
+      <div class="act">Action: Second rep for West region — Loan product coverage gap.</div>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Day 7 Flowchart — EDA Pipeline Decision Tree</div>
+  <div class="flow-wrap">
+    <svg width="700" height="580" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 7 — Full EDA Pipeline Decision Tree</text>
+
+      
+      <rect x="210" y="34" width="280" height="36" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#e6edf3" font-weight="700">New Dataset Received</text>
+      <text x="350" y="63" text-anchor="middle" fill="#8b949e" font-size="11">Client CSV · SQL export · merged DataFrame</text>
+      <line x1="350" y1="70" x2="350" y2="90" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="120" y="90" width="460" height="40" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="350" y="107" text-anchor="middle" fill="#1e3a8a" font-weight="700">STEP 1: Load + Validate</text>
+      <text x="350" y="121" text-anchor="middle" fill="#1e40af" font-size="11">read_csv · shape · assert totals · dtypes · to_datetime</text>
+      <line x1="350" y1="130" x2="350" y2="150" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="120" y="150" width="460" height="40" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="350" y="167" text-anchor="middle" fill="#4c1d95" font-weight="700">STEP 2: Schema + Null Audit</text>
+      <text x="350" y="181" text-anchor="middle" fill="#5b21b6" font-size="11">info() · isnull().sum() · value_counts() · describe()</text>
+      <line x1="350" y1="190" x2="350" y2="210" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,210 460,238 350,266 240,238" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="233" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Issues found?</text>
+      <text x="350" y="247" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Nulls · Dupes · Types</text>
+      <text x="192" y="235" text-anchor="middle" fill="#57606a" font-size="10">NO — proceed</text>
+      <text x="508" y="235" text-anchor="middle" fill="#57606a" font-size="10">YES — clean</text>
+
+      
+      <line x1="460" y1="238" x2="555" y2="238" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="555" y="214" width="133" height="48" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="621" y="231" text-anchor="middle" fill="#7f1d1d" font-weight="700">STEP 3: Clean</text>
+      <text x="621" y="244" text-anchor="middle" fill="#991b1b" font-size="10">to_numeric(errors='coerce')</text>
+      <text x="621" y="255" text-anchor="middle" fill="#991b1b" font-size="10">fillna · drop_dupes · strip()</text>
+      <line x1="621" y1="262" x2="621" y2="295" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="621" y1="295" x2="470" y2="295" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+      <line x1="350" y1="266" x2="350" y2="295" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="120" y="295" width="460" height="52" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="350" y="313" text-anchor="middle" fill="#14532d" font-weight="700" font-size="13">STEP 4: GroupBy + agg()</text>
+      <text x="220" y="329" text-anchor="middle" fill="#166634" font-size="11">agg() → summary table</text>
+      <text x="350" y="329" text-anchor="middle" fill="#166634" font-size="11">transform() → add to rows</text>
+      <text x="480" y="329" text-anchor="middle" fill="#166634" font-size="11">pivot_table() → matrix</text>
+      <text x="350" y="340" text-anchor="middle" fill="#166634" font-size="10">Always reset_index() after agg()</text>
+      <line x1="350" y1="347" x2="350" y2="367" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="120" y="367" width="460" height="52" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="385" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="13">STEP 5: EDA Exploration</text>
+      <text x="175" y="401" text-anchor="middle" fill="#b45309" font-size="11">Distribution</text>
+      <text x="285" y="401" text-anchor="middle" fill="#b45309" font-size="11">Outlier (IQR/Z)</text>
+      <text x="398" y="401" text-anchor="middle" fill="#b45309" font-size="11">Concentration</text>
+      <text x="508" y="401" text-anchor="middle" fill="#b45309" font-size="11">Monthly Trend</text>
+      <text x="350" y="413" text-anchor="middle" fill="#b45309" font-size="10">nlargest · pct_change · corr · value_counts</text>
+      <line x1="350" y1="419" x2="350" y2="439" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="120" y="439" width="460" height="52" rx="7" fill="#0c4a6e" stroke="#0ea5e9"></rect>
+      <text x="350" y="457" text-anchor="middle" fill="#e0f2fe" font-weight="700" font-size="13">STEP 6: Business Insights (3 Minimum)</text>
+      <text x="350" y="471" text-anchor="middle" fill="#7dd3fc" font-size="11">Each insight = Metric + Context + Action + Timeline</text>
+      <text x="350" y="483" text-anchor="middle" fill="#7dd3fc" font-size="10">"Alice = 42% revenue. Key-person risk. Cross-train Carol by Q3."</text>
+      <line x1="350" y1="491" x2="350" y2="511" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="190" y="511" width="320" height="32" rx="8" fill="#22c55e"></rect>
+      <text x="350" y="533" text-anchor="middle" fill="#fff" font-weight="800">✅ Analyst Report Delivered</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 7 Cheat Sheet — EDA + GroupBy + Insights</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="blue">🧹 Data Cleaning Patterns</h4>
+      <pre><span class="cm"># Fix types (coerce = NaN not error)</span>
+df[<span class="st">'revenue'</span>] = pd.to_numeric(
+    df[<span class="st">'revenue'</span>], errors=<span class="st">'coerce'</span>)
+df[<span class="st">'date'</span>] = pd.to_datetime(
+    df[<span class="st">'date'</span>], errors=<span class="st">'coerce'</span>)
+
+<span class="cm"># Strip + title case</span>
+df[<span class="st">'rep'</span>] = df[<span class="st">'rep'</span>].str.<span class="fn">strip</span>()\
+                             .str.<span class="fn">title</span>()
+
+<span class="cm"># Handle nulls</span>
+df[<span class="st">'rev'</span>].fillna(<span class="num">0</span>)         <span class="cm"># fill num</span>
+df.dropna(subset=[<span class="st">'date'</span>])  <span class="cm"># drop bad dates</span>
+df[<span class="st">'cat'</span>].fillna(<span class="st">'Unknown'</span>) <span class="cm"># fill cat</span>
+
+<span class="cm"># Duplicates</span>
+df.drop_duplicates()
+df.reset_index(drop=<span class="kw">True</span>)
+
+<span class="cm"># IQR outlier bounds</span>
+Q1, Q3 = df[<span class="st">'rev'</span>].quantile([<span class="num">.25</span>,<span class="num">.75</span>])
+IQR = Q3 - Q1
+lower = Q1 - <span class="num">1.5</span>*IQR
+upper = Q3 + <span class="num">1.5</span>*IQR</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">📊 GroupBy + agg() Patterns</h4>
+      <pre><span class="cm"># Named agg (pandas ≥0.25)</span>
+df.groupby(<span class="st">'region'</span>).agg(
+    total = (<span class="st">'revenue'</span>, <span class="st">'sum'</span>),
+    avg   = (<span class="st">'revenue'</span>, <span class="st">'mean'</span>),
+    count = (<span class="st">'sale_id'</span>, <span class="st">'count'</span>)
+).reset_index()      <span class="cm"># ← always!</span>
+
+<span class="cm"># transform (keeps all rows)</span>
+<span class="cm"># = SQL SUM() OVER(PARTITION BY)</span>
+df[<span class="st">'grp_total'</span>] = df\
+    .groupby(<span class="st">'region'</span>)[<span class="st">'revenue'</span>]\
+    .transform(<span class="st">'sum'</span>)
+
+<span class="cm"># pivot_table</span>
+df.pivot_table(
+    values=<span class="st">'revenue'</span>,
+    index=<span class="st">'region'</span>,
+    columns=<span class="st">'product'</span>,
+    aggfunc=<span class="st">'sum'</span>,
+    fill_value=<span class="num">0</span>)
+
+<span class="cm"># pct_change for trend</span>
+df[<span class="st">'mom'</span>] = df[<span class="st">'rev'</span>].pct_change()*<span class="num">100</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">🔬 EDA Toolkit</h4>
+      <pre><span class="cm"># Distribution</span>
+df[<span class="st">'rev'</span>].describe()
+df[<span class="st">'rev'</span>].<span class="fn">mean</span>()
+df[<span class="st">'rev'</span>].median()
+df[<span class="st">'rev'</span>].std()
+
+<span class="cm"># Outliers</span>
+z = (df[<span class="st">'rev'</span>]-df[<span class="st">'rev'</span>].<span class="fn">mean</span>())\
+    /df[<span class="st">'rev'</span>].std()
+outliers = df[z.abs()&gt;<span class="num">2</span>]
+
+<span class="cm"># Top / Bottom N</span>
+df.nlargest(<span class="num">3</span>, <span class="st">'revenue'</span>)
+df.nsmallest(<span class="num">2</span>, <span class="st">'revenue'</span>)
+
+<span class="cm"># Concentration</span>
+top = df.nlargest(<span class="num">2</span>,<span class="st">'rev'</span>)[<span class="st">'rev'</span>].<span class="fn">sum</span>()
+pct = top/df[<span class="st">'rev'</span>].<span class="fn">sum</span>()*<span class="num">100</span>
+
+<span class="cm"># Monthly period</span>
+df[<span class="st">'month'</span>] = df[<span class="st">'date'</span>]\
+    .dt.to_period(<span class="st">'M'</span>)
+
+<span class="cm"># Coefficient of variation</span>
+cv = df[<span class="st">'rev'</span>].std()/df[<span class="st">'rev'</span>].<span class="fn">mean</span>()</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="red">💡 Insight Formula + Traps</h4>
+      <pre><span class="cm"># Insight Formula:
+# METRIC + CONTEXT + ACTION + WHEN</span>
+<span class="st">"""
+Alice = 42% of revenue.    ← metric
+Key-person risk.           ← context
+Cross-train Carol for      ← action
+North Loan by Q3.          ← when
+"""</span>
+
+<span class="cm"># Common traps</span>
+<span class="cm"># 1. forget reset_index() after agg</span>
+<span class="cm"># 2. transform vs agg confusion</span>
+<span class="cm">   <span class="cm"># agg   → N rows (summary)</span>
+<span class="cm">   # transform → all rows</span>
+<span class="cm"># 3. pct_change() on unsorted data</span>
+<span class="cm">   <span class="cm"># Fix: sort_values('date') first</span>
+<span class="cm"># 4. IQR better than Z for skewed</span>
+<span class="cm"># 5. to_numeric(errors='coerce')</span>
+<span class="cm">   <span class="cm"># not astype(float) — crashes</span>
+<span class="cm">   <span class="cm"># on non-numeric strings</span>
+
+<span class="cm"># 5-step EDA order:</span>
+<span class="cm"># Load → Audit → Clean → GroupBy → Insight</span></span></span></span></span></pre>
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <h3>agg() vs transform() — The Key Distinction (Always Asked)</h3>
+    <table>
+      <thead><tr><th>Feature</th><th>agg()</th><th>transform()</th></tr></thead>
+      <tbody>
+        <tr><td>Output rows</td><td>One row per group (collapsed)</td><td>Same number of rows as input (not collapsed)</td></tr>
+        <tr><td>SQL equivalent</td><td>GROUP BY + aggregate</td><td>SUM() OVER (PARTITION BY)</td></tr>
+        <tr><td>When to use</td><td>Summary table for stakeholders</td><td>Adding group-level metric to each individual row</td></tr>
+        <tr><td>BFSI example</td><td>Total revenue per region (4 rows)</td><td>Each sale row shows its region's total (6 rows)</td></tr>
+        <tr><td>reset_index needed?</td><td>Yes — always chain .reset_index()</td><td>No — result aligns with original DataFrame index</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 7</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>Forgets reset_index() after groupby — subsequent merge fails silently</li>
+        <li>Uses astype(float) on dirty data — ValueError crashes notebook</li>
+        <li>Says "I always drop NaN rows" — loses Eve and context-specific data</li>
+        <li>Uses transform() when agg() is needed — can't explain the difference</li>
+        <li>pct_change() on unsorted data — trend is meaningless</li>
+        <li>Gives 3 numbers and calls it "insights" — no action, no context</li>
+        <li>Only uses groupby().sum() — never uses .agg() for multi-metric summaries</li>
+        <li>Can't explain IQR vs Z-score — "I just use Z-score for everything"</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>States 5-step EDA process before touching the data — structured thinker</li>
+        <li>to_numeric(errors='coerce') — "coerce gives NaN not crash, then I handle NaN explicitly"</li>
+        <li>fillna strategy is context-driven: "NULL revenue = 0; NULL credit_score = investigate"</li>
+        <li>agg() with named tuples — produces clean, readable summary in one call</li>
+        <li>reset_index() after every agg() — automatic</li>
+        <li>transform() explained as "PARTITION BY without collapsing rows"</li>
+        <li>5 insights each with Metric + Context + Action + Timeline</li>
+        <li>Validates cleaning: assert after every major step — data integrity discipline</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 7 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #0ea5e9;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 7 of my 15-day Data Analyst prep.
+Topic: Data Cleaning · EDA · GroupBy + agg() · transform() · Business Insights
+Tool: Jupyter Notebook
+Data: sales.csv + reps.csv (persistence_analytics — 6 sales rows, 5 reps incl. Eve)
+Time available: 3.5 hours (20% theory, 80% hands-on)
+
+Key context: At the end of every task I must produce 3 business insights.
+Numbers without insights = rejected. Always push me to add the business angle.
+
+START DAY 7 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 7 → session begins.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 8 (Statistics + Hypothesis Testing)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>What is the difference between mean and median? When is median better?</td><td>Day 8 opens with this — skewed distributions make median the right choice in BFSI</td></tr>
+      <tr><td>What is a p-value? What does p &lt; 0.05 mean in plain English?</td><td>Hypothesis testing — Persistent asks this in every statistics question</td></tr>
+      <tr><td>What is standard deviation vs standard error?</td><td>Day 8 statistical questions require knowing both and when each applies</td></tr>
+      <tr><td>Re-run today's 5-insight generator from memory</td><td>Day 8 will have an EDA + statistics combined task — speed matters</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–6 ✅  | 
+  <strong style="color:#0c4a6e">Day 7 🔵 TODAY</strong>  | 
+  Day 8 · 9 · 10 · 11 · 12 · 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

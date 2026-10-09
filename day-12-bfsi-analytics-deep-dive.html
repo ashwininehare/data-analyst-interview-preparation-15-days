@@ -1,0 +1,809 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 12 — BFSI Analytics · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#7f1d1d;color:#fecaca}
+.b2{background:#1e3a8a;color:#bfdbfe}
+.b3{background:#14532d;color:#bbf7d0}
+.b4{background:#4c1d95;color:#ddd6fe}
+.b5{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#3b82d4;border-bottom:2px solid #3b82d4;padding-bottom:4px;margin-bottom:14px}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.sql{background:#dbeafe;color:#1e40af}
+.tag.py{background:#dcfce7;color:#166534}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.str{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}
+
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.green{color:#166534}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+
+.qa{border-left:3px solid #3b82d4;padding:10px 14px;background:#f0f6ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#1e3a5f}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#3b82d4}
+.qa.red{border-color:#b91c1c;background:#fff5f5}
+.qa.red .q{color:#7f1d1d}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}
+.qa.green .q{color:#14532d}
+
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166534;border:2px solid #86efac}
+.today{background:#fee2e2;color:#991b1b;border:2px dotted #f87171}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+
+.term-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.term{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px}
+.term .name{font-size:11px;font-weight:800;text-transform:uppercase;color:#b91c1c;letter-spacing:.04em;margin-bottom:3px}
+.term .def{font-size:12px;color:#1f2328}
+.term .formula{font-size:11px;color:#57606a;margin-top:4px;font-style:italic}
+
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>🏦 Day 12 — BFSI Analytics Deep Dive</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 4 Hours</p>
+  <div class="badge-row">
+    <span class="badge b1">Customer Analytics</span>
+    <span class="badge b2">Churn Analysis</span>
+    <span class="badge b3">Loan &amp; NPA</span>
+    <span class="badge b4">Risk &amp; Cohort</span>
+    <span class="badge b5">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div><div class="day-dot done">2</div><div class="day-dot done">3</div>
+    <div class="day-dot done">4</div><div class="day-dot done">5</div><div class="day-dot done">6</div>
+    <div class="day-dot done">7</div><div class="day-dot done">8</div><div class="day-dot done">9</div>
+    <div class="day-dot done">10</div><div class="day-dot done">11</div><div class="day-dot today">12</div>
+    <div class="day-dot future">13</div><div class="day-dot future">14</div><div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–11 complete · 🔴 Today: Day 12 · ⬜ Days 13–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">🎯 Why BFSI Analytics Matters at Persistent</div>
+  <div class="card">
+    <h3>Persistent's Top Banking Clients Ask These Questions Every Day</h3>
+    <table>
+      <thead><tr><th>Business Question</th><th>Analyst's Job</th><th>Tool Used</th></tr></thead>
+      <tbody>
+        <tr><td>Which customers will leave next month?</td><td>Churn prediction + flag</td><td><span class="tag sql">SQL</span> <span class="tag py">Python</span></td></tr>
+        <tr><td>Which loans are at risk of default?</td><td>NPA segmentation</td><td><span class="tag sql">SQL</span></td></tr>
+        <tr><td>Which customer segment is most profitable?</td><td>Cohort + LTV analysis</td><td><span class="tag py">Python</span></td></tr>
+        <tr><td>How many new customers did we onboard vs retain?</td><td>Acquisition vs retention KPI</td><td><span class="tag sql">SQL</span></td></tr>
+        <tr><td>What's the transaction anomaly pattern?</td><td>Fraud detection flag</td><td><span class="tag sql">SQL</span> <span class="tag py">Python</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📖 BFSI Domain Dictionary — Must Know All 12</div>
+  <div class="term-grid">
+    <div class="term">
+      <div class="name">NPA</div>
+      <div class="def">Non-Performing Asset. Loan where EMI unpaid &gt;90 days.</div>
+      <div class="formula">NPA Rate = NPA Loans / Total Loans × 100</div>
+    </div>
+    <div class="term">
+      <div class="name">Churn Rate</div>
+      <div class="def">% customers who stopped using a product in a period.</div>
+      <div class="formula">Churned / Start-of-period customers × 100</div>
+    </div>
+    <div class="term">
+      <div class="name">LTV</div>
+      <div class="def">Lifetime Value. Total revenue a customer generates over their lifecycle.</div>
+      <div class="formula">Avg Revenue × Avg Tenure (months)</div>
+    </div>
+    <div class="term">
+      <div class="name">CAC</div>
+      <div class="def">Customer Acquisition Cost. Cost to onboard 1 new customer.</div>
+      <div class="formula">Total Marketing Spend / New Customers</div>
+    </div>
+    <div class="term">
+      <div class="name">AUM</div>
+      <div class="def">Assets Under Management. Total value of assets a bank manages.</div>
+      <div class="formula">Sum of all portfolio values</div>
+    </div>
+    <div class="term">
+      <div class="name">EMI</div>
+      <div class="def">Equated Monthly Instalment. Fixed monthly loan repayment amount.</div>
+      <div class="formula">P × r × (1+r)^n / ((1+r)^n - 1)</div>
+    </div>
+    <div class="term">
+      <div class="name">CIBIL Score</div>
+      <div class="def">India's credit score (300–900). &gt;750 = low risk.</div>
+      <div class="formula">Based on repayment history, utilisation</div>
+    </div>
+    <div class="term">
+      <div class="name">DPD</div>
+      <div class="def">Days Past Due. How many days a payment is overdue.</div>
+      <div class="formula">DPD = Today - EMI_Due_Date</div>
+    </div>
+    <div class="term">
+      <div class="name">Cohort</div>
+      <div class="def">Group of customers who joined in the same time period.</div>
+      <div class="formula">Retention = Active in Month N / Cohort Size</div>
+    </div>
+    <div class="term">
+      <div class="name">ROI / ROA</div>
+      <div class="def">Return on Investment / Assets. Profitability ratios.</div>
+      <div class="formula">Net Profit / Total Assets × 100</div>
+    </div>
+    <div class="term">
+      <div class="name">Delinquency</div>
+      <div class="def">Missed or late loan payment. Pre-stage of NPA.</div>
+      <div class="formula">DPD 1–30: Early · 31–90: Late · 90+: NPA</div>
+    </div>
+    <div class="term">
+      <div class="name">Vintage</div>
+      <div class="def">Age of loan/customer. Older loans = lower risk (proven payer).</div>
+      <div class="formula">Vintage = DATEDIFF(today, disbursement_date)</div>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 12 Agenda — 4 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Topic</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:20</td><td>Theory Blitz</td><td>BFSI domain terms + analytics frameworks</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:20–0:50</td><td>Q&amp;A Round (5 Qs)</td><td>Domain + analytical thinking questions</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:50–1:30</td><td>Task 1 — Churn Analysis</td><td>Identify churned customers in SQL + Python flag</td><td><span class="tag hard">Hard</span></td></tr>
+      <tr><td>1:30–2:10</td><td>Task 2 — NPA Segmentation</td><td>DPD buckets + NPA rate by product in SQL</td><td><span class="tag hard">Hard</span></td></tr>
+      <tr><td>2:10–2:50</td><td>Task 3 — Cohort Retention</td><td>Monthly cohort table in Python</td><td><span class="tag hard">Hard</span></td></tr>
+      <tr><td>2:50–3:40</td><td>Task 4 — Risk Dashboard</td><td>Power BI: NPA + churn KPIs + conditional formatting</td><td><span class="tag med">Medium</span></td></tr>
+      <tr><td>3:40–4:00</td><td>Debrief</td><td>Score card + mistakes + Day 13 prep</td><td><span class="tag easy">Review</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">🎓 Theory Q&amp;A — 5 BFSI Interview Questions</div>
+
+  <div class="qa red">
+    <div class="q">Q1. What is the difference between a delinquent customer and an NPA customer? Why does this distinction matter to a bank?</div>
+    <div class="a"><strong>Hired answer:</strong> A <strong>delinquent</strong> customer has missed payments (DPD 1–90 days) but is not yet classified as NPA. An <strong>NPA</strong> customer has unpaid EMI for more than 90 days — at this point the bank must provision capital against that loan. The distinction matters because: (1) delinquent = recoverable, needs a collections call; (2) NPA = provisioned loss, impacts the bank's P&amp;L and capital adequacy ratio. As an analyst, I segment DPD buckets: 1–30, 31–60, 61–90, 90+ to give collections teams their priority list.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q2. How would you define "churned" in a banking context? Is it the same for savings accounts vs credit cards?</div>
+    <div class="a"><strong>Hired answer:</strong> Churn definition varies by product. For a <strong>savings account</strong>: no transaction in last 6–12 months (dormant account). For a <strong>credit card</strong>: no swipe in last 3 months OR balance transferred out. For a <strong>loan</strong>: early prepayment can mean churn (lost future interest). Always agree the churn definition with the business before writing a single query — the wrong definition produces the wrong intervention.</div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q3. What is cohort analysis and why is it more useful than overall churn rate?</div>
+    <div class="a"><strong>Hired answer:</strong> Cohort analysis groups customers by when they joined (e.g. Jan 2026 cohort) and tracks what % are still active each month. Overall churn rate hides the story — a 10% churn rate could mean: (a) all cohorts churn at 10% uniformly, OR (b) new cohorts churn at 30% but old cohorts are loyal. Cohort analysis separates these. In banking, it shows whether product changes improved retention for newer customers vs older ones — actionable for product and marketing teams.</div>
+  </div>
+
+  <div class="qa red">
+    <div class="q">Q4. A risk manager says "our NPA rate jumped from 3% to 5% this quarter." What are the first 3 questions you ask as a data analyst?</div>
+    <div class="a"><strong>Hired answer:</strong> (1) <strong>Which product?</strong> — Is it concentrated in Loans, Credit Cards, or spread across all? A concentrated spike is a product-design issue. (2) <strong>Which vintage?</strong> — Are the new NPAs from recent disbursements (bad underwriting) or old loans (economic stress)? (3) <strong>Which geography/segment?</strong> — Is it region-specific (local economic event) or pan-India? Each answer changes the intervention: tighten credit scoring, increase collections in a region, or pause disbursements in a product.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5. What is LTV:CAC ratio and what does a ratio of 1.5 mean for a bank's retail lending product?</div>
+    <div class="a"><strong>Hired answer:</strong> LTV (Lifetime Value) is the total revenue a customer generates over their relationship. CAC (Customer Acquisition Cost) is what it cost to onboard them. A ratio of 1.5 means the bank earns ₹1.50 for every ₹1 spent acquiring the customer — <strong>marginally profitable but dangerous</strong>. Best-in-class is 3:1 or higher. At 1.5, any increase in NPA, churn, or servicing cost tips the product into loss. I would flag this to the product team and model the breakeven CAC needed to hit 3:1.</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 1 — Churn Analysis (40 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask: Identify which reps/regions have "churned" customers (no sale in last 90 days) and calculate churn rate by region.</h3>
+    <p style="font-size:12px;color:#57606a;margin-top:4px">For this exercise: a rep is "at-risk" if their last sale was more than 90 days before the latest sale date in the dataset.</p>
+  </div>
+
+  <div class="card">
+    <h3>Query 1A — Last Activity per Rep + Churn Flag</h3>
+    <pre><span class="kw">WITH</span> rep_last_sale <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        rep_name,
+        <span class="fn">MAX</span>(sale_date)                            <span class="kw">AS</span> last_sale_date,
+        <span class="fn">DATEDIFF</span>(
+            (<span class="kw">SELECT</span> <span class="fn">MAX</span>(sale_date) <span class="kw">FROM</span> sales),
+            <span class="fn">MAX</span>(sale_date)
+        )                                         <span class="kw">AS</span> days_since_last_sale
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> rep_name
+),
+all_reps <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        r.rep_name,
+        r.team,
+        <span class="fn">COALESCE</span>(rl.last_sale_date, <span class="str">'1900-01-01'</span>)  <span class="kw">AS</span> last_sale_date,
+        <span class="fn">COALESCE</span>(rl.days_since_last_sale, <span class="num">9999</span>)     <span class="kw">AS</span> days_inactive,
+        <span class="kw">CASE</span>
+            <span class="kw">WHEN</span> rl.rep_name <span class="kw">IS NULL</span>           <span class="kw">THEN</span> <span class="str">'Churned'</span>
+            <span class="kw">WHEN</span> rl.days_since_last_sale &gt; <span class="num">90</span>  <span class="kw">THEN</span> <span class="str">'At Risk'</span>
+            <span class="kw">WHEN</span> rl.days_since_last_sale &gt; <span class="num">30</span>  <span class="kw">THEN</span> <span class="str">'Cooling'</span>
+            <span class="kw">ELSE</span>                                     <span class="str">'Active'</span>
+        <span class="kw">END</span>                                       <span class="kw">AS</span> churn_status
+    <span class="kw">FROM</span> reps r
+    <span class="kw">LEFT JOIN</span> rep_last_sale rl
+        <span class="kw">ON</span> r.rep_name = rl.rep_name
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> all_reps
+<span class="kw">ORDER BY</span> days_inactive <span class="kw">DESC</span>;
+
+<span class="cm">-- Eve has no sales → LEFT JOIN keeps her → COALESCE fills NULL → 'Churned'
+-- Business: Collections/HR gets a prioritised outreach list</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 1B — Churn Rate by Team</h3>
+    <pre><span class="kw">SELECT</span>
+    team,
+    <span class="fn">COUNT</span>(*)                                           <span class="kw">AS</span> total_reps,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> churn_status <span class="kw">IN</span> (<span class="str">'Churned'</span>,<span class="str">'At Risk'</span>)
+             <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)                        <span class="kw">AS</span> at_risk_count,
+    <span class="fn">ROUND</span>(
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> churn_status <span class="kw">IN</span> (<span class="str">'Churned'</span>,<span class="str">'At Risk'</span>)
+                 <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) * <span class="num">100.0</span> / <span class="fn">COUNT</span>(*),
+    <span class="num">1</span>)                                                 <span class="kw">AS</span> churn_rate_pct
+<span class="kw">FROM</span> (
+    <span class="cm">-- paste the all_reps CTE result here or use a subquery</span>
+    <span class="kw">SELECT</span> r.rep_name, r.team,
+           <span class="kw">CASE WHEN</span> <span class="fn">MAX</span>(s.sale_date) <span class="kw">IS NULL</span>
+                    <span class="kw">OR</span> <span class="fn">DATEDIFF</span>((<span class="kw">SELECT</span> <span class="fn">MAX</span>(sale_date) <span class="kw">FROM</span> sales),
+                                 <span class="fn">MAX</span>(s.sale_date)) &gt; <span class="num">90</span>
+                <span class="kw">THEN</span> <span class="str">'Churned'</span>
+                <span class="kw">ELSE</span> <span class="str">'Active'</span> <span class="kw">END</span> <span class="kw">AS</span> churn_status
+    <span class="kw">FROM</span> reps r <span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name
+    <span class="kw">GROUP BY</span> r.rep_name, r.team
+) t
+<span class="kw">GROUP BY</span> team
+<span class="kw">ORDER BY</span> churn_rate_pct <span class="kw">DESC</span>;
+
+<span class="cm">-- Expected: Retail team has higher churn (Eve is Retail, no sales)
+-- Business: Which team needs management intervention NOW?</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 2 — NPA Segmentation (40 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask: Segment the loan portfolio into DPD buckets. Calculate NPA rate and average revenue at risk per bucket.</h3>
+    <p style="font-size:12px;color:#57606a;margin-top:4px">We simulate DPD using days since sale_date (as a proxy for loan disbursement).</p>
+  </div>
+
+  <div class="card">
+    <h3>Query 2A — DPD Bucket Segmentation</h3>
+    <pre><span class="kw">SELECT</span>
+    sale_id,
+    rep_name,
+    region,
+    product,
+    revenue,
+    sale_date,
+    <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date)           <span class="kw">AS</span> dpd,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date) &gt; <span class="num">270</span> <span class="kw">THEN</span> <span class="str">'NPA (90+ DPD)'</span>
+        <span class="kw">WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date) &gt; <span class="num">180</span> <span class="kw">THEN</span> <span class="str">'Sub-Standard (61–90)'</span>
+        <span class="kw">WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date) &gt; <span class="num">90</span>  <span class="kw">THEN</span> <span class="str">'Watchlist (31–60)'</span>
+        <span class="kw">ELSE</span>                                          <span class="str">'Standard (0–30)'</span>
+    <span class="kw">END</span>                                           <span class="kw">AS</span> dpd_bucket,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), sale_date) &gt; <span class="num">270</span> <span class="kw">THEN</span> <span class="str">'Y'</span>
+        <span class="kw">ELSE</span> <span class="str">'N'</span>
+    <span class="kw">END</span>                                           <span class="kw">AS</span> is_npa
+<span class="kw">FROM</span> sales
+<span class="kw">WHERE</span> product = <span class="str">'Loan'</span>
+<span class="kw">ORDER BY</span> dpd <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 2B — NPA Rate Summary by Product</h3>
+    <pre><span class="kw">SELECT</span>
+    product,
+    <span class="fn">COUNT</span>(*)                                              <span class="kw">AS</span> total_accounts,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(),sale_date)&gt;<span class="num">270</span>
+             <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)                          <span class="kw">AS</span> npa_count,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(),sale_date)&gt;<span class="num">270</span>
+             <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)                     <span class="kw">AS</span> npa_revenue_at_risk,
+    <span class="fn">ROUND</span>(
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(),sale_date)&gt;<span class="num">270</span>
+                 <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) * <span class="num">100.0</span> / <span class="fn">COUNT</span>(*),
+    <span class="num">1</span>)                                                    <span class="kw">AS</span> npa_rate_pct
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> product
+<span class="kw">ORDER BY</span> npa_rate_pct <span class="kw">DESC</span>;
+
+<span class="cm">-- Business: Risk team uses this to decide provisioning amounts
+-- If Loan NPA rate &gt; 5%, regulatory flag in India (RBI guidelines)</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 3 — Cohort Retention in Python (40 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask: Build a monthly cohort retention table. Which acquisition month retained customers best?</h3>
+  </div>
+
+  <div class="card">
+    <h3>Full Cohort Analysis — Jupyter Notebook</h3>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Load data ────────────────────────────────</span>
+sales = pd.read_csv(<span class="str">'sales.csv'</span>)
+sales[<span class="str">'sale_date'</span>] = pd.to_datetime(sales[<span class="str">'sale_date'</span>])
+
+<span class="cm"># ── Step 1: Cohort month = first sale month per rep ──</span>
+cohort_df = sales.groupby(<span class="str">'rep_name'</span>)[<span class="str">'sale_date'</span>]\
+                 .min().reset_index()
+cohort_df.columns = [<span class="str">'rep_name'</span>, <span class="str">'cohort_month'</span>]
+cohort_df[<span class="str">'cohort_month'</span>] = cohort_df[<span class="str">'cohort_month'</span>]\
+                               .dt.to_period(<span class="str">'M'</span>)
+
+<span class="cm"># ── Step 2: Merge cohort month back into sales ──</span>
+sales = sales.merge(cohort_df, on=<span class="str">'rep_name'</span>)
+sales[<span class="str">'sale_month'</span>] = sales[<span class="str">'sale_date'</span>].dt.to_period(<span class="str">'M'</span>)
+
+<span class="cm"># ── Step 3: Month index (0 = acquisition month) ──</span>
+sales[<span class="str">'month_number'</span>] = (
+    sales[<span class="str">'sale_month'</span>].astype(int) -
+    sales[<span class="str">'cohort_month'</span>].astype(int)
+)
+
+<span class="cm"># ── Step 4: Cohort table ──────────────────────</span>
+cohort_table = sales.groupby(
+    [<span class="str">'cohort_month'</span>, <span class="str">'month_number'</span>]
+)[<span class="str">'rep_name'</span>].nunique().reset_index()
+cohort_pivot = cohort_table.pivot_table(
+    index=<span class="str">'cohort_month'</span>,
+    columns=<span class="str">'month_number'</span>,
+    values=<span class="str">'rep_name'</span>
+)
+
+<span class="cm"># ── Step 5: Retention % (divide by cohort size) ──</span>
+cohort_size   = cohort_pivot.iloc[:, <span class="num">0</span>]
+retention_pct = cohort_pivot.divide(cohort_size, axis=<span class="num">0</span>) * <span class="num">100</span>
+
+<span class="fn">print</span>(<span class="str">"── Cohort Retention % ──"</span>)
+<span class="fn">print</span>(retention_pct.round(<span class="num">1</span>))
+
+<span class="cm"># ── Step 6: Business Insight ──────────────────</span>
+best_cohort = retention_pct[<span class="num">1</span>].idxmax()  <span class="cm"># Month-1 retention</span>
+<span class="fn">print</span>(<span class="str">f"\nBest retained cohort: {best_cohort}"</span>)
+<span class="fn">print</span>(<span class="str">f"Avg Month-1 retention: {retention_pct[1].mean():.1f}%"</span>)</pre>
+  </div>
+
+  <div class="card" style="background:#f0fdf4;border-color:#86efac">
+    <h3 style="color:#166534">✅ How to Read a Cohort Table (Interview Essential)</h3>
+    <table>
+      <thead><tr><th>Cohort Month</th><th>Month 0</th><th>Month 1</th><th>Month 2</th><th>Month 3</th></tr></thead>
+      <tbody>
+        <tr><td>Jan 2026</td><td>100%</td><td>100%</td><td>50%</td><td>50%</td></tr>
+        <tr><td>Feb 2026</td><td>100%</td><td>100%</td><td>100%</td><td>—</td></tr>
+        <tr><td>Mar 2026</td><td>100%</td><td>—</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;margin-top:8px"><strong>Reading it:</strong> Jan cohort dropped to 50% by Month 2 — 1 of 2 reps stopped selling. Feb cohort retained 100% through Month 2. This tells the business: reps onboarded in Feb have better stickiness — what did onboarding do differently in Feb?</p>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 4 — Risk Dashboard in Power BI (50 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask: Build a risk monitoring dashboard for the Risk Manager. Must show NPA exposure, churn rate, and rep status at a glance.</h3>
+  </div>
+
+  <div class="card">
+    <h3>DAX Measures for Risk Dashboard</h3>
+    <pre><span class="cm">-- NPA Rate (simulated via DPD proxy)</span>
+<span class="var">NPA Rate %</span> =
+<span class="kw">DIVIDE</span>(
+    <span class="fn">COUNTROWS</span>(<span class="fn">FILTER</span>(sales,
+        <span class="fn">DATEDIFF</span>(sales[sale_date], <span class="fn">TODAY</span>(), <span class="fn">DAY</span>) &gt; <span class="num">270</span>)),
+    <span class="fn">COUNTROWS</span>(sales),
+    <span class="num">0</span>
+)
+
+<span class="cm">-- Revenue at Risk</span>
+<span class="var">Revenue at Risk</span> =
+<span class="fn">CALCULATE</span>(
+    <span class="fn">SUM</span>(sales[revenue]),
+    <span class="fn">FILTER</span>(sales,
+        <span class="fn">DATEDIFF</span>(sales[sale_date], <span class="fn">TODAY</span>(), <span class="fn">DAY</span>) &gt; <span class="num">90</span>)
+)
+
+<span class="cm">-- Active Rep Count (sold in last 90 days)</span>
+<span class="var">Active Reps</span> =
+<span class="fn">COUNTROWS</span>(
+    <span class="fn">FILTER</span>(
+        <span class="fn">SUMMARIZE</span>(sales, sales[rep_name],
+            <span class="str">"LastSale"</span>, <span class="fn">MAX</span>(sales[sale_date])),
+        <span class="fn">DATEDIFF</span>([LastSale], <span class="fn">TODAY</span>(), <span class="fn">DAY</span>) &lt;= <span class="num">90</span>
+    )
+)
+
+<span class="cm">-- Churn Rate %</span>
+<span class="var">Churn Rate %</span> =
+<span class="kw">DIVIDE</span>(
+    <span class="fn">COUNTROWS</span>(reps) - [<span class="var">Active Reps</span>],
+    <span class="fn">COUNTROWS</span>(reps),
+    <span class="num">0</span>
+)</pre>
+  </div>
+
+  <div class="card">
+    <h3>Risk Dashboard Layout — 4 Visuals</h3>
+    <table>
+      <thead><tr><th>#</th><th>Visual</th><th>Fields</th><th>Risk Story</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>KPI Cards (top row)</td><td>NPA Rate · Revenue at Risk · Churn Rate % · Active Reps</td><td>Instant health check</td></tr>
+        <tr><td>2</td><td>Stacked Bar</td><td>X: region · Y: revenue · Legend: DPD bucket</td><td>Which region has most NPA exposure?</td></tr>
+        <tr><td>3</td><td>Table Visual</td><td>rep_name · revenue · days_inactive · churn_status</td><td>Conditional format: Red = Churned, Yellow = At Risk</td></tr>
+        <tr><td>4</td><td>Donut Chart</td><td>Legend: dpd_bucket · Values: revenue</td><td>Portfolio quality breakdown</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;margin-top:6px"><strong>Conditional formatting tip:</strong> Table visual → Format → Cell elements → Background colour → Field value → use a DAX colour measure OR rule-based (red if churn_status = "Churned").</p>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 BFSI Analytics Flowchart — Decision Framework</div>
+  <div class="flow-wrap">
+    <svg width="700" height="600" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+
+      
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 12 — BFSI Analytics Decision Framework</text>
+
+      
+      <rect x="245" y="34" width="210" height="38" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#e6edf3" font-weight="700">Business Question Received</text>
+      <text x="350" y="64" text-anchor="middle" fill="#8b949e" font-size="11">Risk Manager / Regional Head / HR</text>
+      <line x1="350" y1="72" x2="350" y2="92" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,92 480,128 350,164 220,128" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="124" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="12">What type of</text>
+      <text x="350" y="140" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="12">analytics question?</text>
+
+      
+      <text x="155" y="120" text-anchor="middle" fill="#57606a" font-size="10">Churn /</text>
+      <text x="155" y="132" text-anchor="middle" fill="#57606a" font-size="10">Retention</text>
+      <text x="350" y="178" text-anchor="middle" fill="#57606a" font-size="10">NPA / Risk</text>
+      <text x="545" y="120" text-anchor="middle" fill="#57606a" font-size="10">Profitability</text>
+      <text x="545" y="132" text-anchor="middle" fill="#57606a" font-size="10">/ LTV</text>
+
+      
+      <line x1="220" y1="128" x2="90" y2="128" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="20" y="108" width="70" height="0" rx="0"></rect>
+
+      <rect x="18" y="196" width="164" height="56" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="100" y="218" text-anchor="middle" fill="#7f1d1d" font-weight="700">Churn Analysis</text>
+      <text x="100" y="232" text-anchor="middle" fill="#991b1b" font-size="11">1. Define churn (DPD/</text>
+      <text x="100" y="244" text-anchor="middle" fill="#991b1b" font-size="11">inactivity period)</text>
+      <line x1="90" y1="128" x2="90" y2="196" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      <rect x="18" y="268" width="164" height="56" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="100" y="290" text-anchor="middle" fill="#7f1d1d" font-weight="700">SQL: LEFT JOIN + CTE</text>
+      <text x="100" y="304" text-anchor="middle" fill="#991b1b" font-size="11">CASE WHEN DPD &gt; N</text>
+      <text x="100" y="316" text-anchor="middle" fill="#991b1b" font-size="11">COALESCE for NULLs</text>
+      <line x1="100" y1="252" x2="100" y2="268" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      <rect x="18" y="340" width="164" height="56" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="100" y="362" text-anchor="middle" fill="#7f1d1d" font-weight="700">Python: Cohort Table</text>
+      <text x="100" y="376" text-anchor="middle" fill="#991b1b" font-size="11">groupby + pivot_table</text>
+      <text x="100" y="388" text-anchor="middle" fill="#991b1b" font-size="11">Retention % heatmap</text>
+      <line x1="100" y1="324" x2="100" y2="340" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <line x1="350" y1="164" x2="350" y2="196" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="240" y="196" width="220" height="56" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="218" text-anchor="middle" fill="#854d0e" font-weight="700">NPA / Risk Segmentation</text>
+      <text x="350" y="232" text-anchor="middle" fill="#854d0e" font-size="11">1. Calculate DPD per account</text>
+      <text x="350" y="244" text-anchor="middle" fill="#854d0e" font-size="11">2. Bucket: 0–30, 31–60, 61–90, 90+</text>
+
+      <rect x="240" y="268" width="220" height="56" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="290" text-anchor="middle" fill="#854d0e" font-weight="700">SQL: CASE WHEN DPD</text>
+      <text x="350" y="304" text-anchor="middle" fill="#854d0e" font-size="11">NPA Rate = NPA / Total × 100</text>
+      <text x="350" y="316" text-anchor="middle" fill="#854d0e" font-size="11">Group by product / region</text>
+      <line x1="350" y1="252" x2="350" y2="268" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      <rect x="240" y="340" width="220" height="56" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="362" text-anchor="middle" fill="#854d0e" font-weight="700">Power BI: Risk Dashboard</text>
+      <text x="350" y="376" text-anchor="middle" fill="#854d0e" font-size="11">Stacked bar by DPD bucket</text>
+      <text x="350" y="388" text-anchor="middle" fill="#854d0e" font-size="11">Conditional formatting red flags</text>
+      <line x1="350" y1="324" x2="350" y2="340" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <line x1="480" y1="128" x2="610" y2="128" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="518" y="196" width="164" height="56" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="600" y="218" text-anchor="middle" fill="#4c1d95" font-weight="700">LTV / Profitability</text>
+      <text x="600" y="232" text-anchor="middle" fill="#5b21b6" font-size="11">1. Avg Revenue × Tenure</text>
+      <text x="600" y="244" text-anchor="middle" fill="#5b21b6" font-size="11">2. Segment by product</text>
+      <line x1="610" y1="128" x2="610" y2="196" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      <rect x="518" y="268" width="164" height="56" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="600" y="290" text-anchor="middle" fill="#4c1d95" font-weight="700">SQL: AVG + COUNT + JOIN</text>
+      <text x="600" y="304" text-anchor="middle" fill="#5b21b6" font-size="11">Python: LTV = rev × months</text>
+      <text x="600" y="316" text-anchor="middle" fill="#5b21b6" font-size="11">LTV:CAC ratio calculation</text>
+      <line x1="600" y1="252" x2="600" y2="268" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      <rect x="518" y="340" width="164" height="56" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="600" y="362" text-anchor="middle" fill="#4c1d95" font-weight="700">Excel: Scatter + Segment</text>
+      <text x="600" y="376" text-anchor="middle" fill="#5b21b6" font-size="11">High LTV / Low LTV matrix</text>
+      <text x="600" y="388" text-anchor="middle" fill="#5b21b6" font-size="11">Retention spend allocation</text>
+      <line x1="600" y1="324" x2="600" y2="340" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <line x1="100" y1="396" x2="100" y2="432" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="396" x2="350" y2="432" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="600" y1="396" x2="600" y2="432" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="100" y1="432" x2="600" y2="432" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="432" x2="350" y2="452" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="180" y="452" width="340" height="44" rx="8" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="350" y="470" text-anchor="middle" fill="#14532d" font-weight="700">Business Insight + Recommendation</text>
+      <text x="350" y="486" text-anchor="middle" fill="#166534" font-size="11">Always link findings to ₹ impact and next action</text>
+      <line x1="350" y1="496" x2="350" y2="516" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="200" y="516" width="300" height="38" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="532" text-anchor="middle" fill="#e6edf3" font-weight="700">✅ Risk Report Delivered to Stakeholder</text>
+      <text x="350" y="548" text-anchor="middle" fill="#8b949e" font-size="11">SQL extract → Python analysis → Power BI visual</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 12 Cheat Sheet — BFSI Analytics</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="red">🏦 BFSI KPI Formulas</h4>
+      <pre><span class="cm">-- Churn Rate</span>
+Churned / Start_Customers × 100
+
+<span class="cm">-- NPA Rate</span>
+NPA_Loans / Total_Loans × 100
+
+<span class="cm">-- LTV</span>
+Avg_Revenue × Avg_Tenure_months
+
+<span class="cm">-- LTV:CAC (target ≥ 3)</span>
+LTV / CAC
+
+<span class="cm">-- DPD buckets</span>
+1–30   : Early Delinquency
+31–60  : Watchlist
+61–90  : Sub-Standard
+90+    : NPA (provision!)
+
+<span class="cm">-- Retention Rate</span>
+Active_M2 / Cohort_Size × 100</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="blue">🗄 SQL — BFSI Patterns</h4>
+      <pre><span class="cm">-- DPD Calculation</span>
+<span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), emi_due_date)
+
+<span class="cm">-- Churn flag</span>
+<span class="kw">CASE WHEN</span> last_sale <span class="kw">IS NULL</span>
+  <span class="kw">OR</span> <span class="fn">DATEDIFF</span>(today, last_sale)&gt;<span class="num">90</span>
+  <span class="kw">THEN</span> <span class="str">'Churned'</span> <span class="kw">END</span>
+
+<span class="cm">-- NPA count</span>
+<span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> dpd &gt; <span class="num">90</span>
+         <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)
+
+<span class="cm">-- COALESCE for NULL reps</span>
+<span class="fn">COALESCE</span>(revenue, <span class="num">0</span>)
+
+<span class="cm">-- LEFT JOIN to include no-sales</span>
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s
+  <span class="kw">ON</span> r.rep_name = s.rep_name</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">🐍 Python — Cohort Patterns</h4>
+      <pre><span class="cm"># Cohort month (first purchase)</span>
+df[<span class="str">'cohort'</span>] = df.groupby(
+  <span class="str">'customer_id'</span>)[<span class="str">'date'</span>]\
+  .transform(<span class="str">'min'</span>)\
+  .dt.to_period(<span class="str">'M'</span>)
+
+<span class="cm"># Month index</span>
+df[<span class="str">'month_no'</span>] = (
+  df[<span class="str">'sale_month'</span>].astype(int) -
+  df[<span class="str">'cohort'</span>].astype(int)
+)
+
+<span class="cm"># Pivot to cohort table</span>
+pivot = df.groupby(
+  [<span class="str">'cohort'</span>,<span class="str">'month_no'</span>]
+)[<span class="str">'id'</span>].nunique()\
+  .unstack()
+
+<span class="cm"># Retention %</span>
+retention = pivot.divide(
+  pivot.iloc[:,<span class="num">0</span>], axis=<span class="num">0</span>) * <span class="num">100</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">📊 Power BI — Risk DAX</h4>
+      <pre><span class="cm">-- Safe NPA rate</span>
+<span class="var">NPA Rate</span> = <span class="kw">DIVIDE</span>(
+  <span class="fn">COUNTROWS</span>(<span class="fn">FILTER</span>(sales,
+    <span class="fn">DATEDIFF</span>(sales[date],
+    <span class="fn">TODAY</span>(),<span class="fn">DAY</span>)&gt;<span class="num">270</span>)),
+  <span class="fn">COUNTROWS</span>(sales), <span class="num">0</span>)
+
+<span class="cm">-- Revenue at risk</span>
+<span class="var">Rev at Risk</span> = <span class="fn">CALCULATE</span>(
+  <span class="fn">SUM</span>(sales[revenue]),
+  <span class="fn">FILTER</span>(sales,
+    <span class="fn">DATEDIFF</span>(sales[date],
+    <span class="fn">TODAY</span>(),<span class="fn">DAY</span>)&gt;<span class="num">90</span>))
+
+<span class="cm">-- Conditional colour (measure)</span>
+<span class="var">Status Colour</span> =
+<span class="kw">SWITCH</span>(<span class="kw">TRUE</span>(),
+  [<span class="var">NPA Rate</span>]&gt;<span class="num">0.05</span>, <span class="str">"#ef4444"</span>,
+  [<span class="var">NPA Rate</span>]&gt;<span class="num">0.03</span>, <span class="str">"#f59e0b"</span>,
+  <span class="str">"#22c55e"</span>)</pre>
+    </div>
+
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 12</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>Can't define NPA or DPD when asked</li>
+        <li>Uses INNER JOIN — misses Eve-type reps with no activity</li>
+        <li>Says "churn" without specifying the definition period</li>
+        <li>Builds cohort table but can't explain what 50% retention means</li>
+        <li>NPA query returns rate but no ₹ revenue-at-risk figure</li>
+        <li>Doesn't mention RBI 90-day NPA rule in India</li>
+        <li>Power BI table has no conditional formatting on risk status</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>Defines churn differently for savings vs loan vs credit card products</li>
+        <li>Uses LEFT JOIN + COALESCE — no rep is excluded from analysis</li>
+        <li>Mentions RBI 90-day NPA rule without being asked</li>
+        <li>Cohort table + business interpretation: "Feb cohort retained better — why?"</li>
+        <li>NPA query gives BOTH rate (%) AND revenue at risk (₹) — dual impact</li>
+        <li>DIVIDE() in DAX — knows it handles divide-by-zero gracefully</li>
+        <li>Asks 3 diagnosis questions when NPA spikes (product / vintage / region)</li>
+        <li>Links every metric to a specific business action or escalation</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 12 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #b91c1c;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 12 of my 15-day Data Analyst prep.
+Topic: BFSI Analytics — Customer Analytics · Churn · NPA · Loan Risk · Cohort Retention
+Tools: MySQL Workbench + Jupyter Notebook + Power BI Desktop
+Database: persistence_analytics (sales, reps, regions)
+Time available: 4 hours (20% theory, 80% hands-on)
+
+Key BFSI context: I work in banking. My clients care about NPA rates, churn,
+LTV, DPD buckets, and risk provisioning. Always grade domain knowledge too.
+
+START DAY 12 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 12 → session starts.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 13 (AI for Data Analysts)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>What is GenAI? How is it different from traditional ML?</td><td>Day 13 opens with a GenAI definition challenge</td></tr>
+      <tr><td>What is prompt engineering? Give 1 data analyst use case</td><td>You'll write prompts for SQL/Python generation</td></tr>
+      <tr><td>What is "hallucination" in AI? How do you validate AI output?</td><td>Persistent's responsible AI angle — critical question</td></tr>
+      <tr><td>Re-run today's churn + NPA queries from memory</td><td>These are the highest-frequency Persistent interview topics</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–11 ✅  | 
+  <strong style="color:#b91c1c">Day 12 🔴 TODAY</strong>  | 
+  Day 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

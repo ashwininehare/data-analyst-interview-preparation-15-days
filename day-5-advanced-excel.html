@@ -1,0 +1,744 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 5 — Advanced Excel · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#14532d;color:#bbf7d0}
+.b2{background:#1e3a8a;color:#bfdbfe}
+.b3{background:#4c1d95;color:#ddd6fe}
+.b4{background:#7f1d1d;color:#fecaca}
+.b5{background:#78350f;color:#fde68a}
+.b6{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#166534;border-bottom:2px solid #166534;padding-bottom:4px;margin-bottom:14px}
+.sec-title.blue{color:#1e40af;border-color:#1e40af}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.dark{color:#1f2328;border-color:#1f2328}
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+.card.warn{background:#fffbeb;border-color:#fde68a}
+.card.success{background:#f0fdf4;border-color:#86efac}
+.card.excel{background:#f0fdf4;border-color:#86efac}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+.tag.xl{background:#dcfce7;color:#166534}
+.formula-box{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.7;border-radius:6px;padding:14px 16px;margin:8px 0;white-space:pre-wrap;border-left:4px solid #22c55e}
+.formula-box .fn{color:#86efac;font-weight:700}
+.formula-box .arg{color:#a5d6ff}
+.formula-box .cm{color:#8b949e}
+.formula-box .str{color:#fde68a}
+.formula-box .num{color:#f8c041}
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.green{color:#166534}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell .fb{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:11px;padding:10px 12px;border-radius:5px;margin-top:4px;white-space:pre-wrap}
+.cheat-cell .fb .fn{color:#86efac;font-weight:700}
+.cheat-cell .fb .cm{color:#8b949e}
+.cheat-cell .fb .str{color:#fde68a}
+.cheat-cell .fb .num{color:#f8c041}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+.qa{border-left:3px solid #166534;padding:10px 14px;background:#f0fdf4;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#14532d}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#166534}
+.qa.blue{border-color:#1e40af;background:#f0f6ff}.qa.blue .q{color:#1e3a5f}.qa.blue .a strong{color:#1e40af}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}.qa.purple .q{color:#4c1d95}.qa.purple .a strong{color:#7c5cd8}
+.qa.red{border-color:#b91c1c;background:#fff5f5}.qa.red .q{color:#7f1d1d}.qa.red .a strong{color:#b91c1c}
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166634;border:2px solid #86efac}
+.today{background:#dcfce7;color:#166534;border:2px solid #22c55e}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+.step-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.step-box{border-radius:7px;padding:10px 8px;text-align:center;border:1px solid #e5e7eb}
+.step-box .snum{font-size:16px;font-weight:800;margin-bottom:3px}
+.step-box .sname{font-size:11px;font-weight:700}
+.step-box .sdesc{font-size:10px;color:#57606a;margin-top:2px}
+.s1{background:#dcfce7;border-color:#86efac}.s1 .snum,.s1 .sname{color:#14532d}
+.s2{background:#dbeafe;border-color:#93c5fd}.s2 .snum,.s2 .sname{color:#1e3a8a}
+.s3{background:#ede9fe;border-color:#c4b5fd}.s3 .snum,.s3 .sname{color:#4c1d95}
+.s4{background:#fef9c3;border-color:#fde047}.s4 .snum,.s4 .sname{color:#854d0e}
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>📊 Day 5 — Advanced Excel</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 3.5 Hours</p>
+  <div class="badge-row">
+    <span class="badge b1">Pivot Tables</span>
+    <span class="badge b2">XLOOKUP · VLOOKUP</span>
+    <span class="badge b3">IFS · SUMIFS · AVERAGEIFS</span>
+    <span class="badge b4">Power Query</span>
+    <span class="badge b5">Conditional Formatting</span>
+    <span class="badge b6">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div><div class="day-dot done">2</div>
+    <div class="day-dot done">3</div><div class="day-dot done">4</div>
+    <div class="day-dot today">5</div>
+    <div class="day-dot future">6</div><div class="day-dot future">7</div><div class="day-dot future">8</div>
+    <div class="day-dot future">9</div><div class="day-dot future">10</div><div class="day-dot future">11</div>
+    <div class="day-dot future">12</div><div class="day-dot future">13</div><div class="day-dot future">14</div>
+    <div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–4 complete (SQL) · 🟢 Today: Day 5 Excel · ⬜ Days 6–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎯 Why Advanced Excel Is Still Core at Persistent BFSI Projects</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">Reality Check — What BFSI Clients Actually Use</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Used For</th><th>Interview Question</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pivot Table</strong></td><td>Quick aggregation, stakeholder-facing summaries</td><td>"Build a revenue breakdown by region and product"</td></tr>
+        <tr><td><strong>XLOOKUP</strong></td><td>Modern lookup replacing VLOOKUP everywhere</td><td>"Why is XLOOKUP better than VLOOKUP?"</td></tr>
+        <tr><td><strong>IFS / SUMIFS</strong></td><td>Multi-condition logic and conditional totals</td><td>"Flag reps as On Track / At Risk / Under"</td></tr>
+        <tr><td><strong>Power Query</strong></td><td>Automated data cleaning and transformation</td><td>"How do you handle messy CSV from a client?"</td></tr>
+        <tr><td><strong>Conditional Format</strong></td><td>Visual risk flags in dashboards</td><td>"Make the NPA cells turn red automatically"</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📁 Step 0 — Create Your Excel File (5 min)</div>
+  <div class="card">
+    <h3>Sheet Structure — Create 3 Sheets</h3>
+    <div class="step-grid">
+      <div class="step-box s1"><div class="snum">📋</div><div class="sname">Sheet1: Sales</div><div class="sdesc">Raw data — 6 rows + header</div></div>
+      <div class="step-box s2"><div class="snum">📋</div><div class="sname">Sheet2: Reps</div><div class="sdesc">5 reps including Eve</div></div>
+      <div class="step-box s3"><div class="snum">📊</div><div class="sname">Sheet3: Dashboard</div><div class="sdesc">Pivot + formulas + KPIs</div></div>
+      <div class="step-box s4"><div class="snum">🔄</div><div class="sname">Sheet4: PQ_Clean</div><div class="sdesc">Power Query output</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Sales Sheet — Type This Data (Row 1 = Headers)</h3>
+    <table>
+      <thead><tr><th>A: sale_id</th><th>B: region</th><th>C: product</th><th>D: revenue</th><th>E: sale_date</th><th>F: rep_name</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>North</td><td>Loan</td><td>120000</td><td>15-Jan-2026</td><td>Alice</td></tr>
+        <tr><td>2</td><td>South</td><td>Insurance</td><td>85000</td><td>20-Feb-2026</td><td>Bob</td></tr>
+        <tr><td>3</td><td>East</td><td>Loan</td><td>95000</td><td>10-Mar-2026</td><td>Carol</td></tr>
+        <tr><td>4</td><td>West</td><td>Deposit</td><td>60000</td><td>05-Apr-2026</td><td>Dave</td></tr>
+        <tr><td>5</td><td>North</td><td>Insurance</td><td>110000</td><td>22-May-2026</td><td>Alice</td></tr>
+        <tr><td>6</td><td>South</td><td>Loan</td><td>75000</td><td>18-Jun-2026</td><td>Bob</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:#57606a">Reps Sheet headers: rep_name · team · hire_date · target (Alice=200000, Bob=180000, Carol=150000, Dave=120000, Eve=100000)</p>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 5 Agenda — 3.5 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Topic</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:20</td><td>Theory Blitz</td><td>Pivot anatomy · XLOOKUP vs VLOOKUP · formula vs function</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:20–0:50</td><td>Q&amp;A Round (5 Qs)</td><td>Excel interview questions — graded</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:50–1:30</td><td>Task 1 — Pivot Table</td><td>Revenue by region · product mix · slicers</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>1:30–2:10</td><td>Task 2 — Lookup Formulas</td><td>XLOOKUP · VLOOKUP · INDEX-MATCH</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:10–2:45</td><td>Task 3 — Logic + Conditional</td><td>IFS · SUMIFS · AVERAGEIFS · Conditional Format</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:45–3:20</td><td>Task 4 — Power Query</td><td>Load CSV · Clean · Transform · Refresh</td><td><span class="tag med">Hands-On</span></td></tr>
+      <tr><td>3:20–3:30</td><td>Debrief</td><td>Score card · mistakes → fixes · Day 6 prep</td><td><span class="tag easy">Review</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎓 Theory Q&amp;A — 5 Interview Questions</div>
+
+  <div class="qa">
+    <div class="q">Q1. What is the difference between XLOOKUP and VLOOKUP? Why does Persistent expect you to use XLOOKUP?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>VLOOKUP</strong> only searches left-to-right, requires you to specify a column number (fragile — breaks if columns are inserted), and returns only one value. <strong>XLOOKUP</strong> searches in any direction (left, right, even horizontal), returns entire rows or columns, has built-in error handling (4th argument), supports wildcard matching, and uses column references instead of numbers so it doesn't break when columns shift. In a BFSI environment where data schemas change, XLOOKUP is far more production-safe. <strong>Rule: Never use VLOOKUP in a new workbook — XLOOKUP does everything VLOOKUP does, plus more.</strong></div>
+  </div>
+
+  <div class="qa blue">
+    <div class="q">Q2. A colleague sends you a Pivot Table and says "the totals don't match my SQL query." What do you check first?</div>
+    <div class="a"><strong>Hired answer (5-step reconciliation):</strong><br />
+    (1) <strong>Data source range</strong> — is the pivot pointing at all 6 rows, or was the range defined when there were only 4 rows? (Right-click → Change Data Source)<br />
+    (2) <strong>Filters active</strong> — is there a hidden filter on a field that's excluding rows?<br />
+    (3) <strong>Value field setting</strong> — is it showing SUM or COUNT? A common mistake is COUNT of revenue instead of SUM.<br />
+    (4) <strong>Refresh</strong> — has the pivot been refreshed after the source data was updated? (Right-click → Refresh)<br />
+    (5) <strong>Cross-check</strong> — =SUMIF(Sales!C:C,"Loan",Sales!D:D) vs pivot total — if they match, pivot is correct; if they differ, data source is the issue.</div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">Q3. What is Power Query and why would a data analyst use it instead of manual copy-paste?</div>
+    <div class="a"><strong>Hired answer:</strong> Power Query (Get &amp; Transform) is Excel's built-in ETL engine. You connect to a data source (CSV, database, SharePoint), apply transformation steps (remove columns, rename headers, change types, filter rows, merge tables), and the result loads into a sheet. The key advantage: <strong>every step is recorded</strong> — when next month's data arrives, you click Refresh and all transformations reapply automatically. Manual copy-paste = repeat work every month + human error risk. Power Query = automation + reproducibility. In BFSI, where monthly NPA and revenue reports follow the same structure, Power Query eliminates 80% of manual prep time.</div>
+  </div>
+
+  <div class="qa red">
+    <div class="q">Q4. What is the difference between IF and IFS? When must you use IFS?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>IF</strong> handles one condition — TRUE branch or FALSE branch. For multiple conditions you have to nest: <code>=IF(x&gt;=100,"A",IF(x&gt;=80,"B","C"))</code> — readable up to 2 levels, unreadable beyond that. <strong>IFS</strong> evaluates multiple conditions in sequence without nesting: <code>=IFS(x&gt;=100,"A",x&gt;=80,"B",TRUE,"C")</code> — cleaner, easier to audit, supports up to 127 conditions. <strong>Rule: use IFS whenever you have 3+ conditions</strong>. Always end IFS with a TRUE catch-all to avoid #N/A errors when no condition matches — equivalent to the ELSE in SQL CASE WHEN.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5. What is the difference between SUMIF and SUMIFS? When do you use each?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>SUMIF</strong> — one condition, simple syntax: <code>=SUMIF(range, criteria, sum_range)</code>. Use for single-condition totals: "sum all Loan revenue."<br /><strong>SUMIFS</strong> — multiple conditions: <code>=SUMIFS(sum_range, range1, criteria1, range2, criteria2, ...)</code>. Note the argument order changes — sum_range comes FIRST in SUMIFS, last in SUMIF. Use for multi-condition totals: "sum revenue where product=Loan AND region=North." <strong>BFSI example:</strong> <code>=SUMIFS(D:D, C:C, "Loan", B:B, "North")</code> — total Loan revenue in the North region. This replaces a filtered Pivot Table for quick dashboard KPIs.</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">Task 1 — Pivot Table (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Build a Pivot Table on Sheet3 showing revenue by region AND product. Add a slicer for rep_name. Format as currency. Show % of column total.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Step-by-Step Pivot Build</h3>
+    <table>
+      <thead><tr><th>Step</th><th>Action</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Click any cell in Sales data → Insert → PivotTable → New Worksheet (Sheet3)</td><td>Blank pivot created on Sheet3</td></tr>
+        <tr><td>2</td><td>Drag <strong>region</strong> → Rows · Drag <strong>product</strong> → Columns · Drag <strong>revenue</strong> → Values</td><td>Revenue matrix: regions as rows, products as columns</td></tr>
+        <tr><td>3</td><td>Right-click on any revenue value → Value Field Settings → SUM → Number Format → Currency (₹)</td><td>All values show as ₹ formatted</td></tr>
+        <tr><td>4</td><td>Right-click revenue value → Show Values As → % of Column Total</td><td>Each product column shows regional % breakdown</td></tr>
+        <tr><td>5</td><td>PivotTable Analyze tab → Insert Slicer → check rep_name → OK</td><td>Clickable slicer — click Alice → pivot shows only Alice's sales</td></tr>
+        <tr><td>6</td><td>Design tab → Report Layout → Show in Tabular Form</td><td>Cleaner layout for stakeholder sharing</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card success">
+    <h3 style="color:#166534">Expected Pivot Output — Verify This</h3>
+    <table>
+      <thead><tr><th>Region</th><th>Deposit</th><th>Insurance</th><th>Loan</th><th>Grand Total</th></tr></thead>
+      <tbody>
+        <tr><td>East</td><td>—</td><td>—</td><td>95,000</td><td>95,000</td></tr>
+        <tr><td>North</td><td>—</td><td>110,000</td><td>120,000</td><td>230,000</td></tr>
+        <tr><td>South</td><td>—</td><td>85,000</td><td>75,000</td><td>160,000</td></tr>
+        <tr><td>West</td><td>60,000</td><td>—</td><td>—</td><td>60,000</td></tr>
+        <tr><td><strong>Grand Total</strong></td><td>60,000</td><td>195,000</td><td>290,000</td><td><strong>545,000</strong></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;margin-top:6px">Grand total must = 545,000. If it doesn't — check data source range, check for duplicate rows, check Value Field Settings is set to SUM not COUNT.</p>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title blue">Task 2 — Lookup Formulas (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: On Sheet3, build a Rep KPI table that pulls each rep's target from Sheet2 (Reps), calculates variance, and shows % of target. Use XLOOKUP.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Set Up the KPI Table on Sheet3 (below the Pivot)</h3>
+    <table>
+      <thead><tr><th>Col A</th><th>Col B</th><th>Col C</th><th>Col D</th><th>Col E</th><th>Col F</th></tr></thead>
+      <tbody>
+        <tr><td>rep_name</td><td>team</td><td>target</td><td>actual_rev</td><td>variance</td><td>pct_target</td></tr>
+        <tr><td>Alice</td><td>formula</td><td>formula</td><td>formula</td><td>formula</td><td>formula</td></tr>
+        <tr><td>Bob</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td></tr>
+        <tr><td>Carol</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>Dave</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>Eve</td><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card excel">
+    <h3>XLOOKUP — Pull Team and Target from Reps Sheet</h3>
+    <div class="formula-box"><span class="cm">-- B2: Pull team for each rep</span>
+=<span class="fn">XLOOKUP</span>(<span class="arg">A2</span>, <span class="arg">Reps!A:A</span>, <span class="arg">Reps!B:B</span>, <span class="str">"Not Found"</span>)
+<span class="cm">-- lookup_value=A2 · lookup_array=Reps col A · return_array=Reps col B · if_not_found</span>
+
+<span class="cm">-- C2: Pull target</span>
+=<span class="fn">XLOOKUP</span>(<span class="arg">A2</span>, <span class="arg">Reps!A:A</span>, <span class="arg">Reps!D:D</span>, <span class="num">0</span>)
+<span class="cm">-- if_not_found=0 so Eve (who exists in Reps) still gets her target value</span>
+
+<span class="cm">-- D2: Actual revenue (SUMIF from Sales sheet)</span>
+=<span class="fn">SUMIF</span>(<span class="arg">Sales!F:F</span>, <span class="arg">A2</span>, <span class="arg">Sales!D:D</span>)
+<span class="cm">-- sum Sales column D where rep_name (col F) = A2 · Eve returns 0 automatically</span>
+
+<span class="cm">-- E2: Variance = actual - target</span>
+=<span class="arg">D2</span> - <span class="arg">C2</span>
+
+<span class="cm">-- F2: % of target</span>
+=<span class="fn">IFERROR</span>(<span class="arg">D2</span>/<span class="arg">C2</span>, <span class="num">0</span>)
+<span class="cm">-- IFERROR handles divide by zero if target is ever blank</span>
+<span class="cm">-- Format F column as Percentage with 1 decimal</span></div>
+  </div>
+
+  <div class="card excel">
+    <h3>VLOOKUP (Legacy — Know It for Interviews)</h3>
+    <div class="formula-box"><span class="cm">-- VLOOKUP syntax (still tested in legacy BFSI environments)</span>
+=<span class="fn">VLOOKUP</span>(<span class="arg">A2</span>, <span class="arg">Reps!A:D</span>, <span class="num">4</span>, <span class="num">0</span>)
+<span class="cm">-- lookup_value · table_array · col_index_num(4=target) · 0=exact match
+-- Weakness: if someone inserts a column in Reps, col 4 changes → wrong result
+-- XLOOKUP fix: references column directly, not by number</span>
+
+<span class="cm">-- INDEX-MATCH (enterprise favourite — works in older Excel)</span>
+=<span class="fn">INDEX</span>(<span class="arg">Reps!D:D</span>, <span class="fn">MATCH</span>(<span class="arg">A2</span>, <span class="arg">Reps!A:A</span>, <span class="num">0</span>))
+<span class="cm">-- MATCH returns row number · INDEX fetches value at that row</span></div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 3 — IFS · SUMIFS · Conditional Formatting (35 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Add a Status column to the KPI table. Then build a regional summary using SUMIFS. Apply traffic-light conditional formatting.</h3>
+  </div>
+
+  <div class="card excel">
+    <h3>IFS — Rep Status (On Track / At Risk / Underperforming)</h3>
+    <div class="formula-box"><span class="cm">-- G2: Status based on % of target (column F)</span>
+=<span class="fn">IFS</span>(
+  <span class="arg">F2</span> &gt;= <span class="num">1</span>,     <span class="str">"🟢 On Track"</span>,
+  <span class="arg">F2</span> &gt;= <span class="num">0.8</span>,   <span class="str">"🟡 At Risk"</span>,
+  <span class="fn">TRUE</span>,          <span class="str">"🔴 Underperforming"</span>
+)
+<span class="cm">-- TRUE at end = catch-all (like ELSE in SQL CASE WHEN)
+-- Without TRUE: formula returns #N/A if no condition matches!
+-- Expected: Alice 🟢 · Bob 🟡 · Carol 🔴 · Dave 🔴 · Eve 🔴</span></div>
+  </div>
+
+  <div class="card excel">
+    <h3>SUMIFS — Multi-Condition Regional Summary</h3>
+    <div class="formula-box"><span class="cm">-- Build a mini summary table with headers: Region | Loan Rev | Insurance Rev | Total</span>
+
+<span class="cm">-- Loan revenue for North</span>
+=<span class="fn">SUMIFS</span>(<span class="arg">Sales!D:D</span>, <span class="arg">Sales!B:B</span>, <span class="str">"North"</span>, <span class="arg">Sales!C:C</span>, <span class="str">"Loan"</span>)
+<span class="cm">-- Result: 120,000</span>
+
+<span class="cm">-- Insurance revenue for North</span>
+=<span class="fn">SUMIFS</span>(<span class="arg">Sales!D:D</span>, <span class="arg">Sales!B:B</span>, <span class="str">"North"</span>, <span class="arg">Sales!C:C</span>, <span class="str">"Insurance"</span>)
+<span class="cm">-- Result: 110,000</span>
+
+<span class="cm">-- Dynamic version — reference cells instead of hardcoding</span>
+=<span class="fn">SUMIFS</span>(<span class="arg">Sales!$D:$D</span>, <span class="arg">Sales!$B:$B</span>, <span class="arg">$A2</span>, <span class="arg">Sales!$C:$C</span>, <span class="arg">B$1</span>)
+<span class="cm">-- $A2 = region from col A (locks col, free row) · B$1 = product from row 1 (locks row, free col)
+-- This lets you drag the formula across the whole summary table!</span>
+
+<span class="cm">-- COUNTIFS — count deals by region and product</span>
+=<span class="fn">COUNTIFS</span>(<span class="arg">Sales!$B:$B</span>, <span class="arg">A2</span>, <span class="arg">Sales!$C:$C</span>, <span class="str">"Loan"</span>)
+
+<span class="cm">-- AVERAGEIFS — avg deal size for Loan in North</span>
+=<span class="fn">AVERAGEIFS</span>(<span class="arg">Sales!$D:$D</span>, <span class="arg">Sales!$B:$B</span>, <span class="str">"North"</span>, <span class="arg">Sales!$C:$C</span>, <span class="str">"Loan"</span>)</div>
+  </div>
+
+  <div class="card excel">
+    <h3>Conditional Formatting — Traffic Light on KPI Table</h3>
+    <div class="formula-box"><span class="cm">-- Step 1: Select the Status column (G2:G6)
+-- Step 2: Home → Conditional Formatting → New Rule → "Format cells that contain"
+-- Step 3: Cell value contains "On Track" → Fill Green (#92D050)
+-- Step 4: Repeat — contains "At Risk" → Fill Amber (#FFEB9C)
+-- Step 5: Repeat — contains "Under" → Fill Red (#FFC7CE)
+
+-- Alternative: Use formula-based rule on % column (F2:F6)
+-- Rule 1: =F2&gt;=1     → Green fill  (On Track)
+-- Rule 2: =F2&gt;=0.8   → Amber fill  (At Risk)
+-- Rule 3: =F2&lt;0.8    → Red fill    (Underperforming)
+
+-- Data Bars on revenue column (D2:D6):
+-- Home → Conditional Formatting → Data Bars → Gradient Fill → Green
+-- Visual bar inside each cell proportional to revenue value</span></div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 4 — Power Query (35 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Load sales.csv using Power Query. Clean it (rename columns, remove blanks, add revenue band column). Load to Sheet4. Demonstrate refresh when data changes.</h3>
+  </div>
+
+  <div class="card excel">
+    <h3>Power Query Step-by-Step</h3>
+    <table>
+      <thead><tr><th>Step</th><th>Action in Power Query Editor</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>1. Load</td><td>Data tab → Get Data → From File → From Text/CSV → select sales.csv → Transform Data</td><td>Opens PQ Editor without loading raw data yet</td></tr>
+        <tr><td>2. Headers</td><td>Home → Use First Row as Headers</td><td>Promotes row 1 to column headers</td></tr>
+        <tr><td>3. Types</td><td>Select revenue column → Transform → Data Type → Decimal Number</td><td>Ensures revenue is numeric not text</td></tr>
+        <tr><td>4. Date type</td><td>Select sale_date → Data Type → Date</td><td>Enables date filtering and sorting</td></tr>
+        <tr><td>5. Remove nulls</td><td>Home → Remove Rows → Remove Blank Rows</td><td>Cleans empty rows that cause calculation errors</td></tr>
+        <tr><td>6. Rename col</td><td>Double-click "rep_name" → rename to "Rep Name"</td><td>Stakeholder-friendly column name</td></tr>
+        <tr><td>7. Add column</td><td>Add Column → Custom Column → name "Revenue Band" → formula below</td><td>Calculated column inside PQ (not formula in sheet)</td></tr>
+        <tr><td>8. Load</td><td>Home → Close &amp; Load To → Table → Sheet4</td><td>Outputs clean table to Sheet4</td></tr>
+        <tr><td>9. Refresh</td><td>Data tab → Refresh All (or right-click table → Refresh)</td><td>Reapplies ALL steps when source file updates</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card excel">
+    <h3>Power Query Custom Column Formula (M Language)</h3>
+    <div class="formula-box"><span class="cm">// Revenue Band custom column formula in Power Query (M language)</span>
+= <span class="fn">if</span> [revenue] &gt;= <span class="num">100000</span> <span class="fn">then</span> <span class="str">"High"</span>
+  <span class="fn">else if</span> [revenue] &gt;= <span class="num">75000</span> <span class="fn">then</span> <span class="str">"Mid"</span>
+  <span class="fn">else</span> <span class="str">"Low"</span>
+
+<span class="cm">// Note: M language is case-sensitive — "if" lowercase, not "IF"
+// Column references use [column_name] with square brackets
+// This is the Power Query equivalent of Excel IFS or SQL CASE WHEN</span>
+
+<span class="cm">// Other useful M transforms:</span>
+= <span class="fn">Text.Upper</span>([rep_name])          <span class="cm">// UPPER</span>
+= <span class="fn">Text.Trim</span>([rep_name])           <span class="cm">// TRIM</span>
+= <span class="fn">Date.Month</span>([sale_date])         <span class="cm">// MONTH</span>
+= <span class="fn">Number.Round</span>([revenue], <span class="num">0</span>)    <span class="cm">// ROUND</span></div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Day 5 Flowchart — Excel Analyst Workflow</div>
+  <div class="flow-wrap">
+    <svg width="700" height="570" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 5 — Advanced Excel Decision Framework</text>
+
+      
+      <rect x="210" y="34" width="280" height="36" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#e6edf3" font-weight="700">Receive Data from Client / SQL Export</text>
+      <text x="350" y="63" text-anchor="middle" fill="#8b949e" font-size="11">CSV / Excel / Database extract → needs analysis</text>
+      <line x1="350" y1="70" x2="350" y2="90" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,90 465,120 350,150 235,120" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="114" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Is data clean?</text>
+      <text x="350" y="128" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Correct types · No blanks?</text>
+      <text x="177" y="116" text-anchor="middle" fill="#57606a" font-size="10">NO — messy</text>
+      <text x="523" y="116" text-anchor="middle" fill="#57606a" font-size="10">YES — proceed</text>
+
+      
+      <line x1="235" y1="120" x2="120" y2="120" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="18" y="98" width="102" height="44" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="69" y="115" text-anchor="middle" fill="#7f1d1d" font-weight="700">Power Query</text>
+      <text x="69" y="127" text-anchor="middle" fill="#991b1b" font-size="10">Clean · Type · Transform</text>
+      <text x="69" y="138" text-anchor="middle" fill="#991b1b" font-size="10">Refresh-ready pipeline</text>
+      <line x1="69" y1="142" x2="69" y2="182" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="69" y1="182" x2="220" y2="182" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <line x1="465" y1="120" x2="572" y2="120" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="572" y="98" width="116" height="44" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="630" y="115" text-anchor="middle" fill="#14532d" font-weight="700">Data Ready ✅</text>
+      <text x="630" y="127" text-anchor="middle" fill="#166534" font-size="10">Named Table → Ctrl+T</text>
+      <text x="630" y="138" text-anchor="middle" fill="#166534" font-size="10">Structured reference</text>
+      <line x1="630" y1="142" x2="630" y2="182" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="630" y1="182" x2="480" y2="182" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <line x1="350" y1="150" x2="350" y2="182" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,182 470,214 350,246 230,214" fill="#ede9fe" stroke="#c4b5fd" stroke-width="2"></polygon>
+      <text x="350" y="208" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">What output</text>
+      <text x="350" y="222" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">is needed?</text>
+
+      
+      <text x="100" y="207" text-anchor="middle" fill="#57606a" font-size="10">Aggregate /</text>
+      <text x="100" y="219" text-anchor="middle" fill="#57606a" font-size="10">Summary</text>
+      <text x="350" y="255" text-anchor="middle" fill="#57606a" font-size="10">Lookup / Join</text>
+      <text x="600" y="207" text-anchor="middle" fill="#57606a" font-size="10">KPI / Flag /</text>
+      <text x="600" y="219" text-anchor="middle" fill="#57606a" font-size="10">Conditional</text>
+
+      
+      <line x1="230" y1="214" x2="130" y2="214" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="18" y="282" width="152" height="64" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="94" y="300" text-anchor="middle" fill="#14532d" font-weight="700">Pivot Table</text>
+      <text x="94" y="314" text-anchor="middle" fill="#166534" font-size="11">Rows: region</text>
+      <text x="94" y="327" text-anchor="middle" fill="#166534" font-size="11">Cols: product</text>
+      <text x="94" y="340" text-anchor="middle" fill="#166534" font-size="11">Values: SUM(revenue)</text>
+      <line x1="130" y1="214" x2="94" y2="214" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="94" y1="214" x2="94" y2="282" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <line x1="350" y1="246" x2="350" y2="282" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="240" y="282" width="220" height="64" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="350" y="300" text-anchor="middle" fill="#1e3a8a" font-weight="700">XLOOKUP / INDEX-MATCH</text>
+      <text x="350" y="314" text-anchor="middle" fill="#1e40af" font-size="11">=XLOOKUP(A2, Reps!A:A,</text>
+      <text x="350" y="327" text-anchor="middle" fill="#1e40af" font-size="11">Reps!D:D, "Not Found")</text>
+      <text x="350" y="340" text-anchor="middle" fill="#3b82f6" font-size="10">Pull target, team, hire_date</text>
+
+      
+      <line x1="470" y1="214" x2="570" y2="214" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="530" y="282" width="158" height="64" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="609" y="300" text-anchor="middle" fill="#4c1d95" font-weight="700">IFS / SUMIFS</text>
+      <text x="609" y="314" text-anchor="middle" fill="#5b21b6" font-size="11">=IFS(pct&gt;=1,"🟢",</text>
+      <text x="609" y="327" text-anchor="middle" fill="#5b21b6" font-size="11">pct&gt;=0.8,"🟡",</text>
+      <text x="609" y="340" text-anchor="middle" fill="#5b21b6" font-size="11">TRUE,"🔴")</text>
+      <line x1="570" y1="214" x2="609" y2="214" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="609" y1="214" x2="609" y2="282" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <line x1="94" y1="346" x2="94" y2="390" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="346" x2="350" y2="390" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="609" y1="346" x2="609" y2="390" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="94" y1="390" x2="609" y2="390" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="390" x2="350" y2="410" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="130" y="410" width="440" height="42" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="428" text-anchor="middle" fill="#854d0e" font-weight="700">Apply Conditional Formatting</text>
+      <text x="350" y="442" text-anchor="middle" fill="#b45309" font-size="11">Traffic lights · Data bars · Colour scales · Icon sets</text>
+      <line x1="350" y1="452" x2="350" y2="472" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="130" y="472" width="440" height="42" rx="7" fill="#1f2328"></rect>
+      <text x="350" y="490" text-anchor="middle" fill="#e6edf3" font-weight="700">Business Insight + Stakeholder Summary</text>
+      <text x="350" y="505" text-anchor="middle" fill="#8b949e" font-size="11">"North = 42% of revenue · Alice 115% target · 3/5 reps underperforming"</text>
+      <line x1="350" y1="514" x2="350" y2="534" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="200" y="534" width="300" height="28" rx="7" fill="#22c55e"></rect>
+      <text x="350" y="552" text-anchor="middle" fill="#fff" font-weight="800">✅ Dashboard Delivered to Stakeholder</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 5 Cheat Sheet — Advanced Excel</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="green">📊 Pivot Table — Quick Steps</h4>
+      <div class="fb"><span class="cm">-- Build</span>
+Insert → PivotTable → New Sheet
+Rows: region
+Columns: product
+Values: SUM of revenue
+
+<span class="cm">-- Format</span>
+Right-click value → Value Field Settings
+→ SUM → Number Format → Currency
+
+<span class="cm">-- % of total</span>
+Value Field Settings
+→ Show Values As
+→ % of Column Total
+
+<span class="cm">-- Slicer</span>
+PivotTable Analyze
+→ Insert Slicer → rep_name
+
+<span class="cm">-- Refresh</span>
+Right-click → Refresh
+(after source data changes)</div>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="blue">🔍 Lookup Formulas</h4>
+      <div class="fb"><span class="cm">-- XLOOKUP (modern · best)</span>
+=<span class="fn">XLOOKUP</span>(A2, Reps!A:A,
+         Reps!D:D, "Not Found")
+<span class="cm">-- any direction · no col number</span>
+
+<span class="cm">-- VLOOKUP (legacy · know it)</span>
+=<span class="fn">VLOOKUP</span>(A2, Reps!A:D, 4, 0)
+<span class="cm">-- left-to-right only · fragile</span>
+
+<span class="cm">-- INDEX-MATCH (enterprise)</span>
+=<span class="fn">INDEX</span>(Reps!D:D,
+  <span class="fn">MATCH</span>(A2, Reps!A:A, 0))
+
+<span class="cm">-- IFERROR wrapper</span>
+=<span class="fn">IFERROR</span>(XLOOKUP(...),"N/A")
+
+<span class="cm">-- % of target</span>
+=<span class="fn">IFERROR</span>(D2/C2, 0)
+<span class="cm">-- prevents #DIV/0!</span></div>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">🔀 Logic + Conditional Formulas</h4>
+      <div class="fb"><span class="cm">-- IFS (multi-condition)</span>
+=<span class="fn">IFS</span>(F2&gt;=1,   "🟢 On Track",
+    F2&gt;=0.8, "🟡 At Risk",
+    <span class="fn">TRUE</span>,    "🔴 Under")
+<span class="cm">-- TRUE = catch-all (mandatory!)</span>
+
+<span class="cm">-- SUMIFS (multi-condition sum)</span>
+=<span class="fn">SUMIFS</span>(D:D, B:B,"North",
+              C:C,"Loan")
+<span class="cm">-- sum_range FIRST in SUMIFS</span>
+
+<span class="cm">-- COUNTIFS</span>
+=<span class="fn">COUNTIFS</span>(B:B,"North",C:C,"Loan")
+
+<span class="cm">-- AVERAGEIFS</span>
+=<span class="fn">AVERAGEIFS</span>(D:D,B:B,"North",
+                   C:C,"Loan")
+
+<span class="cm">-- Dynamic with $ locks</span>
+=<span class="fn">SUMIFS</span>($D:$D,$B:$B,$A2,$C:$C,B$1)</div>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="red">🔄 Power Query + Traps</h4>
+      <div class="fb"><span class="cm">-- Load CSV</span>
+Data → Get Data → From File
+→ From Text/CSV → Transform Data
+
+<span class="cm">-- Must-do steps</span>
+Use First Row as Headers
+Set revenue → Decimal Number
+Set sale_date → Date
+Remove Blank Rows
+
+<span class="cm">-- Custom column (M language)</span>
+= if [revenue] &gt;= 100000
+  then "High"
+  else if [revenue] &gt;= 75000
+  then "Mid"
+  else "Low"
+
+<span class="cm">-- Common traps</span>
+VLOOKUP col breaks on insert
+IFS without TRUE → #N/A
+SUMIFS sum_range comes FIRST
+Pivot not refreshed → stale data
+= NULL (use IFERROR, not "")</div>
+    </div>
+
+  </div>
+
+  
+  <div class="card">
+    <h3>XLOOKUP vs VLOOKUP vs INDEX-MATCH — Quick Comparison</h3>
+    <table>
+      <thead><tr><th>Feature</th><th>VLOOKUP</th><th>INDEX-MATCH</th><th>XLOOKUP</th></tr></thead>
+      <tbody>
+        <tr><td>Direction</td><td>Left-to-right only</td><td>Any direction</td><td>Any direction</td></tr>
+        <tr><td>Column reference</td><td>Number (fragile)</td><td>Range reference</td><td>Range reference</td></tr>
+        <tr><td>Error handling</td><td>Wrap in IFERROR</td><td>Wrap in IFERROR</td><td>4th argument built-in</td></tr>
+        <tr><td>Multiple returns</td><td>One column only</td><td>One column only</td><td>Entire array possible</td></tr>
+        <tr><td>Availability</td><td>All Excel versions</td><td>All Excel versions</td><td>Excel 2021 / Microsoft 365</td></tr>
+        <tr><td>Persistent verdict</td><td>Legacy — know it</td><td>Enterprise standard</td><td>🟢 Modern standard — use this</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 5</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>Uses VLOOKUP with a column number — "fragile and outdated" signal</li>
+        <li>IFS formula missing TRUE catch-all — random #N/A errors</li>
+        <li>SUMIFS with sum_range last (SUMIF order) — wrong result silently</li>
+        <li>Pivot showing COUNT instead of SUM — revenue looks like "6" not "545,000"</li>
+        <li>Pivot not refreshed after data change — presents stale numbers</li>
+        <li>Can't explain why Power Query is better than copy-paste</li>
+        <li>No IFERROR on division formula — #DIV/0! visible in stakeholder report</li>
+        <li>Gives raw numbers with no business insight attached</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>Explains XLOOKUP advantage — "direction-free, no column number, built-in error handling"</li>
+        <li>IFS always ends with TRUE catch-all — "equivalent to ELSE in SQL CASE WHEN"</li>
+        <li>States SUMIFS sum_range comes first — doesn't confuse with SUMIF</li>
+        <li>Pivot: changes Value Field to SUM, formats as currency, adds % of total</li>
+        <li>Explains Power Query "every step is recorded — click Refresh, done"</li>
+        <li>IFERROR wrapped on all division formulas — production-quality workbook</li>
+        <li>Uses $ locking correctly in SUMIFS — formula drags without breaking</li>
+        <li>Business insight per output: "Eve = 0% target — needs HR escalation today"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 5 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #22c55e;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 5 of my 15-day Data Analyst prep.
+Topic: Advanced Excel — Pivot Tables · XLOOKUP · IFS · SUMIFS · Power Query · Conditional Formatting
+Tool: Microsoft Excel (365 or 2021)
+Data: sales.csv + reps data (persistence_analytics dataset from Days 1–4)
+Time available: 3.5 hours (20% theory, 80% hands-on)
+
+START DAY 5 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 5 → session begins.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 6 (Python + NumPy + Pandas Fundamentals)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>What is a DataFrame? How is it similar to an Excel table?</td><td>Day 6 opens with this analogy — anchors all pandas concepts</td></tr>
+      <tr><td>What does df.head(), df.shape, df.dtypes do?</td><td>First 3 lines every pandas session — graded in first 5 min</td></tr>
+      <tr><td>What is the difference between a Series and a DataFrame?</td><td>Core concept — one column vs the full table</td></tr>
+      <tr><td>Export your Excel KPI table as CSV — import it in Python tomorrow</td><td>Day 6 uses the same dataset — continuity reinforces learning</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–4 ✅  | 
+  <strong style="color:#166534">Day 5 🟢 TODAY</strong>  | 
+  Day 6 · 7 · 8 · 9 · 10 · 11 · 12 · 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

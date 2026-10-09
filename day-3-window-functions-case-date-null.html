@@ -1,0 +1,849 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 3 — Window Functions · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#0c4a6e;color:#bae6fd}
+.b2{background:#1e3a8a;color:#bfdbfe}
+.b3{background:#4c1d95;color:#ddd6fe}
+.b4{background:#14532d;color:#bbf7d0}
+.b5{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#1e40af;border-bottom:2px solid #1e40af;padding-bottom:4px;margin-bottom:14px}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.dark{color:#1f2328;border-color:#1f2328}
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+.card.warn{background:#fffbeb;border-color:#fde68a}
+.card.success{background:#f0fdf4;border-color:#86efac}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.sql{background:#dbeafe;color:#1e40af}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.str{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.green{color:#166534}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+.qa{border-left:3px solid #1e40af;padding:10px 14px;background:#f0f6ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#1e3a5f}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#1e40af}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}
+.qa.purple .q{color:#4c1d95}.qa.purple .a strong{color:#7c5cd8}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}
+.qa.green .q{color:#14532d}.qa.green .a strong{color:#1a7f4b}
+.qa.red{border-color:#b91c1c;background:#fff5f5}
+.qa.red .q{color:#7f1d1d}.qa.red .a strong{color:#b91c1c}
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166534;border:2px solid #86efac}
+.today{background:#dbeafe;color:#1e40af;border:2px dotted #3b82d4}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+.fn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.fn-box{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px}
+.fn-box .fname{font-size:11px;font-weight:800;text-transform:uppercase;color:#1e40af;letter-spacing:.04em;margin-bottom:3px}
+.fn-box .fdesc{font-size:12px;color:#1f2328}
+.fn-box .fex{font-size:11px;color:#57606a;font-family:monospace;margin-top:3px;background:#f0f2f5;padding:2px 5px;border-radius:3px;display:inline-block}
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>🪟 Day 3 — Window Functions · CASE · Date · NULL</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 3.5 Hours</p>
+  <div class="badge-row">
+    <span class="badge b1">RANK · DENSE_RANK · ROW_NUMBER</span>
+    <span class="badge b2">LAG · LEAD · Running Total</span>
+    <span class="badge b3">CASE WHEN</span>
+    <span class="badge b4">Date + NULL Functions</span>
+    <span class="badge b5">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div><div class="day-dot done">2</div>
+    <div class="day-dot today">3</div>
+    <div class="day-dot future">4</div><div class="day-dot future">5</div><div class="day-dot future">6</div>
+    <div class="day-dot future">7</div><div class="day-dot future">8</div><div class="day-dot future">9</div>
+    <div class="day-dot future">10</div><div class="day-dot future">11</div><div class="day-dot future">12</div>
+    <div class="day-dot future">13</div><div class="day-dot future">14</div><div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–2 complete · 🔵 Today: Day 3 · ⬜ Days 4–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎯 Why Day 3 Is the Hardest SQL Day — And the Most Asked</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">Persistent Interview Reality Check</h3>
+    <table>
+      <thead><tr><th>Concept</th><th>Interview Frequency</th><th>Candidate Failure Rate</th></tr></thead>
+      <tbody>
+        <tr><td>RANK() vs DENSE_RANK() difference</td><td>🔥 Asked in 90% of DA interviews</td><td>~60% get it wrong</td></tr>
+        <tr><td>LAG() for month-over-month comparison</td><td>🔥 Asked in 85% of BFSI DA interviews</td><td>~70% can't write it cold</td></tr>
+        <tr><td>Running total with OVER()</td><td>🔥 Asked in 80% of interviews</td><td>~65% miss ROWS BETWEEN</td></tr>
+        <tr><td>CASE WHEN inside aggregate (SUM CASE WHEN)</td><td>🔥 Asked in 75% of interviews</td><td>~55% mix up WHERE vs CASE</td></tr>
+        <tr><td>NULLIF() to prevent divide-by-zero</td><td>🔥 Asked in 60% of interviews</td><td>~80% have never used it</td></tr>
+        <tr><td>COALESCE vs ISNULL vs IFNULL</td><td>Asked in 70% of interviews</td><td>~40% confuse them</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 3 Agenda — 3.5 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Topic</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:25</td><td>Theory Blitz</td><td>Window function anatomy · OVER() · PARTITION BY · ORDER BY</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:25–0:55</td><td>Q&amp;A Round (5 Qs)</td><td>RANK vs DENSE_RANK · LAG · NULL rules</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:55–1:35</td><td>Task 1 — Ranking</td><td>RANK · DENSE_RANK · ROW_NUMBER · NTILE</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>1:35–2:15</td><td>Task 2 — LAG/LEAD + Running Total</td><td>MoM comparison · cumulative revenue</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:15–2:50</td><td>Task 3 — CASE WHEN + Date Functions</td><td>Conditional aggregation · DATEDIFF · DATE_FORMAT</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:50–3:20</td><td>Task 4 — NULL Handling Deep Dive</td><td>COALESCE · NULLIF · IFNULL · IS NULL traps</td><td><span class="tag med">Hands-On</span></td></tr>
+      <tr><td>3:20–3:30</td><td>Debrief</td><td>Score card · mistakes → fixes · Day 4 prep</td><td><span class="tag easy">Review</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🧬 Window Function Anatomy — The Complete Mental Model</div>
+  <div class="card">
+    <h3>Structure Every Window Function Follows</h3>
+    <pre><span class="fn">FUNCTION_NAME</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> column_name   <span class="cm">-- optional: "for each group"</span>
+    <span class="kw">ORDER BY</span>     column_name   <span class="cm">-- required for LAG/LEAD/RANK/running totals</span>
+    <span class="kw">ROWS BETWEEN</span> start <span class="kw">AND</span> end <span class="cm">-- optional: window frame</span>
+)
+
+<span class="cm">-- PARTITION BY = GROUP BY but rows NOT collapsed (all rows stay visible)
+-- ORDER BY inside OVER = different from outer ORDER BY
+-- ROWS BETWEEN = how wide the "sliding window" is</span>
+
+<span class="cm">-- Common window frames:</span>
+<span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>  <span class="cm">-- running total</span>
+<span class="kw">ROWS BETWEEN</span> <span class="num">1</span> <span class="kw">PRECEDING AND</span> <span class="num">1</span> <span class="kw">FOLLOWING</span>         <span class="cm">-- 3-row moving avg</span>
+<span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</span> <span class="cm">-- whole partition</span></pre>
+  </div>
+
+  <div class="fn-grid">
+    <div class="fn-box">
+      <div class="fname">RANK()</div>
+      <div class="fdesc">Assigns rank. Ties get same rank. Next rank skips numbers.</div>
+      <div class="fex">1,1,3 (skip 2)</div>
+    </div>
+    <div class="fn-box">
+      <div class="fname">DENSE_RANK()</div>
+      <div class="fdesc">Assigns rank. Ties get same rank. Next rank does NOT skip.</div>
+      <div class="fex">1,1,2 (no skip)</div>
+    </div>
+    <div class="fn-box">
+      <div class="fname">ROW_NUMBER()</div>
+      <div class="fdesc">Unique sequential number. Ties broken arbitrarily.</div>
+      <div class="fex">1,2,3 (always unique)</div>
+    </div>
+    <div class="fn-box">
+      <div class="fname">LAG(col, n)</div>
+      <div class="fdesc">Returns value n rows BEFORE the current row.</div>
+      <div class="fex">LAG(revenue, 1)</div>
+    </div>
+    <div class="fn-box">
+      <div class="fname">LEAD(col, n)</div>
+      <div class="fdesc">Returns value n rows AFTER the current row.</div>
+      <div class="fex">LEAD(revenue, 1)</div>
+    </div>
+    <div class="fn-box">
+      <div class="fname">NTILE(n)</div>
+      <div class="fdesc">Divides rows into n equal buckets (quartiles, deciles).</div>
+      <div class="fex">NTILE(4) = quartile</div>
+    </div>
+    <div class="fn-box">
+      <div class="fname">SUM() OVER()</div>
+      <div class="fdesc">Running total or partition total without collapsing rows.</div>
+      <div class="fex">Cumulative revenue</div>
+    </div>
+    <div class="fn-box">
+      <div class="fname">AVG() OVER()</div>
+      <div class="fdesc">Moving average or partition average per row.</div>
+      <div class="fex">3-month moving avg</div>
+    </div>
+    <div class="fn-box">
+      <div class="fname">FIRST_VALUE()</div>
+      <div class="fdesc">Returns the first value in a window frame.</div>
+      <div class="fex">First sale in region</div>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎓 Theory Q&amp;A — 5 Interview Questions</div>
+
+  <div class="qa">
+    <div class="q">Q1. What is the difference between RANK(), DENSE_RANK(), and ROW_NUMBER()? Give a BFSI use case for each.</div>
+    <div class="a">
+      <strong>Hired answer:</strong><br />
+      <strong>RANK()</strong> — skips numbers after ties. Example: Two loan officers both at ₹1L → both rank 1, next officer gets rank 3. Use when you want to show actual competitive gaps.<br />
+      <strong>DENSE_RANK()</strong> — no skip. Both get rank 1, next gets rank 2. Use when bucketing customers into Gold/Silver/Bronze tiers — no empty tier gaps acceptable.<br />
+      <strong>ROW_NUMBER()</strong> — always unique, ties broken arbitrarily by database. Use for pagination in an NPA ledger report — fetching rows 1–50 requires unique row identifiers.<br />
+      <strong>Key rule:</strong> if the interviewer asks "how do you get Top-N without duplicates?" — <code>ROW_NUMBER()</code>. If "how do you rank with fair ties?" — <code>RANK()</code> or <code>DENSE_RANK()</code>.
+    </div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">Q2. What is PARTITION BY inside OVER()? How is it different from GROUP BY?</div>
+    <div class="a">
+      <strong>Hired answer:</strong> Both divide data into groups, but they behave completely differently. <strong>GROUP BY</strong> collapses rows — you get one output row per group. <strong>PARTITION BY</strong> does NOT collapse rows — every original row stays in the result, but the window function calculation resets for each partition group.<br />
+      <strong>Analogy:</strong> GROUP BY = calculating the team total (1 row per team). PARTITION BY = stamping each employee row with their team's total (all rows stay, each shows team total alongside individual data).<br />
+      <strong>BFSI example:</strong> <code>SUM(revenue) OVER (PARTITION BY region)</code> — each sale row shows both its own revenue AND the total revenue for its region. Impossible with GROUP BY alone.
+    </div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q3. What does LAG() do and when would you use it in banking analytics?</div>
+    <div class="a">
+      <strong>Hired answer:</strong> <strong>LAG(column, n)</strong> returns the value from n rows before the current row within the defined ORDER BY. It does NOT join to another table — the "previous" value comes from the same result set.<br />
+      <strong>BFSI use cases:</strong><br />
+      1. Month-over-month revenue change: <code>LAG(monthly_revenue, 1) OVER (ORDER BY month)</code> — previous month's revenue on each row, then calculate % change.<br />
+      2. DPD escalation: <code>LAG(dpd_bucket) OVER (PARTITION BY account_id ORDER BY month)</code> — was this account in a worse bucket last month? If yes, it's an escalation.<br />
+      3. Customer balance trend: <code>LAG(balance) OVER (PARTITION BY customer_id ORDER BY txn_date)</code> — detect rapid balance decreases (early churn signal).
+    </div>
+  </div>
+
+  <div class="qa red">
+    <div class="q">Q4. What is NULLIF() and when is it essential? What happens without it?</div>
+    <div class="a">
+      <strong>Hired answer:</strong> <strong>NULLIF(expr1, expr2)</strong> returns NULL if expr1 = expr2, otherwise returns expr1. Its primary use is preventing divide-by-zero errors.<br />
+      <strong>Without it:</strong> <code>revenue / target</code> — if target = 0 (like a new rep whose target wasn't set), MySQL returns a division by zero error that crashes the entire query.<br />
+      <strong>With it:</strong> <code>revenue / NULLIF(target, 0)</code> — when target = 0, NULLIF returns NULL, so the division returns NULL instead of an error. You can then wrap with <code>COALESCE(..., 0)</code> to replace NULL with 0.<br />
+      <strong>In DAX (Power BI):</strong> DIVIDE() does the same job — <code>DIVIDE(revenue, target, 0)</code>. Always use DIVIDE() in DAX, never "/".
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5. What is the difference between COALESCE(), IFNULL(), and ISNULL()? Which should you use in MySQL?</div>
+    <div class="a">
+      <strong>Hired answer:</strong><br />
+      <strong>COALESCE(v1, v2, v3, ...)</strong> — returns the first non-NULL value from a list. Works in ALL SQL databases. Accepts multiple arguments. <strong>Use this — it's the standard.</strong><br />
+      <strong>IFNULL(expr, replacement)</strong> — MySQL-specific. Only 2 arguments. Equivalent to COALESCE with 2 values.<br />
+      <strong>ISNULL(expr)</strong> — SQL Server function. In MySQL, ISNULL() is a boolean check (returns 1 if NULL, 0 if not) — it does NOT replace NULL.<br />
+      <strong>Rule:</strong> Always use COALESCE() in MySQL interviews — it's portable, multi-argument, and interviewers expect it. Using ISNULL() in MySQL to replace a value is a mistake that signals SQL Server background confusion.
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">Task 1 — Ranking Functions (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: The Sales Head wants a revenue leaderboard showing RANK, DENSE_RANK, ROW_NUMBER, and quartile (NTILE) for all reps. Include reps with no sales.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 1A — All 4 Ranking Functions Side-by-Side</h3>
+    <pre><span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)              <span class="kw">AS</span> total_revenue,
+    <span class="fn">RANK</span>()        <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue),<span class="num">0</span>) <span class="kw">DESC</span>) <span class="kw">AS</span> rnk,
+    <span class="fn">DENSE_RANK</span>()  <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue),<span class="num">0</span>) <span class="kw">DESC</span>) <span class="kw">AS</span> dense_rnk,
+    <span class="fn">ROW_NUMBER</span>()  <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue),<span class="num">0</span>) <span class="kw">DESC</span>) <span class="kw">AS</span> row_num,
+    <span class="fn">NTILE</span>(<span class="num">4</span>)      <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue),<span class="num">0</span>) <span class="kw">DESC</span>) <span class="kw">AS</span> quartile
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name
+<span class="kw">GROUP BY</span> r.rep_name, r.team
+<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- Expected output (5 rows):
+-- Alice  230000  1  1  1  1 (Platinum)
+-- Carol   95000  2  2  2  2 (Gold)
+-- Bob     85000  3  3  3  2 (Gold) — wait, Bob+Carol both Q2 with 5 reps
+-- Dave    60000  4  4  4  3 (Silver)
+-- Eve          0  5  5  5  4 (Bronze)
+-- Business: quartile 4 = underperformers needing HR attention</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 1B — Rank WITHIN Each Team (PARTITION BY)</h3>
+    <pre><span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)              <span class="kw">AS</span> total_revenue,
+    <span class="fn">RANK</span>() <span class="kw">OVER</span> (
+        <span class="kw">PARTITION BY</span> r.team
+        <span class="kw">ORDER BY</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue),<span class="num">0</span>) <span class="kw">DESC</span>
+    )                                          <span class="kw">AS</span> team_rank
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name
+<span class="kw">GROUP BY</span> r.rep_name, r.team
+<span class="kw">ORDER BY</span> r.team, team_rank;
+
+<span class="cm">-- Retail team: Alice=rank1, Carol=rank2, Eve=rank3 (within Retail only)
+-- SME team: Bob=rank1, Dave=rank2 (within SME only)
+-- Business: "Who is the top performer within each team?" — team-level incentives</span></pre>
+  </div>
+
+  <div class="card success">
+    <h3 style="color:#166534">Expected Results — Verify These</h3>
+    <table>
+      <thead><tr><th>rep_name</th><th>team</th><th>total_rev</th><th>RANK</th><th>DENSE_RANK</th><th>ROW_NUM</th><th>NTILE(4)</th></tr></thead>
+      <tbody>
+        <tr><td>Alice</td><td>Retail</td><td>230,000</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+        <tr><td>Carol</td><td>Retail</td><td>95,000</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+        <tr><td>Bob</td><td>SME</td><td>85,000</td><td>3</td><td>3</td><td>3</td><td>2</td></tr>
+        <tr><td>Dave</td><td>SME</td><td>60,000</td><td>4</td><td>4</td><td>4</td><td>3</td></tr>
+        <tr><td>Eve</td><td>Retail</td><td>0</td><td>5</td><td>5</td><td>5</td><td>4</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;margin-top:6px">With 5 unique values, RANK = DENSE_RANK = ROW_NUMBER (no ties). NTILE(4) on 5 rows: buckets are 2/1/1/1 — rows 1–2 → Q1, row 3 → Q2, row 4 → Q3, row 5 → Q4.</p>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 2 — LAG/LEAD + Running Total (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: The CFO needs a monthly trend report showing revenue, previous month, MoM % change, and cumulative YTD revenue. Flag months as Growth or Decline.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 2A — MoM Revenue Change with LAG()</h3>
+    <pre><span class="kw">WITH</span> monthly_rev <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>)  <span class="kw">AS</span> month,
+        <span class="fn">SUM</span>(revenue)                    <span class="kw">AS</span> monthly_revenue
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>)
+)
+<span class="kw">SELECT</span>
+    month,
+    monthly_revenue,
+    <span class="fn">LAG</span>(monthly_revenue, <span class="num">1</span>) <span class="kw">OVER</span>
+        (<span class="kw">ORDER BY</span> month)                  <span class="kw">AS</span> prev_month,
+    <span class="fn">ROUND</span>(
+        (monthly_revenue -
+         <span class="fn">LAG</span>(monthly_revenue, <span class="num">1</span>)
+             <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month))
+        * <span class="num">100.0</span> /
+        <span class="fn">NULLIF</span>(
+            <span class="fn">LAG</span>(monthly_revenue, <span class="num">1</span>)
+                <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month),
+        <span class="num">0</span>),
+    <span class="num">1</span>)                                   <span class="kw">AS</span> mom_pct_change,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">LAG</span>(monthly_revenue,<span class="num">1</span>)
+                 <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> month) <span class="kw">IS NULL</span>    <span class="kw">THEN</span> <span class="str">'First Month'</span>
+        <span class="kw">WHEN</span> monthly_revenue &gt;
+             <span class="fn">LAG</span>(monthly_revenue,<span class="num">1</span>)
+                 <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> month)             <span class="kw">THEN</span> <span class="str">'Growth'</span>
+        <span class="kw">ELSE</span>                                           <span class="str">'Decline'</span>
+    <span class="kw">END</span>                                  <span class="kw">AS</span> trend_flag
+<span class="kw">FROM</span> monthly_rev
+<span class="kw">ORDER BY</span> month;
+
+<span class="cm">-- NULLIF prevents ÷0 on first row where LAG = NULL
+-- Business: CFO sees exactly which months drove growth vs decline</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 2B — Cumulative Running Total + % of Grand Total</h3>
+    <pre><span class="kw">SELECT</span>
+    rep_name,
+    region,
+    product,
+    revenue,
+    sale_date,
+    <span class="fn">SUM</span>(revenue) <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> sale_date
+        <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>
+    )                                    <span class="kw">AS</span> running_total,
+    <span class="fn">ROUND</span>(
+        <span class="fn">SUM</span>(revenue) <span class="kw">OVER</span> (
+            <span class="kw">ORDER BY</span> sale_date
+            <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>
+        ) * <span class="num">100.0</span> /
+        <span class="fn">SUM</span>(revenue) <span class="kw">OVER</span> (),
+    <span class="num">1</span>)                                   <span class="kw">AS</span> pct_of_total_so_far
+<span class="kw">FROM</span> sales
+<span class="kw">ORDER BY</span> sale_date;
+
+<span class="cm">-- SUM(revenue) OVER () = grand total (no ORDER BY, no frame = whole table)
+-- ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW = classic running total
+-- Business: at which sale did we cross 50% of total revenue?</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 2C — LEAD() for Next Sale Preview</h3>
+    <pre><span class="kw">SELECT</span>
+    rep_name,
+    sale_date,
+    revenue,
+    <span class="fn">LEAD</span>(sale_date, <span class="num">1</span>) <span class="kw">OVER</span>
+        (<span class="kw">PARTITION BY</span> rep_name <span class="kw">ORDER BY</span> sale_date) <span class="kw">AS</span> next_sale_date,
+    <span class="fn">DATEDIFF</span>(
+        <span class="fn">LEAD</span>(sale_date, <span class="num">1</span>) <span class="kw">OVER</span>
+            (<span class="kw">PARTITION BY</span> rep_name <span class="kw">ORDER BY</span> sale_date),
+        sale_date
+    )                                               <span class="kw">AS</span> days_to_next_sale
+<span class="kw">FROM</span> sales
+<span class="kw">ORDER BY</span> rep_name, sale_date;
+
+<span class="cm">-- PARTITION BY rep_name → LEAD resets for each rep
+-- days_to_next_sale = NULL for each rep's last sale (no next sale)
+-- Business: sales velocity — how fast does each rep close their next deal?</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 3 — CASE WHEN + Date Functions (35 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Segment sales by quarter, flag high/low revenue deals, and calculate rep tenure. Use CASE WHEN inside aggregates.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 3A — CASE WHEN Inside SUM() — Conditional Aggregation</h3>
+    <pre><span class="kw">SELECT</span>
+    rep_name,
+    <span class="fn">COUNT</span>(*)                                          <span class="kw">AS</span> total_deals,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> revenue &gt; <span class="num">100000</span> <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> high_value_rev,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> revenue &lt;= <span class="num">100000</span> <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> low_value_rev,
+    <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> product = <span class="str">'Loan'</span> <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">END</span>)          <span class="kw">AS</span> loan_deals,
+    <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> product = <span class="str">'Insurance'</span> <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">END</span>)     <span class="kw">AS</span> insurance_deals,
+    <span class="fn">ROUND</span>(
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> revenue &gt; <span class="num">100000</span> <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)
+        * <span class="num">100.0</span> / <span class="fn">SUM</span>(revenue),
+    <span class="num">1</span>)                                                <span class="kw">AS</span> high_value_pct
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> rep_name
+<span class="kw">ORDER BY</span> high_value_rev <span class="kw">DESC</span>;
+
+<span class="cm">-- SUM(CASE WHEN) = pivot-style aggregation without actual PIVOT
+-- COUNT(CASE WHEN ... THEN 1 END) counts only matching rows (NULLs excluded)
+-- Business: which reps close high-value deals vs low-value volume?</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 3B — Date Functions: Quarter + Tenure + DPD</h3>
+    <pre><span class="kw">SELECT</span>
+    s.rep_name,
+    s.sale_date,
+    s.revenue,
+    <span class="cm">-- Quarter labelling</span>
+    <span class="kw">CASE</span> <span class="fn">QUARTER</span>(s.sale_date)
+        <span class="kw">WHEN</span> <span class="num">1</span> <span class="kw">THEN</span> <span class="str">'Q1 (Jan–Mar)'</span>
+        <span class="kw">WHEN</span> <span class="num">2</span> <span class="kw">THEN</span> <span class="str">'Q2 (Apr–Jun)'</span>
+        <span class="kw">WHEN</span> <span class="num">3</span> <span class="kw">THEN</span> <span class="str">'Q3 (Jul–Sep)'</span>
+        <span class="kw">ELSE</span>        <span class="str">'Q4 (Oct–Dec)'</span>
+    <span class="kw">END</span>                                   <span class="kw">AS</span> quarter_label,
+    <span class="cm">-- Rep tenure in months</span>
+    <span class="fn">TIMESTAMPDIFF</span>(<span class="fn">MONTH</span>, r.hire_date, <span class="fn">CURDATE</span>()) <span class="kw">AS</span> tenure_months,
+    <span class="cm">-- Days since sale (DPD proxy)</span>
+    <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), s.sale_date)    <span class="kw">AS</span> days_since_sale,
+    <span class="cm">-- Month name</span>
+    <span class="fn">DATE_FORMAT</span>(s.sale_date, <span class="str">'%b %Y'</span>)  <span class="kw">AS</span> month_year,
+    <span class="cm">-- Days until year end</span>
+    <span class="fn">DATEDIFF</span>(<span class="fn">DATE_FORMAT</span>(<span class="fn">CURDATE</span>(),<span class="str">'%Y-12-31'</span>),
+             <span class="fn">CURDATE</span>())                 <span class="kw">AS</span> days_to_year_end
+<span class="kw">FROM</span> sales s
+<span class="kw">JOIN</span> reps r <span class="kw">ON</span> s.rep_name = r.rep_name
+<span class="kw">ORDER BY</span> s.sale_date;</pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 4 — NULL Handling Deep Dive (30 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Audit the full rep roster including reps with no sales. Handle all NULL scenarios correctly. This is the "Eve test."</h3>
+  </div>
+
+  <div class="card">
+    <h3>The 5 NULL Traps — Know All 5 Before the Interview</h3>
+    <table>
+      <thead><tr><th>Trap</th><th>Wrong Way</th><th>Right Way</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Compare to NULL</td><td><code>WHERE col = NULL</code></td><td><code>WHERE col IS NULL</code></td><td>NULL = NULL is never TRUE in SQL</td></tr>
+        <tr><td>COUNT misses NULLs</td><td><code>COUNT(revenue)</code> on Eve</td><td><code>COUNT(*)</code> or <code>COALESCE(rev,0)</code></td><td>COUNT(col) skips NULLs, COUNT(*) doesn't</td></tr>
+        <tr><td>AVG ignores NULLs</td><td>Treating AVG as mean of ALL reps</td><td>State: "AVG excludes NULLs — Eve not counted"</td><td>AVG(0,100,NULL) = 50, not 33</td></tr>
+        <tr><td>Divide by zero</td><td><code>revenue / target</code> when target=0</td><td><code>revenue / NULLIF(target,0)</code></td><td>Division by zero = error, not NULL</td></tr>
+        <tr><td>CONCAT with NULL</td><td><code>CONCAT(first,' ',last)</code></td><td><code>CONCAT_WS(' ',first,last)</code></td><td>CONCAT returns NULL if any arg is NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Query 4 — Complete NULL-Safe Rep Audit</h3>
+    <pre><span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    r.target,
+    <span class="cm">-- COALESCE: replace NULL revenue with 0</span>
+    <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)          <span class="kw">AS</span> actual_revenue,
+    <span class="cm">-- COALESCE: replace NULL last sale with 'No Sales'</span>
+    <span class="fn">COALESCE</span>(<span class="fn">CAST</span>(<span class="fn">MAX</span>(s.sale_date) <span class="kw">AS</span> <span class="kw">CHAR</span>), <span class="str">'No Sales'</span>) <span class="kw">AS</span> last_sale,
+    <span class="cm">-- NULLIF + COALESCE: safe % of target</span>
+    <span class="fn">COALESCE</span>(
+        <span class="fn">ROUND</span>(
+            <span class="fn">SUM</span>(s.revenue) * <span class="num">100.0</span>
+            / <span class="fn">NULLIF</span>(r.target, <span class="num">0</span>),
+        <span class="num">1</span>),
+    <span class="num">0</span>)                                    <span class="kw">AS</span> pct_of_target,
+    <span class="cm">-- IS NULL check for churn status</span>
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">MAX</span>(s.sale_date) <span class="kw">IS NULL</span>   <span class="kw">THEN</span> <span class="str">'Never Sold'</span>
+        <span class="kw">WHEN</span> <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(),
+                     <span class="fn">MAX</span>(s.sale_date)) &gt; <span class="num">90</span> <span class="kw">THEN</span> <span class="str">'Inactive'</span>
+        <span class="kw">ELSE</span>                               <span class="str">'Active'</span>
+    <span class="kw">END</span>                                   <span class="kw">AS</span> activity_status
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name
+<span class="kw">GROUP BY</span> r.rep_name, r.team, r.target
+<span class="kw">ORDER BY</span> actual_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- Eve: COALESCE(NULL,0)=0 · last_sale='No Sales' · pct=0 · status='Never Sold'
+-- All 5 NULL traps handled in one query
+-- Business: HR gets complete rep health report including dormant reps</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Day 3 Flowchart — Window Function Decision Tree</div>
+  <div class="flow-wrap">
+    <svg width="700" height="570" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 3 — Window Function + NULL Decision Tree</text>
+
+      
+      <rect x="220" y="34" width="260" height="36" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#e6edf3" font-weight="700">Business Question Received</text>
+      <text x="350" y="63" text-anchor="middle" fill="#8b949e" font-size="11">Ranking? Trend? Segmentation? NULL audit?</text>
+      <line x1="350" y1="70" x2="350" y2="90" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,90 470,122 350,154 230,122" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="117" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Do ALL rows need</text>
+      <text x="350" y="131" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">to stay visible?</text>
+      <text x="175" y="120" text-anchor="middle" fill="#57606a" font-size="10">NO — collapse</text>
+      <text x="525" y="120" text-anchor="middle" fill="#57606a" font-size="10">YES — no collapse</text>
+
+      
+      <line x1="230" y1="122" x2="120" y2="122" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="20" y="104" width="100" height="36" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="70" y="119" text-anchor="middle" fill="#14532d" font-weight="700">GROUP BY</text>
+      <text x="70" y="131" text-anchor="middle" fill="#166534" font-size="10">SUM · COUNT · AVG</text>
+
+      
+      <line x1="470" y1="122" x2="570" y2="122" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="570" y="104" width="118" height="36" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="629" y="119" text-anchor="middle" fill="#1e3a8a" font-weight="700">OVER ()</text>
+      <text x="629" y="131" text-anchor="middle" fill="#1e40af" font-size="10">Window Function</text>
+
+      
+      <line x1="629" y1="140" x2="629" y2="170" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="629" y1="170" x2="490" y2="170" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+      <line x1="350" y1="154" x2="350" y2="170" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,170 470,204 350,238 230,204" fill="#ede9fe" stroke="#c4b5fd" stroke-width="2"></polygon>
+      <text x="350" y="199" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">What type of</text>
+      <text x="350" y="213" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">window needed?</text>
+
+      
+      <text x="110" y="198" text-anchor="middle" fill="#57606a" font-size="10">Rank / Order</text>
+      <text x="350" y="250" text-anchor="middle" fill="#57606a" font-size="10">Running Total</text>
+      <text x="590" y="198" text-anchor="middle" fill="#57606a" font-size="10">Prev / Next row</text>
+
+      
+      <line x1="230" y1="204" x2="130" y2="204" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="18" y="270" width="152" height="80" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="94" y="288" text-anchor="middle" fill="#1e3a8a" font-weight="700">Ranking Functions</text>
+      <text x="94" y="302" text-anchor="middle" fill="#1e40af" font-size="11">RANK() — ties skip</text>
+      <text x="94" y="315" text-anchor="middle" fill="#1e40af" font-size="11">DENSE_RANK() — no skip</text>
+      <text x="94" y="328" text-anchor="middle" fill="#1e40af" font-size="11">ROW_NUMBER() — unique</text>
+      <text x="94" y="341" text-anchor="middle" fill="#1e40af" font-size="11">NTILE(n) — buckets</text>
+      <line x1="130" y1="204" x2="94" y2="204" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="94" y1="204" x2="94" y2="270" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <line x1="350" y1="238" x2="350" y2="270" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="230" y="270" width="240" height="80" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="350" y="288" text-anchor="middle" fill="#14532d" font-weight="700">Aggregation Windows</text>
+      <text x="350" y="302" text-anchor="middle" fill="#166534" font-size="11">SUM() OVER (ORDER BY ...)</text>
+      <text x="350" y="315" text-anchor="middle" fill="#166534" font-size="11">ROWS BETWEEN UNBOUNDED</text>
+      <text x="350" y="328" text-anchor="middle" fill="#166534" font-size="11">PRECEDING AND CURRENT ROW</text>
+      <text x="350" y="341" text-anchor="middle" fill="#166534" font-size="11">AVG() OVER () — moving average</text>
+
+      
+      <line x1="470" y1="204" x2="570" y2="204" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="530" y="270" width="160" height="80" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="610" y="288" text-anchor="middle" fill="#4c1d95" font-weight="700">Offset Functions</text>
+      <text x="610" y="302" text-anchor="middle" fill="#5b21b6" font-size="11">LAG(col, n) — prev row</text>
+      <text x="610" y="315" text-anchor="middle" fill="#5b21b6" font-size="11">LEAD(col, n) — next row</text>
+      <text x="610" y="328" text-anchor="middle" fill="#5b21b6" font-size="11">FIRST_VALUE() — first</text>
+      <text x="610" y="341" text-anchor="middle" fill="#5b21b6" font-size="11">LAST_VALUE() — last</text>
+      <line x1="570" y1="204" x2="610" y2="204" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="610" y1="204" x2="610" y2="270" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <line x1="94" y1="350" x2="94" y2="390" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="350" x2="350" y2="390" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="610" y1="350" x2="610" y2="390" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="94" y1="390" x2="610" y2="390" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="390" x2="350" y2="410" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="140" y="410" width="420" height="54" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="350" y="430" text-anchor="middle" fill="#7f1d1d" font-weight="700">NULL Handling — Always Check</text>
+      <text x="350" y="444" text-anchor="middle" fill="#991b1b" font-size="11">LEFT JOIN → COALESCE(col, 0) · IS NULL (not = NULL) · NULLIF(target,0)</text>
+      <text x="350" y="456" text-anchor="middle" fill="#991b1b" font-size="11">COUNT(col) skips NULLs · AVG ignores NULLs · CONCAT returns NULL</text>
+      <line x1="350" y1="464" x2="350" y2="484" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="140" y="484" width="420" height="44" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="502" text-anchor="middle" fill="#854d0e" font-weight="700">CASE WHEN — Conditional Logic</text>
+      <text x="350" y="516" text-anchor="middle" fill="#b45309" font-size="11">Inside SELECT (label) · Inside SUM/COUNT (conditional aggregation) · Inside ORDER BY (custom sort)</text>
+      <line x1="350" y1="528" x2="350" y2="548" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="200" y="548" width="300" height="16" rx="7" fill="#1f2328"></rect>
+      <text x="350" y="560" text-anchor="middle" fill="#e6edf3" font-weight="700" font-size="11">✅ Business Report Delivered — All Edge Cases Handled</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 3 Cheat Sheet — Window · CASE · Date · NULL</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="blue">🪟 Window Functions</h4>
+      <pre><span class="cm">-- Ranking</span>
+<span class="fn">RANK</span>()       <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> rev <span class="kw">DESC</span>)
+<span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> rev <span class="kw">DESC</span>)
+<span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> rev <span class="kw">DESC</span>)
+<span class="fn">NTILE</span>(<span class="num">4</span>)     <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> rev <span class="kw">DESC</span>)
+
+<span class="cm">-- Running total</span>
+<span class="fn">SUM</span>(rev) <span class="kw">OVER</span> (
+  <span class="kw">ORDER BY</span> sale_date
+  <span class="kw">ROWS BETWEEN</span>
+  UNBOUNDED PRECEDING
+  <span class="kw">AND CURRENT ROW</span>)
+
+<span class="cm">-- LAG / LEAD</span>
+<span class="fn">LAG</span>(revenue, <span class="num">1</span>)
+  <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month)
+<span class="fn">LEAD</span>(revenue, <span class="num">1</span>)
+  <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> rep
+        <span class="kw">ORDER BY</span> sale_date)
+
+<span class="cm">-- Grand total (no frame)</span>
+<span class="fn">SUM</span>(revenue) <span class="kw">OVER</span> ()</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">🔀 CASE WHEN Patterns</h4>
+      <pre><span class="cm">-- Simple label</span>
+<span class="kw">CASE</span>
+  <span class="kw">WHEN</span> revenue &gt; <span class="num">100000</span> <span class="kw">THEN</span> <span class="str">'High'</span>
+  <span class="kw">WHEN</span> revenue &gt; <span class="num">50000</span>  <span class="kw">THEN</span> <span class="str">'Mid'</span>
+  <span class="kw">ELSE</span> <span class="str">'Low'</span>
+<span class="kw">END</span> <span class="kw">AS</span> rev_band
+
+<span class="cm">-- Inside SUM (pivot-style)</span>
+<span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> product=<span class="str">'Loan'</span>
+         <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)
+  <span class="kw">AS</span> loan_revenue
+
+<span class="cm">-- Inside COUNT</span>
+<span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> status=<span class="str">'NPA'</span>
+           <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">END</span>)
+  <span class="kw">AS</span> npa_count
+
+<span class="cm">-- With IS NULL</span>
+<span class="kw">CASE WHEN</span> col <span class="kw">IS NULL</span>
+     <span class="kw">THEN</span> <span class="str">'No Data'</span>
+     <span class="kw">ELSE</span> col <span class="kw">END</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">📅 Date Functions</h4>
+      <pre><span class="cm">-- Current date/time</span>
+<span class="fn">CURDATE</span>()           <span class="cm">-- date only</span>
+<span class="fn">NOW</span>()               <span class="cm">-- date + time</span>
+
+<span class="cm">-- Difference</span>
+<span class="fn">DATEDIFF</span>(d1, d2)    <span class="cm">-- days</span>
+<span class="fn">TIMESTAMPDIFF</span>(<span class="fn">MONTH</span>, d1, d2)
+
+<span class="cm">-- Formatting</span>
+<span class="fn">DATE_FORMAT</span>(dt, <span class="str">'%Y-%m'</span>)   <span class="cm">-- 2026-01</span>
+<span class="fn">DATE_FORMAT</span>(dt, <span class="str">'%b %Y'</span>)  <span class="cm">-- Jan 2026</span>
+<span class="fn">DATE_FORMAT</span>(dt, <span class="str">'%d/%m/%Y'</span>)
+
+<span class="cm">-- Extraction</span>
+<span class="fn">YEAR</span>(dt)   <span class="fn">MONTH</span>(dt)
+<span class="fn">DAY</span>(dt)    <span class="fn">QUARTER</span>(dt)
+<span class="fn">WEEK</span>(dt)   <span class="fn">DAYNAME</span>(dt)
+
+<span class="cm">-- Arithmetic</span>
+<span class="fn">DATE_ADD</span>(dt, <span class="kw">INTERVAL</span> <span class="num">30</span> <span class="fn">DAY</span>)
+<span class="fn">DATE_SUB</span>(dt, <span class="kw">INTERVAL</span> <span class="num">1</span> <span class="fn">MONTH</span>)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="red">🚫 NULL Functions</h4>
+      <pre><span class="cm">-- Replace NULL with value</span>
+<span class="fn">COALESCE</span>(col, <span class="num">0</span>)         <span class="cm">-- standard ✅</span>
+<span class="fn">IFNULL</span>(col, <span class="num">0</span>)           <span class="cm">-- MySQL only</span>
+<span class="fn">ISNULL</span>(col)              <span class="cm">-- boolean (not replace!)</span>
+
+<span class="cm">-- Prevent divide by zero</span>
+rev / <span class="fn">NULLIF</span>(target, <span class="num">0</span>)
+<span class="cm">-- returns NULL instead of ERROR</span>
+
+<span class="cm">-- Check for NULL</span>
+<span class="kw">WHERE</span> col <span class="kw">IS NULL</span>        <span class="cm">-- ✅</span>
+<span class="kw">WHERE</span> col = <span class="kw">NULL</span>         <span class="cm">-- ❌ never TRUE</span>
+
+<span class="cm">-- NULL in aggregates</span>
+<span class="fn">COUNT</span>(col)   <span class="cm">-- skips NULLs</span>
+<span class="fn">COUNT</span>(*)     <span class="cm">-- counts ALL rows</span>
+<span class="fn">AVG</span>(col)     <span class="cm">-- ignores NULLs (÷ non-NULL count)</span>
+<span class="fn">SUM</span>(col)     <span class="cm">-- ignores NULLs (not 0)</span>
+
+<span class="cm">-- CONCAT trap</span>
+<span class="fn">CONCAT_WS</span>(<span class="str">' '</span>, f, l)     <span class="cm">-- NULL-safe</span>
+<span class="fn">CONCAT</span>(f, <span class="str">' '</span>, l)        <span class="cm">-- NULL → whole NULL</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 3</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>Can't explain difference between RANK() and DENSE_RANK()</li>
+        <li>Uses GROUP BY and says it's the same as PARTITION BY</li>
+        <li>Forgets ROWS BETWEEN in running total — gets wrong cumulative values</li>
+        <li>Writes <code>WHERE col = NULL</code> — never matches any rows</li>
+        <li>Uses INNER JOIN and misses reps with no sales (Eve disappears)</li>
+        <li>No NULLIF() in MoM % — divide-by-zero error on first month row</li>
+        <li>COUNT(revenue) on Eve — returns 0 correctly but can't explain WHY</li>
+        <li>Can't use SUM(CASE WHEN) — tries to use multiple WHERE clauses instead</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>States RANK/DENSE_RANK/ROW_NUMBER differences + BFSI use case for each</li>
+        <li>Explains PARTITION BY = GROUP BY but rows don't collapse</li>
+        <li>Uses <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> from memory</li>
+        <li>Always uses IS NULL — never = NULL</li>
+        <li>LEFT JOIN + COALESCE on every query that references reps table</li>
+        <li>NULLIF(target, 0) in every MoM % — prevents divide-by-zero on first row</li>
+        <li>Uses SUM(CASE WHEN) for conditional aggregation — "pivot without PIVOT"</li>
+        <li>Connects every result to business action: "Bottom quartile = HR priority list"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 3 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #3b82d4;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 3 of my 15-day Data Analyst prep.
+Topic: Window Functions (RANK · DENSE_RANK · ROW_NUMBER · LAG · LEAD · Running Total)
+       + CASE WHEN + Date Functions + NULL Handling
+Tool: MySQL Workbench
+Database: persistence_analytics (sales, reps, regions)
+Time available: 3.5 hours (20% theory, 80% hands-on)
+
+START DAY 3 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 3 → session starts.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 4 (SQL Assessment)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>Re-run all 4 tasks from memory — no notes</td><td>Day 4 is a timed assessment — speed is the test</td></tr>
+      <tr><td>Write RANK vs DENSE_RANK vs ROW_NUMBER on paper</td><td>Day 4 opens with this as a 3-minute theory question</td></tr>
+      <tr><td>Memorise ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</td><td>Running total syntax is always tested cold — no peeking</td></tr>
+      <tr><td>Review Day 1 (GROUP BY / HAVING) + Day 2 (JOINs / CTEs)</td><td>Day 4 combines ALL topics — Days 1–3 in one assessment</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–2 ✅  | 
+  <strong style="color:#1e40af">Day 3 🔵 TODAY</strong>  | 
+  Day 4 · 5 · 6 · 7 · 8 · 9 · 10 · 11 · 12 · 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,762 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 1 — SQL Foundations · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#1e3a8a;color:#bfdbfe}
+.b2{background:#14532d;color:#bbf7d0}
+.b3{background:#4c1d95;color:#ddd6fe}
+.b4{background:#7f1d1d;color:#fecaca}
+.b5{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#1e40af;border-bottom:2px solid #1e40af;padding-bottom:4px;margin-bottom:14px}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.dark{color:#1f2328;border-color:#1f2328}
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+.card.warn{background:#fffbeb;border-color:#fde68a}
+.card.success{background:#f0fdf4;border-color:#86efac}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.str{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.green{color:#166534}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+.qa{border-left:3px solid #1e40af;padding:10px 14px;background:#f0f6ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#1e3a5f}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#1e40af}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}.qa.green .q{color:#14532d}.qa.green .a strong{color:#1a7f4b}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}.qa.purple .q{color:#4c1d95}.qa.purple .a strong{color:#7c5cd8}
+.qa.red{border-color:#b91c1c;background:#fff5f5}.qa.red .q{color:#7f1d1d}.qa.red .a strong{color:#b91c1c}
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166634;border:2px solid #86efac}
+.today{background:#dbeafe;color:#1e40af;border:2px dotted #3b82d4}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+.exec-order{display:flex;align-items:center;gap:0;margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb}
+.eo-step{flex:1;padding:10px 6px;text-align:center;font-size:11px;font-weight:700}
+.eo-step .num{display:block;font-size:18px;font-weight:800;margin-bottom:2px}
+.eo-1{background:#fee2e2;color:#7f1d1d}
+.eo-2{background:#fef9c3;color:#854d0e}
+.eo-3{background:#fef9c3;color:#854d0e}
+.eo-4{background:#fef9c3;color:#854d0e}
+.eo-5{background:#dcfce7;color:#14532d}
+.eo-6{background:#dbeafe;color:#1e3a8a}
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>🗄 Day 1 — SQL Foundations</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 3.5 Hours</p>
+  <div class="badge-row">
+    <span class="badge b1">SELECT · WHERE · GROUP BY</span>
+    <span class="badge b2">HAVING · ORDER BY</span>
+    <span class="badge b3">Aggregation · COUNT/SUM/AVG</span>
+    <span class="badge b4">CASE WHEN · Subquery</span>
+    <span class="badge b5">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot today">1</div>
+    <div class="day-dot future">2</div><div class="day-dot future">3</div><div class="day-dot future">4</div>
+    <div class="day-dot future">5</div><div class="day-dot future">6</div><div class="day-dot future">7</div>
+    <div class="day-dot future">8</div><div class="day-dot future">9</div><div class="day-dot future">10</div>
+    <div class="day-dot future">11</div><div class="day-dot future">12</div><div class="day-dot future">13</div>
+    <div class="day-dot future">14</div><div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">🔵 Today: Day 1 · ⬜ Days 2–15 ahead · Every line of SQL you write today is muscle memory for the interview</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🗄 Step 0 — Database Setup (Run First · 5 Min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">⚡ Open MySQL Workbench → paste this → run → confirm 6 rows in sales, 5 in reps</h3>
+  </div>
+  <pre><span class="kw">CREATE DATABASE IF NOT EXISTS</span> persistence_analytics;
+<span class="kw">USE</span> persistence_analytics;
+
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> sales (
+    sale_id   <span class="kw">INT PRIMARY KEY</span>,
+    region    <span class="kw">VARCHAR</span>(<span class="num">20</span>),
+    product   <span class="kw">VARCHAR</span>(<span class="num">30</span>),
+    revenue   <span class="kw">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+    sale_date <span class="kw">DATE</span>,
+    rep_name  <span class="kw">VARCHAR</span>(<span class="num">30</span>)
+);
+
+<span class="kw">INSERT INTO</span> sales <span class="kw">VALUES</span>
+(<span class="num">1</span>,<span class="str">'North'</span>,<span class="str">'Loan'</span>,<span class="num">120000</span>,<span class="str">'2026-01-15'</span>,<span class="str">'Alice'</span>),
+(<span class="num">2</span>,<span class="str">'South'</span>,<span class="str">'Insurance'</span>,<span class="num">85000</span>,<span class="str">'2026-02-20'</span>,<span class="str">'Bob'</span>),
+(<span class="num">3</span>,<span class="str">'East'</span>,<span class="str">'Loan'</span>,<span class="num">95000</span>,<span class="str">'2026-03-10'</span>,<span class="str">'Carol'</span>),
+(<span class="num">4</span>,<span class="str">'West'</span>,<span class="str">'Deposit'</span>,<span class="num">60000</span>,<span class="str">'2026-04-05'</span>,<span class="str">'Dave'</span>),
+(<span class="num">5</span>,<span class="str">'North'</span>,<span class="str">'Insurance'</span>,<span class="num">110000</span>,<span class="str">'2026-05-22'</span>,<span class="str">'Alice'</span>),
+(<span class="num">6</span>,<span class="str">'South'</span>,<span class="str">'Loan'</span>,<span class="num">75000</span>,<span class="str">'2026-06-18'</span>,<span class="str">'Bob'</span>);
+
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> reps (
+    rep_name  <span class="kw">VARCHAR</span>(<span class="num">30</span>) <span class="kw">PRIMARY KEY</span>,
+    team      <span class="kw">VARCHAR</span>(<span class="num">20</span>),
+    hire_date <span class="kw">DATE</span>,
+    target    <span class="kw">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)
+);
+
+<span class="kw">INSERT INTO</span> reps <span class="kw">VALUES</span>
+(<span class="str">'Alice'</span>,<span class="str">'Retail'</span>,<span class="str">'2022-01-10'</span>,<span class="num">200000</span>),
+(<span class="str">'Bob'</span>,<span class="str">'SME'</span>,<span class="str">'2021-06-15'</span>,<span class="num">180000</span>),
+(<span class="str">'Carol'</span>,<span class="str">'Retail'</span>,<span class="str">'2023-03-01'</span>,<span class="num">150000</span>),
+(<span class="str">'Dave'</span>,<span class="str">'SME'</span>,<span class="str">'2020-11-20'</span>,<span class="num">120000</span>),
+(<span class="str">'Eve'</span>,<span class="str">'Retail'</span>,<span class="str">'2024-07-01'</span>,<span class="num">100000</span>);
+
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> regions (
+    region  <span class="kw">VARCHAR</span>(<span class="num">20</span>) <span class="kw">PRIMARY KEY</span>,
+    zone    <span class="kw">VARCHAR</span>(<span class="num">20</span>),
+    manager <span class="kw">VARCHAR</span>(<span class="num">30</span>)
+);
+
+<span class="kw">INSERT INTO</span> regions <span class="kw">VALUES</span>
+(<span class="str">'North'</span>,<span class="str">'Zone-A'</span>,<span class="str">'Rajesh'</span>),
+(<span class="str">'South'</span>,<span class="str">'Zone-B'</span>,<span class="str">'Priya'</span>),
+(<span class="str">'East'</span>,<span class="str">'Zone-A'</span>,<span class="str">'Amit'</span>),
+(<span class="str">'West'</span>,<span class="str">'Zone-B'</span>,<span class="str">'Sunita'</span>);
+
+<span class="cm">-- Verify: SELECT COUNT(*) FROM sales;  → 6
+--         SELECT COUNT(*) FROM reps;   → 5 (Eve has no sales — she is the NULL trap!)</span></pre>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">⚙ The Most Asked Theory Question — SQL Execution Order</div>
+  <div class="exec-order">
+    <div class="eo-step eo-1"><span class="num">1</span>FROM<br />+ JOIN</div>
+    <div class="eo-step eo-2"><span class="num">2</span>WHERE</div>
+    <div class="eo-step eo-3"><span class="num">3</span>GROUP<br />BY</div>
+    <div class="eo-step eo-4"><span class="num">4</span>HAVING</div>
+    <div class="eo-step eo-5"><span class="num">5</span>SELECT</div>
+    <div class="eo-step eo-6"><span class="num">6</span>ORDER<br />BY</div>
+  </div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">Why This Matters — 3 Rules That Flow From Execution Order</h3>
+    <table>
+      <thead><tr><th>Rule</th><th>Wrong (Rejected)</th><th>Right (Hired)</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Alias in HAVING</td><td><code>HAVING total_rev &gt; 100000</code></td><td><code>HAVING SUM(revenue) &gt; 100000</code></td><td>HAVING runs at step 4, SELECT alias created at step 5</td></tr>
+        <tr><td>Aggregate in WHERE</td><td><code>WHERE SUM(revenue) &gt; 100000</code></td><td><code>HAVING SUM(revenue) &gt; 100000</code></td><td>WHERE runs before GROUP BY — aggregates don't exist yet</td></tr>
+        <tr><td>HAVING without GROUP BY</td><td>Applies filter to whole table</td><td>Only use HAVING after GROUP BY</td><td>HAVING filters groups, not individual rows</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 1 Agenda — 3.5 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Topic</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:25</td><td>Theory Blitz</td><td>SQL execution order · SELECT anatomy · data types · NULL rules</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:25–0:55</td><td>Q&amp;A Round (5 Qs)</td><td>Interviewer fires 5 conceptual questions — answer + get graded</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:55–1:40</td><td>Task 1 — Filtering</td><td>WHERE + AND/OR + BETWEEN + LIKE + IN</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>1:40–2:25</td><td>Task 2 — Aggregation</td><td>GROUP BY + COUNT/SUM/AVG/MAX/MIN + HAVING</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:25–3:05</td><td>Task 3 — Data Audit</td><td>CASE WHEN + NULL checks + data quality flags</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>3:05–3:30</td><td>Task 4 — Business KPI</td><td>% contribution subquery · Top-N · revenue by product</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>3:30–3:30</td><td>Debrief</td><td>Score card · mistakes → fixes · Day 2 prep</td><td><span class="tag easy">Review</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎓 Theory Q&amp;A — 5 Interview Questions</div>
+
+  <div class="qa">
+    <div class="q">Q1. What is the SQL execution order? Why does it matter for a data analyst?</div>
+    <div class="a"><strong>Hired answer:</strong> FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY. It matters because: (1) you cannot use a SELECT alias in a HAVING clause — the alias doesn't exist yet at HAVING execution time; (2) you cannot filter on an aggregate in WHERE — GROUP BY hasn't happened; (3) ORDER BY can use SELECT aliases because it runs last. In interviews, when asked "why doesn't this query work?" — 80% of the time the answer traces back to execution order.</div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">Q2. What is the difference between COUNT(*) and COUNT(column)?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>COUNT(*)</strong> counts every row including NULLs — it counts the row itself, not the value. <strong>COUNT(column)</strong> skips NULL values in that column — only counts rows where the column is NOT NULL. Common trap: if Eve has NULL revenue (no sales), <code>COUNT(revenue)</code> excludes her but <code>COUNT(*)</code> includes her. In BFSI analytics this matters enormously — counting customers vs counting transactions are different things.</div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q3. What is the difference between WHERE and HAVING?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>WHERE</strong> filters individual rows BEFORE grouping — it cannot reference aggregate functions. <strong>HAVING</strong> filters groups AFTER GROUP BY — it CAN reference aggregates like SUM(), COUNT(). Rule: if the filter is on a raw column value, use WHERE. If the filter is on a calculated aggregate, use HAVING. Mixing them up is one of the most common SQL interview failures.</div>
+  </div>
+
+  <div class="qa red">
+    <div class="q">Q4. In MySQL, what is the correct way to write string values in a query?</div>
+    <div class="a"><strong>Hired answer:</strong> Single quotes — <code>'Alice'</code>, <code>'North'</code>, <code>'Loan'</code>. Double quotes are for identifiers (column/table names with special characters) in MySQL's ANSI mode, but in standard MySQL mode double quotes around string values will throw an error or behave unexpectedly. Rule: <strong>always use single quotes for string literals</strong> in SQL. Using double quotes for strings is one of the most common Day 1 mistakes interviewers catch immediately.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5. What does DISTINCT do? When should you use it and when should you avoid it?</div>
+    <div class="a"><strong>Hired answer:</strong> DISTINCT eliminates duplicate rows from the result set. Use it when you genuinely need unique values — e.g., <code>SELECT DISTINCT region FROM sales</code> to get a list of regions. Avoid it as a shortcut to "fix" unexpected duplicates — if your query returns duplicates unexpectedly, the real fix is correcting the JOIN condition, not slapping DISTINCT on top. In interviews: saying "I'd investigate why duplicates exist before using DISTINCT" signals senior thinking.</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">Task 1 — Filtering (45 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: The Sales Head wants targeted lists of sales records based on multiple conditions. Write filtering queries using WHERE, AND/OR, BETWEEN, LIKE, and IN.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 1A — Basic WHERE + AND + OR</h3>
+    <pre><span class="cm">-- High-value Loan or Insurance deals in North or South regions</span>
+<span class="kw">SELECT</span>
+    sale_id,
+    rep_name,
+    region,
+    product,
+    revenue,
+    sale_date
+<span class="kw">FROM</span> sales
+<span class="kw">WHERE</span> revenue &gt; <span class="num">80000</span>
+  <span class="kw">AND</span> product <span class="kw">IN</span> (<span class="str">'Loan'</span>, <span class="str">'Insurance'</span>)
+  <span class="kw">AND</span> region <span class="kw">IN</span> (<span class="str">'North'</span>, <span class="str">'South'</span>)
+<span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- Expected: 3 rows — Alice Loan 120K, Alice Insurance 110K, Bob Insurance 85K
+-- Business: Regional Head sees which high-value deals came from priority regions</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 1B — BETWEEN + LIKE</h3>
+    <pre><span class="cm">-- Sales between Jan-Mar 2026 where rep name starts with 'A' or 'B'</span>
+<span class="kw">SELECT</span>
+    rep_name,
+    product,
+    revenue,
+    sale_date
+<span class="kw">FROM</span> sales
+<span class="kw">WHERE</span> sale_date <span class="kw">BETWEEN</span> <span class="str">'2026-01-01'</span> <span class="kw">AND</span> <span class="str">'2026-03-31'</span>
+  <span class="kw">AND</span> (rep_name <span class="kw">LIKE</span> <span class="str">'A%'</span> <span class="kw">OR</span> rep_name <span class="kw">LIKE</span> <span class="str">'B%'</span>)
+<span class="kw">ORDER BY</span> sale_date;
+
+<span class="cm">-- BETWEEN is inclusive on both ends
+-- LIKE 'A%' = starts with A · '%A%' = contains A · '_lice' = any char + lice
+-- Expected: Alice Jan, Bob Feb — 2 rows</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 1C — NOT IN + IS NOT NULL</h3>
+    <pre><span class="cm">-- All sales except Deposit product, where revenue is not null</span>
+<span class="kw">SELECT</span>
+    rep_name,
+    region,
+    product,
+    revenue
+<span class="kw">FROM</span> sales
+<span class="kw">WHERE</span> product <span class="kw">NOT IN</span> (<span class="str">'Deposit'</span>)
+  <span class="kw">AND</span> revenue <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- Expected: 5 rows (all except Dave's Deposit deal)
+-- IS NOT NULL — never write != NULL or &lt;&gt; NULL → those never match!</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 2 — Aggregation + GROUP BY + HAVING (45 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Produce a revenue summary by region and product. Filter to show only groups with meaningful revenue. Sort by highest revenue first.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 2A — GROUP BY + All Aggregates</h3>
+    <pre><span class="kw">SELECT</span>
+    region,
+    <span class="fn">COUNT</span>(*)                    <span class="kw">AS</span> num_deals,
+    <span class="fn">SUM</span>(revenue)                <span class="kw">AS</span> total_revenue,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(revenue), <span class="num">0</span>)     <span class="kw">AS</span> avg_revenue,
+    <span class="fn">MAX</span>(revenue)                <span class="kw">AS</span> highest_deal,
+    <span class="fn">MIN</span>(revenue)                <span class="kw">AS</span> lowest_deal
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> region
+<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- North: 2 deals, 230K total · South: 2 deals, 160K · East: 95K · West: 60K
+-- Business: North is the star region — allocate more resources there</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 2B — HAVING to Filter Groups</h3>
+    <pre><span class="kw">SELECT</span>
+    product,
+    <span class="fn">COUNT</span>(*)             <span class="kw">AS</span> num_deals,
+    <span class="fn">SUM</span>(revenue)         <span class="kw">AS</span> total_revenue,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(revenue),<span class="num">0</span>) <span class="kw">AS</span> avg_deal_size
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> product
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(revenue) &gt; <span class="num">150000</span>   <span class="cm">-- ✅ aggregate in HAVING, NOT in WHERE</span>
+<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- Only Loan (290K) and Insurance (195K) pass the 150K threshold
+-- Deposit (60K) is filtered OUT by HAVING
+-- Business: focus product training on Loan and Insurance — highest revenue</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 2C — WHERE + GROUP BY + HAVING Combined</h3>
+    <pre><span class="cm">-- Pre-filter rows (WHERE), then group, then filter groups (HAVING)</span>
+<span class="kw">SELECT</span>
+    rep_name,
+    <span class="fn">COUNT</span>(*)              <span class="kw">AS</span> deals,
+    <span class="fn">SUM</span>(revenue)          <span class="kw">AS</span> total_revenue
+<span class="kw">FROM</span> sales
+<span class="kw">WHERE</span> sale_date &gt;= <span class="str">'2026-01-01'</span>     <span class="cm">-- row-level filter first</span>
+  <span class="kw">AND</span> product != <span class="str">'Deposit'</span>           <span class="cm">-- exclude Deposit before grouping</span>
+<span class="kw">GROUP BY</span> rep_name
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= <span class="num">2</span>               <span class="cm">-- only reps with 2+ qualifying deals</span>
+<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- Only Alice qualifies (2 Loan+Insurance deals, no Deposit)
+-- Business: Alice is the multi-product champion — identify for mentoring role</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 3 — Data Audit with CASE WHEN (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: The Data Quality team needs a flag on every sales record — High/Mid/Low revenue band, deal quarter, and whether the revenue seems anomalous.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 3A — CASE WHEN for Revenue Banding</h3>
+    <pre><span class="kw">SELECT</span>
+    sale_id,
+    rep_name,
+    region,
+    product,
+    revenue,
+    sale_date,
+    <span class="cm">-- Revenue band</span>
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> revenue &gt;= <span class="num">100000</span>             <span class="kw">THEN</span> <span class="str">'High (&gt;=100K)'</span>
+        <span class="kw">WHEN</span> revenue &gt;= <span class="num">75000</span>              <span class="kw">THEN</span> <span class="str">'Mid (75K–99K)'</span>
+        <span class="kw">ELSE</span>                                    <span class="str">'Low (&lt;75K)'</span>
+    <span class="kw">END</span>                                     <span class="kw">AS</span> revenue_band,
+    <span class="cm">-- Quarter label</span>
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">MONTH</span>(sale_date) <span class="kw">BETWEEN</span> <span class="num">1</span> <span class="kw">AND</span> <span class="num">3</span>  <span class="kw">THEN</span> <span class="str">'Q1'</span>
+        <span class="kw">WHEN</span> <span class="fn">MONTH</span>(sale_date) <span class="kw">BETWEEN</span> <span class="num">4</span> <span class="kw">AND</span> <span class="num">6</span>  <span class="kw">THEN</span> <span class="str">'Q2'</span>
+        <span class="kw">WHEN</span> <span class="fn">MONTH</span>(sale_date) <span class="kw">BETWEEN</span> <span class="num">7</span> <span class="kw">AND</span> <span class="num">9</span>  <span class="kw">THEN</span> <span class="str">'Q3'</span>
+        <span class="kw">ELSE</span>                                        <span class="str">'Q4'</span>
+    <span class="kw">END</span>                                     <span class="kw">AS</span> quarter
+<span class="kw">FROM</span> sales
+<span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- 6 rows flagged: Alice 120K=High, Alice 110K=High, Carol 95K=Mid,
+--                 Bob 85K=Mid, Bob 75K=Mid, Dave 60K=Low
+-- Business: Data quality team sees distribution instantly</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 3B — CASE WHEN Inside GROUP BY (Conditional Aggregation)</h3>
+    <pre><span class="kw">SELECT</span>
+    region,
+    <span class="fn">COUNT</span>(*)                                              <span class="kw">AS</span> total_deals,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> revenue &gt;= <span class="num">100000</span> <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)  <span class="kw">AS</span> high_value_deals,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> revenue &gt;= <span class="num">100000</span>
+                 <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)               <span class="kw">AS</span> high_value_revenue,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> product = <span class="str">'Loan'</span>
+                 <span class="kw">THEN</span> revenue <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)               <span class="kw">AS</span> loan_revenue
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> region
+<span class="kw">ORDER BY</span> high_value_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- This is the "pivot without PIVOT" technique — crucial for BFSI reporting
+-- North: 2 high-value deals, 230K high-value rev, 120K loan rev
+-- Business: North dominates both metrics — budget priority confirmed</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 4 — Business KPI with Subquery (25 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Show each product's revenue AND its % contribution to total revenue. This is the most common BFSI dashboard KPI.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 4A — % Contribution via Subquery</h3>
+    <pre><span class="kw">SELECT</span>
+    product,
+    <span class="fn">COUNT</span>(*)                                          <span class="kw">AS</span> num_deals,
+    <span class="fn">SUM</span>(revenue)                                      <span class="kw">AS</span> product_revenue,
+    <span class="fn">ROUND</span>(
+        <span class="fn">SUM</span>(revenue) * <span class="num">100.0</span> /
+        (<span class="kw">SELECT</span> <span class="fn">SUM</span>(revenue) <span class="kw">FROM</span> sales),            <span class="cm">-- subquery for grand total</span>
+    <span class="num">1</span>)                                                <span class="kw">AS</span> pct_of_total
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> product
+<span class="kw">ORDER BY</span> product_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- Grand total: SELECT SUM(revenue) FROM sales = 545,000
+-- Loan: 290K = 53.2% · Insurance: 195K = 35.8% · Deposit: 60K = 11.0%
+-- Business: Loan dominates 53% — credit risk concentration flag for Risk team</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 4B — Top-N Query (Top 2 Reps by Revenue)</h3>
+    <pre><span class="kw">SELECT</span>
+    rep_name,
+    <span class="fn">COUNT</span>(*)      <span class="kw">AS</span> deals,
+    <span class="fn">SUM</span>(revenue)  <span class="kw">AS</span> total_revenue
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> rep_name
+<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">2</span>;
+
+<span class="cm">-- Alice: 230,000 (2 deals) · Bob: 160,000 (2 deals)
+-- Alice + Bob = 390K / 545K = 71.6% of total revenue
+-- Business: Key-person risk — 2 reps drive 72% of revenue</span></pre>
+  </div>
+
+  <div class="card success">
+    <h3 style="color:#166534">✅ Expected Results — Cross-Check All 4 Tasks</h3>
+    <table>
+      <thead><tr><th>Query</th><th>Expected Row Count</th><th>Key Value to Verify</th></tr></thead>
+      <tbody>
+        <tr><td>1A — WHERE filter</td><td>3 rows</td><td>Alice Loan 120K · Alice Insurance 110K · Bob Insurance 85K</td></tr>
+        <tr><td>2A — GROUP BY region</td><td>4 rows</td><td>North = 230,000 total</td></tr>
+        <tr><td>2B — HAVING &gt;150K</td><td>2 rows</td><td>Loan 290K · Insurance 195K</td></tr>
+        <tr><td>3A — CASE banding</td><td>6 rows</td><td>2 High · 3 Mid · 1 Low</td></tr>
+        <tr><td>4A — % contribution</td><td>3 rows</td><td>SUM(pct) must = 100.0</td></tr>
+        <tr><td>4B — Top 2</td><td>2 rows</td><td>Alice 230K · Bob 160K</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Day 1 Flowchart — SQL Query Building Decision Tree</div>
+  <div class="flow-wrap">
+    <svg width="700" height="560" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 1 — SQL Query Building Decision Tree</text>
+
+      
+      <rect x="220" y="34" width="260" height="36" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#e6edf3" font-weight="700">Business Question Received</text>
+      <text x="350" y="63" text-anchor="middle" fill="#8b949e" font-size="11">e.g. "Which regions generated &gt;₹1L revenue?"</text>
+      <line x1="350" y1="70" x2="350" y2="90" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="100" y="90" width="500" height="52" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="350" y="108" text-anchor="middle" fill="#1e3a8a" font-weight="700" font-size="13">SQL Execution Order — Always Think in This Sequence</text>
+      <text x="175" y="126" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">① FROM</text>
+      <text x="255" y="126" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">② WHERE</text>
+      <text x="350" y="126" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">③ GROUP BY</text>
+      <text x="450" y="126" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">④ HAVING</text>
+      <text x="530" y="126" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">⑤ SELECT  ⑥ ORDER BY</text>
+      <line x1="350" y1="142" x2="350" y2="162" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,162 470,196 350,230 230,196" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="191" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Need to</text>
+      <text x="350" y="205" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">GROUP / Aggregate?</text>
+      <text x="175" y="192" text-anchor="middle" fill="#57606a" font-size="10">NO — filter rows only</text>
+      <text x="525" y="192" text-anchor="middle" fill="#57606a" font-size="10">YES — aggregate</text>
+
+      
+      <line x1="230" y1="196" x2="120" y2="196" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="18" y="176" width="102" height="40" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="69" y="192" text-anchor="middle" fill="#14532d" font-weight="700">WHERE</text>
+      <text x="69" y="206" text-anchor="middle" fill="#166534" font-size="10">AND · OR · IN · LIKE · BETWEEN</text>
+
+      
+      <line x1="470" y1="196" x2="580" y2="196" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="580" y="176" width="108" height="40" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="634" y="192" text-anchor="middle" fill="#4c1d95" font-weight="700">GROUP BY</text>
+      <text x="634" y="206" text-anchor="middle" fill="#5b21b6" font-size="10">SUM·COUNT·AVG·MAX·MIN</text>
+
+      
+      <line x1="69" y1="216" x2="69" y2="260" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="634" y1="216" x2="634" y2="260" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="230" x2="350" y2="260" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="69" y1="260" x2="634" y2="260" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="260" x2="350" y2="280" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,280 465,312 350,344 235,312" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="307" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Filter on</text>
+      <text x="350" y="321" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Aggregate result?</text>
+      <text x="185" y="308" text-anchor="middle" fill="#57606a" font-size="10">NO</text>
+      <text x="515" y="308" text-anchor="middle" fill="#57606a" font-size="10">YES → HAVING</text>
+      <line x1="465" y1="312" x2="565" y2="312" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="565" y="294" width="122" height="36" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="626" y="309" text-anchor="middle" fill="#7f1d1d" font-weight="700">HAVING</text>
+      <text x="626" y="321" text-anchor="middle" fill="#991b1b" font-size="10">SUM(rev) &gt; 100000</text>
+      <line x1="350" y1="344" x2="350" y2="364" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <line x1="626" y1="330" x2="626" y2="380" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="626" y1="380" x2="410" y2="380" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <rect x="140" y="364" width="270" height="36" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="275" y="379" text-anchor="middle" fill="#854d0e" font-weight="700">Add CASE WHEN Labels?</text>
+      <text x="275" y="392" text-anchor="middle" fill="#b45309" font-size="10">Revenue band · Quarter · Status flag · Conditional aggregate</text>
+      <line x1="275" y1="400" x2="275" y2="420" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+      <line x1="350" y1="400" x2="350" y2="420" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+      
+      <rect x="140" y="420" width="420" height="44" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="350" y="438" text-anchor="middle" fill="#14532d" font-weight="700" font-size="13">SELECT Columns + Aliases + ORDER BY</text>
+      <text x="350" y="452" text-anchor="middle" fill="#166534" font-size="11">Column aliases created HERE — cannot use in WHERE/HAVING · LIMIT for Top-N</text>
+      <line x1="350" y1="464" x2="350" y2="484" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="140" y="484" width="420" height="36" rx="7" fill="#1f2328"></rect>
+      <text x="350" y="499" text-anchor="middle" fill="#e6edf3" font-weight="700">✅ Add Business Insight — Always State the So-What</text>
+      <text x="350" y="513" text-anchor="middle" fill="#8b949e" font-size="11">"North = 42% of revenue — prioritise budget and headcount here"</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 1 Cheat Sheet — SQL Foundations</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="blue">⚙ Execution Order + Clause Rules</h4>
+      <pre><span class="cm">-- Correct order to WRITE a query</span>
+<span class="kw">SELECT</span>   col, <span class="fn">SUM</span>(rev) <span class="kw">AS</span> total  <span class="cm">-- ⑤</span>
+<span class="kw">FROM</span>     sales                   <span class="cm">-- ①</span>
+<span class="kw">WHERE</span>    product = <span class="str">'Loan'</span>        <span class="cm">-- ② rows</span>
+<span class="kw">GROUP BY</span> col                     <span class="cm">-- ③</span>
+<span class="kw">HAVING</span>   <span class="fn">SUM</span>(rev) &gt; <span class="num">100000</span>     <span class="cm">-- ④ groups</span>
+<span class="kw">ORDER BY</span> total <span class="kw">DESC</span>             <span class="cm">-- ⑥</span>
+<span class="kw">LIMIT</span>    <span class="num">10</span>;                     <span class="cm">-- ⑦</span>
+
+<span class="cm">-- Key rules:
+-- WHERE  → raw column values only
+-- HAVING → aggregates only
+-- HAVING uses SUM(rev), NOT alias 'total'
+-- Alias created at SELECT (step 5)
+--   usable only in ORDER BY (step 6)</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">🔍 WHERE Operators</h4>
+      <pre><span class="cm">-- Comparison</span>
+<span class="kw">WHERE</span> rev &gt; <span class="num">100000</span>
+<span class="kw">WHERE</span> rev &gt;= <span class="num">100000</span>
+<span class="kw">WHERE</span> rev != <span class="num">60000</span>
+
+<span class="cm">-- Range</span>
+<span class="kw">WHERE</span> rev <span class="kw">BETWEEN</span> <span class="num">75000</span> <span class="kw">AND</span> <span class="num">120000</span>
+<span class="cm">-- inclusive both ends</span>
+
+<span class="cm">-- List</span>
+<span class="kw">WHERE</span> product <span class="kw">IN</span> (<span class="str">'Loan'</span>,<span class="str">'Insurance'</span>)
+<span class="kw">WHERE</span> region <span class="kw">NOT IN</span> (<span class="str">'West'</span>)
+
+<span class="cm">-- Pattern</span>
+<span class="kw">WHERE</span> rep_name <span class="kw">LIKE</span> <span class="str">'A%'</span>   <span class="cm">-- starts with A</span>
+<span class="kw">WHERE</span> rep_name <span class="kw">LIKE</span> <span class="str">'%ob'</span>  <span class="cm">-- ends with ob</span>
+<span class="kw">WHERE</span> rep_name <span class="kw">LIKE</span> <span class="str">'%li%'</span> <span class="cm">-- contains li</span>
+
+<span class="cm">-- NULL</span>
+<span class="kw">WHERE</span> col <span class="kw">IS NULL</span>      <span class="cm">-- ✅</span>
+<span class="kw">WHERE</span> col <span class="kw">IS NOT NULL</span>  <span class="cm">-- ✅</span>
+<span class="kw">WHERE</span> col = <span class="kw">NULL</span>       <span class="cm">-- ❌ never matches</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">📊 Aggregates + GROUP BY</h4>
+      <pre><span class="cm">-- All 5 aggregate functions</span>
+<span class="fn">COUNT</span>(*)        <span class="cm">-- all rows incl. NULLs</span>
+<span class="fn">COUNT</span>(col)      <span class="cm">-- non-NULL rows only</span>
+<span class="fn">SUM</span>(revenue)    <span class="cm">-- ignores NULLs</span>
+<span class="fn">AVG</span>(revenue)    <span class="cm">-- ignores NULLs</span>
+<span class="fn">MAX</span>(revenue)
+<span class="fn">MIN</span>(revenue)
+
+<span class="cm">-- ROUND for clean output</span>
+<span class="fn">ROUND</span>(<span class="fn">AVG</span>(revenue), <span class="num">0</span>)  <span class="cm">-- 0 decimals</span>
+<span class="fn">ROUND</span>(x * <span class="num">100.0</span> / y, <span class="num">1</span>) <span class="cm">-- % with 1dp</span>
+
+<span class="cm">-- HAVING (never WHERE for aggregates)</span>
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(revenue) &gt; <span class="num">150000</span>
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt;= <span class="num">2</span>
+
+<span class="cm">-- % contribution subquery</span>
+<span class="fn">SUM</span>(rev) * <span class="num">100.0</span> /
+  (<span class="kw">SELECT</span> <span class="fn">SUM</span>(rev) <span class="kw">FROM</span> sales)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="red">🔀 CASE WHEN Patterns</h4>
+      <pre><span class="cm">-- Simple label</span>
+<span class="kw">CASE</span>
+  <span class="kw">WHEN</span> rev &gt;= <span class="num">100000</span> <span class="kw">THEN</span> <span class="str">'High'</span>
+  <span class="kw">WHEN</span> rev &gt;= <span class="num">75000</span>  <span class="kw">THEN</span> <span class="str">'Mid'</span>
+  <span class="kw">ELSE</span> <span class="str">'Low'</span>
+<span class="kw">END</span> <span class="kw">AS</span> rev_band
+
+<span class="cm">-- Conditional count (pivot style)</span>
+<span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> product=<span class="str">'Loan'</span>
+         <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)
+  <span class="kw">AS</span> loan_count
+
+<span class="cm">-- Conditional revenue</span>
+<span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> rev&gt;<span class="num">100000</span>
+         <span class="kw">THEN</span> rev <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)
+  <span class="kw">AS</span> high_rev
+
+<span class="cm">-- Quarter from date</span>
+<span class="kw">CASE</span> <span class="fn">QUARTER</span>(sale_date)
+  <span class="kw">WHEN</span> <span class="num">1</span> <span class="kw">THEN</span> <span class="str">'Q1'</span>
+  <span class="kw">WHEN</span> <span class="num">2</span> <span class="kw">THEN</span> <span class="str">'Q2'</span>
+  <span class="kw">ELSE</span> <span class="str">'Q3/Q4'</span>
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <h3>⚠ Day 1 Common Mistakes — Know All 6 Before You Start</h3>
+    <table>
+      <thead><tr><th>#</th><th>Mistake</th><th>Wrong</th><th>Right</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Execution order</td><td>SELECT comes first conceptually</td><td>FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY</td></tr>
+        <tr><td>2</td><td>String quotes</td><td><code>WHERE name = "Alice"</code></td><td><code>WHERE name = 'Alice'</code></td></tr>
+        <tr><td>3</td><td>Alias in HAVING</td><td><code>HAVING total_rev &gt; 100000</code></td><td><code>HAVING SUM(revenue) &gt; 100000</code></td></tr>
+        <tr><td>4</td><td>Aggregate in WHERE</td><td><code>WHERE SUM(revenue) &gt; 100000</code></td><td><code>HAVING SUM(revenue) &gt; 100000</code></td></tr>
+        <tr><td>5</td><td>NULL comparison</td><td><code>WHERE revenue = NULL</code></td><td><code>WHERE revenue IS NULL</code></td></tr>
+        <tr><td>6</td><td>COUNT difference</td><td>"COUNT(*) and COUNT(col) are same"</td><td>COUNT(*) counts NULLs; COUNT(col) skips NULLs</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 1</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>Says SELECT comes first in SQL execution order</li>
+        <li>Uses double quotes for string values — syntax error in MySQL</li>
+        <li>Writes <code>HAVING total_rev &gt; 100000</code> using alias — query fails</li>
+        <li>Writes <code>WHERE SUM(revenue) &gt; 100000</code> — aggregate in WHERE</li>
+        <li>Says COUNT(*) and COUNT(column) are identical</li>
+        <li>Writes <code>WHERE revenue = NULL</code> — returns 0 rows always</li>
+        <li>Submits query without re-reading the requirement</li>
+        <li>Gives numbers without any business interpretation</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>States execution order: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY</li>
+        <li>Always single quotes for string literals — never double</li>
+        <li>HAVING uses full aggregate: <code>HAVING SUM(revenue) &gt; 100000</code></li>
+        <li>Explains COUNT(*) counts NULLs; COUNT(col) skips NULLs</li>
+        <li>Uses IS NULL / IS NOT NULL — never = NULL</li>
+        <li>Re-reads every requirement before submitting</li>
+        <li>Adds business context: "North drives 42% of revenue — prioritise budget here"</li>
+        <li>Uses ROUND() for clean output — signals production-quality thinking</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 1 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #3b82d4;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 1 of my 15-day Data Analyst prep.
+Topic: SQL Basics — SELECT · WHERE · GROUP BY · HAVING · ORDER BY · Aggregation · CASE WHEN
+Tool: MySQL Workbench
+Database: persistence_analytics (tables: sales, reps, regions)
+Time available: 3.5 hours (20% theory, 80% hands-on)
+
+START DAY 1 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 1 → session begins.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 2 (JOINs + CTEs)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>What is INNER JOIN vs LEFT JOIN — when does a row disappear?</td><td>Day 2 opens with a JOIN question in the first 5 minutes</td></tr>
+      <tr><td>What does a CTE (WITH clause) look like?</td><td>CTEs replace subqueries — Persistent loves them</td></tr>
+      <tr><td>Why does Eve (no sales) matter?</td><td>She is the LEFT JOIN NULL trap — tested on Day 2</td></tr>
+      <tr><td>Re-run today's 4 tasks from memory — no notes</td><td>Muscle memory = speed in the actual interview</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  <strong style="color:#1e40af">Day 1 🔵 TODAY</strong>  | 
+  Day 2 · 3 · 4 · 5 · 6 · 7 · 8 · 9 · 10 · 11 · 12 · 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,758 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 11 — End-to-End Case Study · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+
+/* ── Header ── */
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b-sql{background:#0d47a1;color:#fff}
+.b-py{background:#1565c0;color:#fff}
+.b-xl{background:#1a7f4b;color:#fff}
+.b-pbi{background:#7c5cd8;color:#fff}
+.b-time{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+
+/* ── Section headers ── */
+.sec{margin-bottom:24px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#3b82d4;border-bottom:2px solid #3b82d4;padding-bottom:4px;margin-bottom:14px}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+
+/* ── Cards ── */
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+
+/* ── Agenda table ── */
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.sql{background:#dbeafe;color:#1e40af}
+.tag.py{background:#e0f2fe;color:#0c4a6e}
+.tag.xl{background:#dcfce7;color:#166534}
+.tag.pbi{background:#ede9fe;color:#5b21b6}
+.tag.review{background:#fef9c3;color:#854d0e}
+
+/* ── Code blocks ── */
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}
+.fn{color:#79c0ff}
+.str{color:#a5d6ff}
+.cm{color:#8b949e}
+.num{color:#f8c041}
+.op{color:#ff7b72}
+.var{color:#ffa657}
+
+/* ── Flowchart SVG wrapper ── */
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+
+/* ── Cheat sheet grid ── */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.sql{color:#1e40af}
+.cheat-cell h4.py{color:#0c4a6e}
+.cheat-cell h4.xl{color:#166534}
+.cheat-cell h4.pbi{color:#5b21b6}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+
+/* ── Reject/Hire ── */
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}
+.rh li{margin-bottom:4px}
+
+/* ── Q&A ── */
+.qa{border-left:3px solid #3b82d4;padding:10px 14px;background:#f0f6ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#1e3a5f}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#3b82d4}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}
+.qa.green .q{color:#14532d}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}
+.qa.purple .q{color:#4c1d95}
+
+/* ── Tracker ── */
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166534;border:2px solid #86efac}
+.today{background:#dbeafe;color:#1e40af;border:2px dotted #3b82d4}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+
+/* ── Pipeline steps ── */
+.pipeline{display:flex;align-items:center;gap:0;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+.pipe-step{flex-shrink:0;background:#1f2328;color:#e6edf3;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;text-align:center;min-width:100px}
+.pipe-step.sql{background:#1e3a8a;color:#bfdbfe}
+.pipe-step.py{background:#075985;color:#bae6fd}
+.pipe-step.xl{background:#14532d;color:#bbf7d0}
+.pipe-step.pbi{background:#4c1d95;color:#ddd6fe}
+.pipe-arrow{font-size:20px;color:#9ca3af;padding:0 6px;flex-shrink:0}
+.pipe-sub{font-size:10px;font-weight:400;margin-top:3px;opacity:.8}
+
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>📊 Day 11 — End-to-End Case Study</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 4 Hours</p>
+  <div class="badge-row">
+    <span class="badge b-sql">MySQL</span>
+    <span class="badge b-py">Python / Pandas</span>
+    <span class="badge b-xl">Advanced Excel</span>
+    <span class="badge b-pbi">Power BI</span>
+    <span class="badge b-time">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div>
+    <div class="day-dot done">2</div>
+    <div class="day-dot done">3</div>
+    <div class="day-dot done">4</div>
+    <div class="day-dot done">5</div>
+    <div class="day-dot done">6</div>
+    <div class="day-dot done">7</div>
+    <div class="day-dot done">8</div>
+    <div class="day-dot done">9</div>
+    <div class="day-dot done">10</div>
+    <div class="day-dot today">11</div>
+    <div class="day-dot future">12</div>
+    <div class="day-dot future">13</div>
+    <div class="day-dot future">14</div>
+    <div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Days 1–10 complete · 🔵 Today: Day 11 · ⬜ Days 12–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">The Full Data Analyst Pipeline — Today You Run ALL 4</div>
+  <div class="pipeline">
+    <div class="pipe-step sql">SQL<div class="pipe-sub">Extract &amp; Transform</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step py">Python<div class="pipe-sub">Clean &amp; Analyse</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step xl">Excel<div class="pipe-sub">Summarise &amp; Model</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step pbi">Power BI<div class="pipe-sub">Visualise &amp; Present</div></div>
+  </div>
+  <div class="card">
+    <h3>🎯 Business Scenario — BFSI Loan Portfolio Review</h3>
+    <p style="font-size:13px">You are a Data Analyst at Persistent's Banking Analytics team. The <strong>Regional Head</strong> wants a <strong>monthly loan performance report</strong> for Q1 2026 (Jan–Jun). She needs to know: Which regions are hitting targets? Which reps are underperforming? What's the product-wise revenue split? You have 4 hours to deliver — SQL to pull, Python to clean, Excel to summarise, Power BI to present.</p>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 11 Agenda — 4 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Tool</th><th>Deliverable</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:20</td><td>Theory — Pipeline thinking</td><td>—</td><td>Know when to use which tool <span class="tag review">Theory</span></td></tr>
+      <tr><td>0:20–0:50</td><td>Q&amp;A Round (5 Qs)</td><td>All</td><td>Graded conceptual answers <span class="tag review">Theory</span></td></tr>
+      <tr><td>0:50–1:30</td><td>Task 1 — SQL Extraction</td><td><span class="tag sql">SQL</span></td><td>3 queries: JOIN + Window + CTE</td></tr>
+      <tr><td>1:30–2:10</td><td>Task 2 — Python EDA</td><td><span class="tag py">Python</span></td><td>Clean + GroupBy + Insights</td></tr>
+      <tr><td>2:10–2:50</td><td>Task 3 — Excel Summary</td><td><span class="tag xl">Excel</span></td><td>Pivot + XLOOKUP + % KPI</td></tr>
+      <tr><td>2:50–3:40</td><td>Task 4 — Power BI Dashboard</td><td><span class="tag pbi">Power BI</span></td><td>3 visuals + DAX measure + story</td></tr>
+      <tr><td>3:40–4:00</td><td>Debrief + Score Card</td><td>—</td><td>Mistakes → fixes · Day 12 prep</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎓 Theory Q&amp;A — 5 Interview Questions</div>
+
+  <div class="qa">
+    <div class="q">Q1. An interviewer asks: "Why not just do everything in Python? Why use SQL at all?" Answer in 2 sentences with a business reason.</div>
+    <div class="a"><strong>Hired answer:</strong> SQL runs inside the database engine — it's faster on millions of rows and avoids pulling raw data over the network. For a bank with 50M transactions, pulling everything into Python would crash memory; SQL lets you aggregate at source and bring only the summary.</div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q2. You have SQL output as a CSV. What are the FIRST 3 things you check in Python before any analysis?</div>
+    <div class="a"><strong>Hired answer:</strong> (1) <strong>df.shape</strong> — row/column count matches expected. (2) <strong>df.dtypes</strong> — dates are datetime, revenue is float, not object. (3) <strong>df.isnull().sum()</strong> — which columns have NULLs and how many. In BFSI, a NULL in revenue or loan_amount is a data quality red flag, not just a code issue.</div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">Q3. What's the difference between a Pivot Table in Excel and a GroupBy in Python? When do you use which?</div>
+    <div class="a"><strong>Hired answer:</strong> Both aggregate data, but Excel Pivot is interactive — drag-and-drop, great for business users to self-serve. Python GroupBy is code-based, reproducible, handles 10M+ rows, and can chain multiple transformations. Use Excel for stakeholder-facing summaries; Python when you need automation, scale, or complex multi-step logic.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q4. What is a DAX Measure vs a Calculated Column in Power BI? Give one example of each in a banking context.</div>
+    <div class="a"><strong>Hired answer:</strong> A <strong>Measure</strong> is calculated at query time based on filter context — e.g., <code>Total Revenue = SUM(sales[revenue])</code> — it changes when you filter by region. A <strong>Calculated Column</strong> is row-level, stored in the model — e.g., <code>Revenue_Band = IF(sales[revenue]&gt;100000,"High","Low")</code>. Use measures for KPIs in visuals; use columns for categorising rows.</div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q5. A manager says "your dashboard is beautiful but I don't trust the numbers." What do you do?</div>
+    <div class="a"><strong>Hired answer:</strong> I trace back the data lineage — re-run the SQL query, check the Python transformation steps, verify the Excel formula logic, and cross-check the Power BI measure against the raw CSV total. I also do a <em>sense check</em>: does total revenue in Power BI match <code>SELECT SUM(revenue) FROM sales</code>? If any step diverges, that's where the bug is. This is called <strong>data reconciliation</strong> — critical in BFSI audits.</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">Task 1 — SQL Extraction (40 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask</h3>
+    <p style="font-size:13px">Extract three datasets from <code>persistence_analytics</code> that the Python script and Power BI will consume. Each query has a business justification.</p>
+  </div>
+
+  <div class="card">
+    <h3>Query 1A — Rep Performance vs Target (JOIN + CASE)</h3>
+    <pre><span class="kw">SELECT</span>
+    s.rep_name,
+    r.team,
+    r.target,
+    <span class="fn">SUM</span>(s.revenue)                                    <span class="kw">AS</span> actual_revenue,
+    <span class="fn">ROUND</span>(<span class="fn">SUM</span>(s.revenue) / r.target * <span class="num">100</span>, <span class="num">1</span>)         <span class="kw">AS</span> pct_of_target,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">SUM</span>(s.revenue) &gt;= r.target <span class="kw">THEN</span> <span class="str">'On Track'</span>
+        <span class="kw">WHEN</span> <span class="fn">SUM</span>(s.revenue) &gt;= r.target * <span class="num">0.8</span> <span class="kw">THEN</span> <span class="str">'At Risk'</span>
+        <span class="kw">ELSE</span> <span class="str">'Underperforming'</span>
+    <span class="kw">END</span>                                                <span class="kw">AS</span> status
+<span class="kw">FROM</span> sales s
+<span class="kw">RIGHT JOIN</span> reps r
+    <span class="kw">ON</span> s.rep_name = r.rep_name
+<span class="kw">GROUP BY</span> s.rep_name, r.team, r.target
+<span class="kw">ORDER BY</span> pct_of_target <span class="kw">DESC</span>;
+
+<span class="cm">-- RIGHT JOIN → Eve (no sales) appears with NULL revenue → 'Underperforming'
+-- Business: HR uses this for performance reviews</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 1B — Monthly Revenue Trend (Window Function)</h3>
+    <pre><span class="kw">SELECT</span>
+    <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>)      <span class="kw">AS</span> month,
+    region,
+    <span class="fn">SUM</span>(revenue)                        <span class="kw">AS</span> monthly_revenue,
+    <span class="fn">SUM</span>(<span class="fn">SUM</span>(revenue)) <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>)
+        <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>
+    )                                   <span class="kw">AS</span> running_total,
+    <span class="fn">ROUND</span>(
+        <span class="fn">SUM</span>(revenue) * <span class="num">100.0</span> /
+        <span class="fn">SUM</span>(<span class="fn">SUM</span>(revenue)) <span class="kw">OVER</span> (),
+    <span class="num">1</span>)                                  <span class="kw">AS</span> pct_contribution
+<span class="kw">FROM</span> sales
+<span class="kw">GROUP BY</span> <span class="fn">DATE_FORMAT</span>(sale_date, <span class="str">'%Y-%m'</span>), region
+<span class="kw">ORDER BY</span> month;
+
+<span class="cm">-- Business: identifies which months drove most revenue (seasonality)</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 1C — Product Revenue Ranking (CTE + RANK)</h3>
+    <pre><span class="kw">WITH</span> product_summary <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        product,
+        <span class="fn">COUNT</span>(*)          <span class="kw">AS</span> num_deals,
+        <span class="fn">SUM</span>(revenue)      <span class="kw">AS</span> total_revenue,
+        <span class="fn">AVG</span>(revenue)      <span class="kw">AS</span> avg_deal_size
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> product
+),
+ranked <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *,
+        <span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>) <span class="kw">AS</span> revenue_rank
+    <span class="kw">FROM</span> product_summary
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> ranked
+<span class="kw">ORDER BY</span> revenue_rank;
+
+<span class="cm">-- Business: portfolio mix — which products drive volume vs value</span></pre>
+  </div>
+
+  <p style="font-size:12px;color:#57606a;margin-top:4px">💾 Export each result: Right-click result grid → Export → CSV. Save as <code>rep_performance.csv</code>, <code>monthly_trend.csv</code>, <code>product_rank.csv</code></p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 2 — Python EDA in Jupyter (40 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask</h3>
+    <p style="font-size:13px">Load the SQL exports, validate data quality, run EDA, and produce 3 business insights for the Regional Head.</p>
+  </div>
+
+  <div class="card">
+    <h3>Step 2A — Load &amp; Validate</h3>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Load all 3 exports</span>
+rep_df   = pd.read_csv(<span class="str">'rep_performance.csv'</span>)
+trend_df = pd.read_csv(<span class="str">'monthly_trend.csv'</span>)
+prod_df  = pd.read_csv(<span class="str">'product_rank.csv'</span>)
+
+<span class="cm"># ── Data Audit ──────────────────────────────</span>
+<span class="kw">for</span> name, df <span class="kw">in</span> {<span class="str">'rep'</span>: rep_df, <span class="str">'trend'</span>: trend_df, <span class="str">'product'</span>: prod_df}.items():
+    <span class="fn">print</span>(<span class="str">f"\n── {name} ──"</span>)
+    <span class="fn">print</span>(df.shape)
+    <span class="fn">print</span>(df.dtypes)
+    <span class="fn">print</span>(df.isnull().sum())
+
+<span class="cm"># Fix: fill NULL revenue for Eve (no sales → 0)</span>
+rep_df[<span class="str">'actual_revenue'</span>] = rep_df[<span class="str">'actual_revenue'</span>].fillna(<span class="num">0</span>)
+rep_df[<span class="str">'pct_of_target'</span>]  = rep_df[<span class="str">'pct_of_target'</span>].fillna(<span class="num">0</span>)
+rep_df[<span class="str">'status'</span>]         = rep_df[<span class="str">'status'</span>].fillna(<span class="str">'Underperforming'</span>)</pre>
+  </div>
+
+  <div class="card">
+    <h3>Step 2B — EDA &amp; Business Insights</h3>
+    <pre><span class="cm"># ── Insight 1: Who is underperforming? ──────</span>
+under = rep_df[rep_df[<span class="str">'status'</span>] == <span class="str">'Underperforming'</span>]
+<span class="fn">print</span>(<span class="str">f"Underperforming reps: {len(under)} out of {len(rep_df)}"</span>)
+<span class="fn">print</span>(under[[<span class="str">'rep_name'</span>, <span class="str">'team'</span>, <span class="str">'actual_revenue'</span>, <span class="str">'pct_of_target'</span>]])
+
+<span class="cm"># ── Insight 2: Revenue concentration ────────</span>
+top2_revenue = rep_df.nlargest(<span class="num">2</span>, <span class="str">'actual_revenue'</span>)[<span class="str">'actual_revenue'</span>].sum()
+total        = rep_df[<span class="str">'actual_revenue'</span>].sum()
+<span class="fn">print</span>(<span class="str">f"Top 2 reps drive {top2_revenue/total*100:.1f}% of revenue — key-person risk"</span>)
+
+<span class="cm"># ── Insight 3: Product mix ───────────────────</span>
+loan_rev    = prod_df[prod_df[<span class="str">'product'</span>]==<span class="str">'Loan'</span>][<span class="str">'total_revenue'</span>].values[<span class="num">0</span>]
+total_rev   = prod_df[<span class="str">'total_revenue'</span>].sum()
+<span class="fn">print</span>(<span class="str">f"Loan products = {loan_rev/total_rev*100:.1f}% of total revenue"</span>)
+
+<span class="cm"># ── Summary stats ────────────────────────────</span>
+<span class="fn">print</span>(<span class="str">"\n── Rep Performance Summary ──"</span>)
+<span class="fn">print</span>(rep_df.groupby(<span class="str">'status'</span>)[<span class="str">'actual_revenue'</span>].agg([<span class="str">'count'</span>, <span class="str">'sum'</span>, <span class="str">'mean'</span>]).round(<span class="num">0</span>))
+
+<span class="cm"># ── Export cleaned data for Excel ────────────</span>
+rep_df.to_csv(<span class="str">'rep_performance_clean.csv'</span>, index=<span class="kw">False</span>)
+<span class="fn">print</span>(<span class="str">"Saved rep_performance_clean.csv"</span>)</pre>
+  </div>
+
+  <div class="card" style="background:#f0fdf4;border-color:#86efac">
+    <h3 style="color:#166534">✅ Expected Python Outputs (verify these)</h3>
+    <table>
+      <thead><tr><th>Metric</th><th>Expected Value</th><th>Business Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Underperforming reps</td><td>2 (Dave + Eve)</td><td>40% of team below target — HR escalation needed</td></tr>
+        <tr><td>Top 2 reps revenue share</td><td>~54%</td><td>Key-person concentration risk</td></tr>
+        <tr><td>Loan % of revenue</td><td>~54%</td><td>Loan-heavy portfolio — credit risk flag</td></tr>
+        <tr><td>Total revenue</td><td>545,000</td><td>Base for all % calculations</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 3 — Advanced Excel Summary (40 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask</h3>
+    <p style="font-size:13px">Open <code>rep_performance_clean.csv</code> in Excel. Build a management summary sheet with Pivot Table, XLOOKUP, and KPI flags — something the Regional Head can read in 60 seconds.</p>
+  </div>
+
+  <div class="card">
+    <h3>Step 3A — Pivot Table Setup</h3>
+    <table>
+      <thead><tr><th>Pivot Field</th><th>Drop Zone</th><th>Setting</th></tr></thead>
+      <tbody>
+        <tr><td>team</td><td>Rows</td><td>—</td></tr>
+        <tr><td>rep_name</td><td>Rows</td><td>Nested under team</td></tr>
+        <tr><td>actual_revenue</td><td>Values</td><td>Sum → format as Currency</td></tr>
+        <tr><td>pct_of_target</td><td>Values</td><td>Average → format as %</td></tr>
+        <tr><td>status</td><td>Filters</td><td>Filter to see each status</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Step 3B — XLOOKUP for Target Lookup</h3>
+    <pre><span class="cm">-- In a new sheet "KPI_Summary", pull target from reps table</span>
+=XLOOKUP(A2, rep_performance_clean!A:A, rep_performance_clean!C:C, "Not Found")
+
+<span class="cm">-- Column A = rep_name, Column C = target
+-- Add variance column: =D2 - C2  (actual - target)</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Step 3C — KPI Status Formula (IFS)</h3>
+    <pre>=IFS(
+  E2/C2 &gt;= 1,   "🟢 On Track",
+  E2/C2 &gt;= 0.8, "🟡 At Risk",
+  TRUE,         "🔴 Underperforming"
+)
+
+<span class="cm">-- E2 = actual_revenue, C2 = target
+-- Apply Conditional Formatting: Green/Yellow/Red fill on status column</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Step 3D — SUMIF for Team Rollup</h3>
+    <pre>=SUMIF(rep_performance_clean!B:B, "Retail", rep_performance_clean!D:D)
+<span class="cm">-- B = team, D = actual_revenue
+-- Build team-level summary: Retail vs SME total revenue</span>
+
+=AVERAGEIF(rep_performance_clean!B:B, "Retail", rep_performance_clean!E:E)
+<span class="cm">-- Average % of target per team → which team is healthier?</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 4 — Power BI Dashboard (50 min)</div>
+  <div class="card">
+    <h3>🎯 Business Ask</h3>
+    <p style="font-size:13px">Build a 3-visual executive dashboard that the Regional Head can use in her monthly review. Must include: Rep performance, Product mix, Monthly trend. Add 2 DAX measures.</p>
+  </div>
+
+  <div class="card">
+    <h3>Step 4A — Data Model (3 tables)</h3>
+    <table>
+      <thead><tr><th>Table</th><th>Source</th><th>Key Column</th><th>Relationship</th></tr></thead>
+      <tbody>
+        <tr><td>sales</td><td>sales.csv</td><td>rep_name</td><td>Many side</td></tr>
+        <tr><td>reps</td><td>reps.csv</td><td>rep_name</td><td>One side → sales</td></tr>
+        <tr><td>regions</td><td>regions.csv</td><td>region</td><td>One side → sales</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:#57606a;margin-top:8px">Model View → drag rep_name to connect sales↔reps. Drag region to connect sales↔regions. Both are 1-to-Many (star schema).</p>
+  </div>
+
+  <div class="card">
+    <h3>Step 4B — DAX Measures</h3>
+    <pre><span class="cm">-- Measure 1: Total Revenue</span>
+<span class="var">Total Revenue</span> = <span class="fn">SUM</span>(sales[revenue])
+
+<span class="cm">-- Measure 2: % of Target (whole team)</span>
+<span class="var">% of Target</span> =
+<span class="kw">DIVIDE</span>(
+    <span class="fn">SUM</span>(sales[revenue]),
+    <span class="fn">SUM</span>(reps[target]),
+    <span class="num">0</span>
+)
+
+<span class="cm">-- Measure 3: Revenue Rank (for table visual)</span>
+<span class="var">Revenue Rank</span> =
+<span class="fn">RANKX</span>(
+    <span class="fn">ALL</span>(reps[rep_name]),
+    [<span class="var">Total Revenue</span>],
+    ,
+    <span class="fn">DESC</span>
+)
+
+<span class="cm">-- Measure 4: Running Total (line chart)</span>
+<span class="var">Running Revenue</span> =
+<span class="fn">CALCULATE</span>(
+    [<span class="var">Total Revenue</span>],
+    <span class="fn">FILTER</span>(
+        <span class="fn">ALL</span>(sales[sale_date]),
+        sales[sale_date] &lt;= <span class="fn">MAX</span>(sales[sale_date])
+    )
+)</pre>
+  </div>
+
+  <div class="card">
+    <h3>Step 4C — 3 Dashboard Visuals</h3>
+    <table>
+      <thead><tr><th>#</th><th>Visual Type</th><th>Axis / Values</th><th>Business Story</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Clustered Bar Chart</td><td>X: rep_name · Y: [Total Revenue] + Target line</td><td>Who is hitting/missing target?</td></tr>
+        <tr><td>2</td><td>Donut Chart</td><td>Legend: product · Values: [Total Revenue]</td><td>Which products drive revenue?</td></tr>
+        <tr><td>3</td><td>Line Chart</td><td>X: sale_date · Y: [Running Revenue]</td><td>Is revenue accelerating or flattening?</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;margin-top:8px"><strong>Card visuals:</strong> Add 3 KPI cards — Total Revenue · % of Target · #Deals. Place at the top of the page.</p>
+    <p style="font-size:12px;margin-top:4px"><strong>Slicer:</strong> Add region slicer. Clicking "North" must update all 3 visuals simultaneously.</p>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Pipeline Flowchart — Full Data Analyst Workflow</div>
+  <div class="flow-wrap">
+    <svg width="700" height="540" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      
+      <text x="350" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2328">Day 11 — End-to-End Pipeline</text>
+
+      
+      <rect x="220" y="36" width="260" height="40" rx="8" fill="#1f2328" stroke="#374151"></rect>
+      <text x="350" y="52" text-anchor="middle" fill="#e6edf3" font-weight="700">🏦 Business Question</text>
+      <text x="350" y="68" text-anchor="middle" fill="#8b949e" font-size="11">Regional Head needs Loan Portfolio Report</text>
+
+      
+      <line x1="350" y1="76" x2="350" y2="96" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)"></line>
+
+      
+      <rect x="80" y="96" width="540" height="86" rx="8" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="350" y="113" text-anchor="middle" fill="#1e3a8a" font-weight="700" font-size="13">STEP 1 — SQL (MySQL Workbench)</text>
+      <rect x="96" y="120" width="155" height="48" rx="5" fill="#1e3a8a"></rect>
+      <text x="173" y="138" text-anchor="middle" fill="#bfdbfe" font-size="11" font-weight="700">Query 1A</text>
+      <text x="173" y="152" text-anchor="middle" fill="#93c5fd" font-size="10">JOIN + CASE WHEN</text>
+      <text x="173" y="163" text-anchor="middle" fill="#93c5fd" font-size="10">Rep vs Target</text>
+      <rect x="272" y="120" width="155" height="48" rx="5" fill="#1e3a8a"></rect>
+      <text x="349" y="138" text-anchor="middle" fill="#bfdbfe" font-size="11" font-weight="700">Query 1B</text>
+      <text x="349" y="152" text-anchor="middle" fill="#93c5fd" font-size="10">Window Function</text>
+      <text x="349" y="163" text-anchor="middle" fill="#93c5fd" font-size="10">Monthly Trend</text>
+      <rect x="448" y="120" width="155" height="48" rx="5" fill="#1e3a8a"></rect>
+      <text x="525" y="138" text-anchor="middle" fill="#bfdbfe" font-size="11" font-weight="700">Query 1C</text>
+      <text x="525" y="152" text-anchor="middle" fill="#93c5fd" font-size="10">CTE + RANK</text>
+      <text x="525" y="163" text-anchor="middle" fill="#93c5fd" font-size="10">Product Ranking</text>
+
+      
+      <text x="350" y="196" text-anchor="middle" fill="#1e40af" font-size="10">↓ Export 3 CSV files</text>
+
+      
+      <line x1="350" y1="182" x2="350" y2="202" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)"></line>
+
+      
+      <rect x="80" y="202" width="540" height="78" rx="8" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="350" y="219" text-anchor="middle" fill="#14532d" font-weight="700" font-size="13">STEP 2 — Python / Pandas (Jupyter Notebook)</text>
+      <rect x="96" y="226" width="160" height="44" rx="5" fill="#14532d"></rect>
+      <text x="176" y="243" text-anchor="middle" fill="#bbf7d0" font-size="11" font-weight="700">Load &amp; Validate</text>
+      <text x="176" y="257" text-anchor="middle" fill="#86efac" font-size="10">shape · dtypes · nulls</text>
+      <rect x="270" y="226" width="160" height="44" rx="5" fill="#14532d"></rect>
+      <text x="350" y="243" text-anchor="middle" fill="#bbf7d0" font-size="11" font-weight="700">Clean &amp; Fix</text>
+      <text x="350" y="257" text-anchor="middle" fill="#86efac" font-size="10">fillna · type cast</text>
+      <rect x="444" y="226" width="160" height="44" rx="5" fill="#14532d"></rect>
+      <text x="524" y="243" text-anchor="middle" fill="#bbf7d0" font-size="11" font-weight="700">EDA &amp; Insights</text>
+      <text x="524" y="257" text-anchor="middle" fill="#86efac" font-size="10">groupby · describe · %</text>
+
+      
+      <line x1="350" y1="280" x2="350" y2="300" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)"></line>
+
+      
+      <rect x="80" y="300" width="540" height="78" rx="8" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="350" y="317" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="13">STEP 3 — Advanced Excel</text>
+      <rect x="96" y="324" width="160" height="44" rx="5" fill="#854d0e"></rect>
+      <text x="176" y="341" text-anchor="middle" fill="#fef9c3" font-size="11" font-weight="700">Pivot Table</text>
+      <text x="176" y="355" text-anchor="middle" fill="#fde68a" font-size="10">Team · Rep · Revenue</text>
+      <rect x="270" y="324" width="160" height="44" rx="5" fill="#854d0e"></rect>
+      <text x="350" y="341" text-anchor="middle" fill="#fef9c3" font-size="11" font-weight="700">XLOOKUP + IFS</text>
+      <text x="350" y="355" text-anchor="middle" fill="#fde68a" font-size="10">Target lookup · KPI flag</text>
+      <rect x="444" y="324" width="160" height="44" rx="5" fill="#854d0e"></rect>
+      <text x="524" y="341" text-anchor="middle" fill="#fef9c3" font-size="11" font-weight="700">SUMIF / AVERAGEIF</text>
+      <text x="524" y="355" text-anchor="middle" fill="#fde68a" font-size="10">Team rollup · Cond Format</text>
+
+      
+      <line x1="350" y1="378" x2="350" y2="398" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)"></line>
+
+      
+      <rect x="80" y="398" width="540" height="78" rx="8" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="350" y="415" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="13">STEP 4 — Power BI Dashboard</text>
+      <rect x="96" y="422" width="160" height="44" rx="5" fill="#4c1d95"></rect>
+      <text x="176" y="439" text-anchor="middle" fill="#ddd6fe" font-size="11" font-weight="700">Star Schema Model</text>
+      <text x="176" y="453" text-anchor="middle" fill="#c4b5fd" font-size="10">sales ↔ reps ↔ regions</text>
+      <rect x="270" y="422" width="160" height="44" rx="5" fill="#4c1d95"></rect>
+      <text x="350" y="439" text-anchor="middle" fill="#ddd6fe" font-size="11" font-weight="700">DAX Measures</text>
+      <text x="350" y="453" text-anchor="middle" fill="#c4b5fd" font-size="10">DIVIDE · RANKX · CALCULATE</text>
+      <rect x="444" y="422" width="160" height="44" rx="5" fill="#4c1d95"></rect>
+      <text x="524" y="439" text-anchor="middle" fill="#ddd6fe" font-size="11" font-weight="700">3 Visuals + KPI Cards</text>
+      <text x="524" y="453" text-anchor="middle" fill="#c4b5fd" font-size="10">Bar · Donut · Line · Slicer</text>
+
+      
+      <line x1="350" y1="476" x2="350" y2="496" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)"></line>
+
+      
+      <rect x="180" y="496" width="340" height="36" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="514" text-anchor="middle" fill="#e6edf3" font-weight="700" font-size="13">✅ Loan Portfolio Report Delivered</text>
+      <text x="350" y="527" text-anchor="middle" fill="#8b949e" font-size="10">SQL extract → Python clean → Excel summary → Power BI visual</text>
+
+      
+      <defs>
+        <marker id="arrow">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 11 Cheat Sheet — All 4 Tools</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="sql">🗄 SQL — Key Patterns</h4>
+      <pre><span class="cm">-- JOIN + CASE</span>
+<span class="kw">RIGHT JOIN</span> reps r <span class="kw">ON</span> s.rep_name = r.rep_name
+<span class="kw">CASE WHEN</span> x &gt;= y <span class="kw">THEN</span> <span class="str">'On Track'</span> <span class="kw">END</span>
+
+<span class="cm">-- Window running total</span>
+<span class="fn">SUM</span>(rev) <span class="kw">OVER</span> (
+  <span class="kw">ORDER BY</span> month
+  <span class="kw">ROWS BETWEEN</span>
+  UNBOUNDED PRECEDING <span class="kw">AND</span>
+  <span class="kw">CURRENT ROW</span>)
+
+<span class="cm">-- CTE + RANK</span>
+<span class="kw">WITH</span> cte <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> ...<span class="kw">FROM</span>...
+)
+<span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> total <span class="kw">DESC</span>)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="py">🐍 Python — Key Patterns</h4>
+      <pre><span class="cm"># Load + Audit</span>
+df = pd.read_csv(<span class="str">'file.csv'</span>)
+df.shape · df.dtypes
+df.isnull().sum()
+
+<span class="cm"># Clean</span>
+df[<span class="str">'col'</span>].fillna(<span class="num">0</span>)
+df[<span class="str">'date'</span>] = pd.to_datetime(
+    df[<span class="str">'date'</span>])
+
+<span class="cm"># EDA</span>
+df.groupby(<span class="str">'team'</span>)[<span class="str">'rev'</span>]\
+  .agg([<span class="str">'sum'</span>,<span class="str">'mean'</span>,<span class="str">'count'</span>])
+df.nlargest(<span class="num">3</span>, <span class="str">'revenue'</span>)
+
+<span class="cm"># Export</span>
+df.to_csv(<span class="str">'clean.csv'</span>, index=<span class="kw">False</span>)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="xl">📊 Excel — Key Formulas</h4>
+      <pre><span class="cm">-- XLOOKUP (replaces VLOOKUP)</span>
+=XLOOKUP(A2, Sheet2!A:A,
+         Sheet2!C:C, "N/A")
+
+<span class="cm">-- IFS (multi-condition)</span>
+=IFS(E2/C2&gt;=1,"🟢 On Track",
+     E2/C2&gt;=0.8,"🟡 At Risk",
+     TRUE,"🔴 Under")
+
+<span class="cm">-- SUMIF / AVERAGEIF</span>
+=SUMIF(B:B,"Retail",D:D)
+=AVERAGEIF(B:B,"SME",E:E)
+
+<span class="cm">-- Pivot shortcut</span>
+Insert → PivotTable
+Alt+N+V (Windows)</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="pbi">📈 Power BI — Key DAX</h4>
+      <pre><span class="cm">-- Safe division</span>
+<span class="var">% Target</span> = <span class="fn">DIVIDE</span>(
+  <span class="fn">SUM</span>(sales[revenue]),
+  <span class="fn">SUM</span>(reps[target]), <span class="num">0</span>)
+
+<span class="cm">-- Rank across all reps</span>
+<span class="var">Rank</span> = <span class="fn">RANKX</span>(
+  <span class="fn">ALL</span>(reps[rep_name]),
+  [<span class="var">Total Revenue</span>],,<span class="fn">DESC</span>)
+
+<span class="cm">-- Running total</span>
+<span class="var">Running Rev</span> = <span class="fn">CALCULATE</span>(
+  [<span class="var">Total Revenue</span>],
+  <span class="fn">FILTER</span>(<span class="fn">ALL</span>(sales[sale_date]),
+  sales[sale_date]&lt;=<span class="fn">MAX</span>(
+    sales[sale_date])))
+
+<span class="cm">-- YTD</span>
+<span class="fn">TOTALYTD</span>([<span class="var">Total Revenue</span>],
+           sales[sale_date])</pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 11</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>Runs all 4 tools but never connects findings across them</li>
+        <li>Says "the chart shows revenue" without insight</li>
+        <li>Doesn't handle Eve's NULL in Python → wrong totals in Power BI</li>
+        <li>Uses VLOOKUP instead of XLOOKUP (outdated)</li>
+        <li>Builds Power BI visuals without a star schema model</li>
+        <li>Can't explain why DIVIDE() is safer than "/" in DAX</li>
+        <li>No KPI cards — dashboard has no at-a-glance summary</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>Opens with business context: "Regional Head needs X by Y"</li>
+        <li>Flags Eve's NULL in SQL and handles it explicitly in Python</li>
+        <li>Delivers 3 business insights, not just query results</li>
+        <li>Uses RIGHT JOIN to include reps with no sales (not INNER JOIN)</li>
+        <li>XLOOKUP + IFS for Excel — modern stack knowledge</li>
+        <li>DIVIDE() in DAX — knows it returns 0 not error on divide-by-zero</li>
+        <li>Slicer cross-filters all 3 visuals — proves model relationships work</li>
+        <li>Reconciles: Power BI total = SQL SUM = Python .sum()</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 12 (BFSI Analytics)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>What is churn rate? How do you calculate it in SQL?</td><td>Day 12 opens with a churn query challenge</td></tr>
+      <tr><td>What is NPA (Non-Performing Asset) in banking?</td><td>BFSI domain — Persistent clients ask this constantly</td></tr>
+      <tr><td>Cohort analysis concept</td><td>Customer segmentation task on Day 12</td></tr>
+      <tr><td>Re-run today's 4 tasks end-to-end from memory</td><td>Speed + muscle memory = interview confidence</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 11 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #3b82d4;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 11 of my 15-day Data Analyst prep.
+Topic: End-to-End Case Study — SQL → Python → Excel → Power BI
+Business Scenario: Loan Portfolio Performance Report for a Regional Head
+Tools: MySQL Workbench + Jupyter Notebook + Excel + Power BI Desktop
+Database: persistence_analytics (sales, reps, regions)
+Time available: 4 hours (20% theory, 80% hands-on)
+
+START DAY 11 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 11 → session starts.</p>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Days 1–10 ✅  | 
+  <strong style="color:#3b82d4">Day 11 🔵 TODAY</strong>  | 
+  Day 12 · 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

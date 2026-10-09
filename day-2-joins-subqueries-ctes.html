@@ -1,0 +1,788 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Day 2 — JOINs · Subqueries · CTEs · Persistent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328;padding:32px 16px}
+.wrap{max-width:760px;margin:0 auto}
+.header{background:#1f2328;color:#e6edf3;border-radius:10px;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.header p{font-size:13px;color:#8b949e}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em}
+.b1{background:#1e3a8a;color:#bfdbfe}
+.b2{background:#14532d;color:#bbf7d0}
+.b3{background:#4c1d95;color:#ddd6fe}
+.b4{background:#7f1d1d;color:#fecaca}
+.b5{background:#374151;color:#e5e7eb;border:1px solid #4b5563}
+.sec{margin-bottom:26px}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#1e40af;border-bottom:2px solid #1e40af;padding-bottom:4px;margin-bottom:14px}
+.sec-title.green{color:#1a7f4b;border-color:#1a7f4b}
+.sec-title.purple{color:#7c5cd8;border-color:#7c5cd8}
+.sec-title.red{color:#b91c1c;border-color:#b91c1c}
+.sec-title.orange{color:#b45309;border-color:#b45309}
+.sec-title.dark{color:#1f2328;border-color:#1f2328}
+.card{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
+.card.warn{background:#fffbeb;border-color:#fde68a}
+.card.success{background:#f0fdf4;border-color:#86efac}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+th{background:#f0f2f5;text-align:left;padding:6px 10px;border:1px solid #e5e7eb;font-weight:700;color:#57606a;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:6px 10px;border:1px solid #e5e7eb;vertical-align:top}
+tr:nth-child(even) td{background:#fafbfc}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.tag.hard{background:#fee2e2;color:#991b1b}
+.tag.med{background:#fef9c3;color:#854d0e}
+.tag.easy{background:#dcfce7;color:#166534}
+pre{background:#1f2328;color:#e6edf3;font-family:"Cascadia Code","Fira Code",monospace;font-size:12px;line-height:1.65;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:#ff7b72}.fn{color:#79c0ff}.str{color:#a5d6ff}.cm{color:#8b949e}.num{color:#f8c041}.var{color:#ffa657}
+.flow-wrap{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:18px;overflow-x:auto;margin-bottom:12px}
+.flow-wrap svg{display:block;margin:0 auto}
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cheat-cell{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:12px 14px}
+.cheat-cell h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cheat-cell h4.blue{color:#1e40af}
+.cheat-cell h4.green{color:#166534}
+.cheat-cell h4.purple{color:#5b21b6}
+.cheat-cell h4.red{color:#b91c1c}
+.cheat-cell pre{font-size:11px;background:#1f2328;padding:10px 12px;border-radius:5px}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rh{border-radius:7px;padding:12px 14px;font-size:12.5px}
+.rh.reject{background:#fff5f5;border:1px solid #fca5a5;color:#7f1d1d}
+.rh.hire{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+.rh h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.rh ul{padding-left:16px}.rh li{margin-bottom:4px}
+.qa{border-left:3px solid #1e40af;padding:10px 14px;background:#f0f6ff;border-radius:0 7px 7px 0;margin-bottom:10px}
+.qa .q{font-weight:700;font-size:13px;margin-bottom:6px;color:#1e3a5f}
+.qa .a{font-size:13px;color:#1f2328}
+.qa .a strong{color:#1e40af}
+.qa.green{border-color:#1a7f4b;background:#f0fdf4}.qa.green .q{color:#14532d}.qa.green .a strong{color:#1a7f4b}
+.qa.purple{border-color:#7c5cd8;background:#f5f3ff}.qa.purple .q{color:#4c1d95}.qa.purple .a strong{color:#7c5cd8}
+.qa.red{border-color:#b91c1c;background:#fff5f5}.qa.red .q{color:#7f1d1d}.qa.red .a strong{color:#b91c1c}
+.tracker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.day-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.done{background:#dcfce7;color:#166634;border:2px solid #86efac}
+.today{background:#dbeafe;color:#1e40af;border:2px dotted #3b82d4}
+.future{background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb}
+.join-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.join-box{border-radius:7px;padding:12px 10px;text-align:center;border:1px solid #e5e7eb}
+.join-box .jname{font-size:12px;font-weight:800;margin-bottom:4px}
+.join-box .jdesc{font-size:11px;color:#57606a;margin-bottom:6px}
+.join-box .jresult{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;display:inline-block}
+.j-inner{background:#dbeafe;border-color:#93c5fd}.j-inner .jname{color:#1e3a8a}.j-inner .jresult{background:#1e3a8a;color:#fff}
+.j-left{background:#dcfce7;border-color:#86efac}.j-left .jname{color:#14532d}.j-left .jresult{background:#14532d;color:#fff}
+.j-right{background:#fef9c3;border-color:#fde047}.j-right .jname{color:#854d0e}.j-right .jresult{background:#854d0e;color:#fff}
+.j-full{background:#ede9fe;border-color:#c4b5fd}.j-full .jname{color:#4c1d95}.j-full .jresult{background:#4c1d95;color:#fff}
+footer{text-align:center;font-size:12px;color:#57606a;padding-top:20px;border-top:1px solid #e5e7eb;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="header">
+  <h1>🔗 Day 2 — JOINs · Subqueries · CTEs</h1>
+  <p>15-Day Data Analyst Prep · Persistent Systems · September 2026 · ⏱ 3.5 Hours</p>
+  <div class="badge-row">
+    <span class="badge b1">INNER · LEFT · RIGHT JOIN</span>
+    <span class="badge b2">Subqueries (WHERE / FROM / SELECT)</span>
+    <span class="badge b3">CTEs — WITH clause</span>
+    <span class="badge b4">Eve Trap — NULL in JOINs</span>
+    <span class="badge b5">20% Theory · 80% Hands-On</span>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title dark">15-Day Progress Tracker</div>
+  <div class="tracker">
+    <div class="day-dot done">1</div>
+    <div class="day-dot today">2</div>
+    <div class="day-dot future">3</div><div class="day-dot future">4</div><div class="day-dot future">5</div>
+    <div class="day-dot future">6</div><div class="day-dot future">7</div><div class="day-dot future">8</div>
+    <div class="day-dot future">9</div><div class="day-dot future">10</div><div class="day-dot future">11</div>
+    <div class="day-dot future">12</div><div class="day-dot future">13</div><div class="day-dot future">14</div>
+    <div class="day-dot future">15</div>
+  </div>
+  <p style="font-size:12px;color:#57606a;margin-top:6px">✅ Day 1 complete · 🔵 Today: Day 2 · ⬜ Days 3–15 ahead</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🔗 The 4 JOIN Types — Know All 4 Cold</div>
+  <div class="join-grid">
+    <div class="join-box j-inner">
+      <div class="jname">INNER JOIN</div>
+      <div class="jdesc">Only rows that match in BOTH tables. Eve disappears — no sales.</div>
+      <div class="jresult">Matching rows only</div>
+    </div>
+    <div class="join-box j-left">
+      <div class="jname">LEFT JOIN</div>
+      <div class="jdesc">All rows from LEFT table + matching rows from right. Eve stays with NULLs.</div>
+      <div class="jresult">All LEFT + match RIGHT</div>
+    </div>
+    <div class="join-box j-right">
+      <div class="jname">RIGHT JOIN</div>
+      <div class="jdesc">All rows from RIGHT table + matching rows from left. Rarely used — rewrite as LEFT JOIN.</div>
+      <div class="jresult">All RIGHT + match LEFT</div>
+    </div>
+    <div class="join-box j-full">
+      <div class="jname">FULL OUTER</div>
+      <div class="jdesc">All rows from both tables. NULLs on non-matching side. MySQL: emulate with UNION.</div>
+      <div class="jresult">All rows both sides</div>
+    </div>
+  </div>
+
+  <div class="card warn">
+    <h3 style="color:#854d0e">⚡ The Eve Test — Persistent's Favourite JOIN Trap</h3>
+    <table>
+      <thead><tr><th>Query Uses</th><th>Eve Appears?</th><th>Eve's Revenue</th><th>Interview Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><code>INNER JOIN sales ON rep_name</code></td><td>❌ No — disappears</td><td>N/A — row missing</td><td>🔴 REJECTED — missed a rep</td></tr>
+        <tr><td><code>LEFT JOIN sales ON rep_name</code> (reps is left)</td><td>✅ Yes — stays</td><td>NULL → use COALESCE(,0)</td><td>🟢 HIRED — complete picture</td></tr>
+        <tr><td><code>RIGHT JOIN reps ON rep_name</code> (sales is left)</td><td>✅ Yes — stays</td><td>NULL → same fix</td><td>🟡 Works but prefer LEFT JOIN</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;margin-top:8px"><strong>Rule:</strong> Whenever the question includes "all reps" or "including reps with no sales" — always LEFT JOIN from reps → sales, then COALESCE the revenue NULL to 0.</p>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">📋 Day 2 Agenda — 3.5 Hours</div>
+  <table>
+    <thead><tr><th>Time</th><th>Block</th><th>Topic</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>0:00–0:25</td><td>Theory Blitz</td><td>JOIN types · NULL in JOINs · Subquery types · CTE syntax</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:25–0:55</td><td>Q&amp;A Round (5 Qs)</td><td>INNER vs LEFT · Subquery vs JOIN · CTE vs subquery</td><td><span class="tag med">Theory</span></td></tr>
+      <tr><td>0:55–1:40</td><td>Task 1 — JOINs</td><td>INNER · LEFT · multi-table · SELF JOIN</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>1:40–2:20</td><td>Task 2 — Subqueries</td><td>WHERE subquery · FROM subquery · correlated subquery</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>2:20–3:05</td><td>Task 3 — CTEs</td><td>Single CTE · Multiple CTEs · CTE replacing subquery</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>3:05–3:30</td><td>Task 4 — Combined</td><td>CTE + JOIN + Subquery in one business query</td><td><span class="tag hard">Hands-On</span></td></tr>
+      <tr><td>3:30–3:30</td><td>Debrief</td><td>Score card · mistakes → fixes · Day 3 prep</td><td><span class="tag easy">Review</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🎓 Theory Q&amp;A — 5 Interview Questions</div>
+
+  <div class="qa">
+    <div class="q">Q1. What is the difference between INNER JOIN and LEFT JOIN? When does a row "disappear"?</div>
+    <div class="a"><strong>Hired answer:</strong> <strong>INNER JOIN</strong> returns only rows where the join condition is satisfied in BOTH tables. If a row in the left table has no matching row in the right table, it is excluded from the result — it "disappears." <strong>LEFT JOIN</strong> returns ALL rows from the left table regardless of whether a match exists in the right table; non-matching rows from the right side appear as NULL. In BFSI analytics: if I JOIN reps to sales using INNER JOIN, Eve (who has no sales) disappears — my revenue report now silently under-counts the team. This is a data quality failure. <strong>Default instinct: start with LEFT JOIN when the left table is your primary entity (reps, customers, accounts).</strong></div>
+  </div>
+
+  <div class="qa purple">
+    <div class="q">Q2. What is a CTE (WITH clause)? How is it different from a subquery?</div>
+    <div class="a"><strong>Hired answer:</strong> A <strong>CTE (Common Table Expression)</strong> is a named temporary result set defined at the top of a query using the WITH keyword. Both CTEs and subqueries achieve the same result — break a complex query into steps — but CTEs are: (1) <strong>Readable</strong> — defined once at the top, referenced by name below; (2) <strong>Reusable</strong> — a CTE can be referenced multiple times in the same query; (3) <strong>Recursive</strong> — CTEs support recursion, subqueries do not. <strong>Persistent prefers CTEs</strong> because they make query logic transparent — interviewers can follow your reasoning step by step.</div>
+  </div>
+
+  <div class="qa green">
+    <div class="q">Q3. What are the three types of subqueries? Give a one-line example of each.</div>
+    <div class="a"><strong>Hired answer:</strong><br />
+    (1) <strong>WHERE subquery</strong> — filters rows: <code>WHERE revenue &gt; (SELECT AVG(revenue) FROM sales)</code><br />
+    (2) <strong>FROM subquery (derived table)</strong> — used as a virtual table: <code>FROM (SELECT region, SUM(revenue) AS tot FROM sales GROUP BY region) AS r</code><br />
+    (3) <strong>SELECT subquery (scalar)</strong> — returns a single value inside SELECT: <code>SELECT rep_name, revenue, (SELECT SUM(revenue) FROM sales) AS grand_total</code><br />
+    In BFSI: WHERE subquery = "show deals above average deal size"; FROM subquery = "rank regions by their aggregated totals"; SELECT subquery = "% contribution per row."</div>
+  </div>
+
+  <div class="qa red">
+    <div class="q">Q4. You have a query with INNER JOIN reps and sales. You expect 5 rows (one per rep) but get 4. What happened and how do you fix it?</div>
+    <div class="a"><strong>Hired answer:</strong> Eve has no records in the sales table. INNER JOIN requires a matching row in BOTH tables — since Eve has no sales, her rep record is excluded from the result. The fix is to change INNER JOIN to LEFT JOIN with reps as the left table: <code>FROM reps r LEFT JOIN sales s ON r.rep_name = s.rep_name</code>. Then wrap the revenue aggregate with COALESCE: <code>COALESCE(SUM(s.revenue), 0)</code> so Eve shows ₹0 instead of NULL. This is the "Eve test" — if your query can't account for reps with no activity, it fails a basic data completeness check.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5. When should you use a CTE vs a subquery vs a temporary table?</div>
+    <div class="a"><strong>Hired answer:</strong><br />
+    <strong>CTE</strong> — use when the intermediate result is complex, needs a readable name, or is referenced more than once in the same query. Best for interview queries and production code where clarity matters.<br />
+    <strong>Subquery</strong> — use for simple, one-off inline filters or scalar values. Acceptable for short logic but gets unreadable when nested 3+ levels deep.<br />
+    <strong>Temporary table</strong> — use when the intermediate result is large (millions of rows), needs an index, or is used across multiple separate queries in a session. Overkill for most analytical queries.<br />
+    <strong>Rule of thumb:</strong> CTE for readability, subquery for simplicity, temp table for performance at scale.</div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">Task 1 — JOINs (45 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: The HR team needs a complete rep performance report including reps with zero sales. The Ops team needs sales enriched with region zone and manager data.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 1A — LEFT JOIN: All Reps Including Eve</h3>
+    <pre><span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    r.target,
+    <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)          <span class="kw">AS</span> actual_revenue,
+    <span class="fn">COALESCE</span>(<span class="fn">COUNT</span>(s.sale_id), <span class="num">0</span>)          <span class="kw">AS</span> num_deals,
+    <span class="fn">ROUND</span>(
+        <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)
+        * <span class="num">100.0</span> / r.target,
+    <span class="num">1</span>)                                     <span class="kw">AS</span> pct_of_target
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name
+<span class="kw">GROUP BY</span> r.rep_name, r.team, r.target
+<span class="kw">ORDER BY</span> actual_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- 5 rows: Alice 230K(115%), Carol 95K(63%), Bob 160K(89%), Dave 60K(50%), Eve 0(0%)
+-- COALESCE(SUM(s.revenue), 0) → Eve shows 0 not NULL
+-- Business: HR sees complete team health — Eve needs urgent intervention</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 1B — 3-Table JOIN: sales + reps + regions</h3>
+    <pre><span class="kw">SELECT</span>
+    s.sale_id,
+    s.rep_name,
+    r.team,
+    s.region,
+    rg.zone,
+    rg.manager,
+    s.product,
+    s.revenue,
+    s.sale_date
+<span class="kw">FROM</span> sales s
+<span class="kw">INNER JOIN</span> reps r     <span class="kw">ON</span> s.rep_name = r.rep_name
+<span class="kw">INNER JOIN</span> regions rg <span class="kw">ON</span> s.region   = rg.region
+<span class="kw">ORDER BY</span> s.revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- 6 rows with team, zone, manager columns enriched
+-- INNER JOIN is correct here — every sale has a rep AND a region
+-- Business: Ops team can now filter by zone (Zone-A vs Zone-B) for territory reporting</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 1C — LEFT JOIN to Find "Gap" Rows (Anti-JOIN Pattern)</h3>
+    <pre><span class="cm">-- Find reps who have NEVER made a sale (the "missing" pattern)</span>
+<span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    r.hire_date,
+    r.target
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> r.rep_name = s.rep_name
+<span class="kw">WHERE</span> s.sale_id <span class="kw">IS NULL</span>    <span class="cm">-- keeps only reps with NO match in sales</span>
+<span class="kw">ORDER BY</span> r.hire_date;
+
+<span class="cm">-- Result: Eve (1 row) — she has no sales, so sale_id IS NULL after LEFT JOIN
+-- This is the Anti-JOIN pattern: LEFT JOIN + WHERE right_key IS NULL
+-- Business: "Which reps onboarded after July 2024 have zero sales?" → escalate to manager</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title green">Task 2 — Subqueries (40 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Show deals above the average deal size. Rank regions by their total revenue. Show each sale's % of grand total inline.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 2A — WHERE Subquery: Above-Average Deals</h3>
+    <pre><span class="kw">SELECT</span>
+    rep_name,
+    region,
+    product,
+    revenue,
+    <span class="fn">ROUND</span>((<span class="kw">SELECT</span> <span class="fn">AVG</span>(revenue) <span class="kw">FROM</span> sales), <span class="num">0</span>) <span class="kw">AS</span> avg_deal_size
+<span class="kw">FROM</span> sales
+<span class="kw">WHERE</span> revenue &gt; (<span class="kw">SELECT</span> <span class="fn">AVG</span>(revenue) <span class="kw">FROM</span> sales)
+<span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- AVG(revenue) = 545000/6 = 90,833
+-- Above average: Alice Loan 120K, Alice Insurance 110K, Carol Loan 95K
+-- 3 rows returned
+-- Business: Focus account management effort on these 3 deals for upsell/renewal</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 2B — FROM Subquery (Derived Table): Region Revenue Rank</h3>
+    <pre><span class="kw">SELECT</span>
+    region_summary.region,
+    region_summary.total_revenue,
+    region_summary.num_deals,
+    <span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> region_summary.total_revenue <span class="kw">DESC</span>) <span class="kw">AS</span> revenue_rank
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span>
+        region,
+        <span class="fn">SUM</span>(revenue)  <span class="kw">AS</span> total_revenue,
+        <span class="fn">COUNT</span>(*)      <span class="kw">AS</span> num_deals
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> region
+) <span class="kw">AS</span> region_summary
+<span class="kw">ORDER BY</span> revenue_rank;
+
+<span class="cm">-- Derived table = subquery in FROM clause — must be aliased (AS region_summary)
+-- North rank 1 (230K), South rank 2 (160K), East rank 3 (95K), West rank 4 (60K)
+-- Business: Budget allocation priority order for next quarter</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 2C — SELECT Subquery (Scalar): Inline % of Grand Total</h3>
+    <pre><span class="kw">SELECT</span>
+    rep_name,
+    region,
+    product,
+    revenue,
+    (<span class="kw">SELECT</span> <span class="fn">SUM</span>(revenue) <span class="kw">FROM</span> sales)             <span class="kw">AS</span> grand_total,
+    <span class="fn">ROUND</span>(
+        revenue * <span class="num">100.0</span> /
+        (<span class="kw">SELECT</span> <span class="fn">SUM</span>(revenue) <span class="kw">FROM</span> sales),
+    <span class="num">1</span>)                                             <span class="kw">AS</span> pct_of_grand_total
+<span class="kw">FROM</span> sales
+<span class="kw">ORDER BY</span> pct_of_grand_total <span class="kw">DESC</span>;
+
+<span class="cm">-- Grand total = 545,000 on every row (scalar subquery = single value)
+-- Alice Loan = 120000/545000 = 22.0%
+-- Business: "Alice's Jan Loan deal alone = 22% of entire H1 revenue"</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title purple">Task 3 — CTEs (45 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: Rewrite the subquery approach using CTEs for clarity. Then chain two CTEs to produce a rep performance scorecard with status labels.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 3A — Single CTE: Rep Revenue Summary</h3>
+    <pre><span class="kw">WITH</span> rep_revenue <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        rep_name,
+        <span class="fn">SUM</span>(revenue)   <span class="kw">AS</span> total_revenue,
+        <span class="fn">COUNT</span>(sale_id)  <span class="kw">AS</span> num_deals,
+        <span class="fn">MAX</span>(sale_date)  <span class="kw">AS</span> last_sale_date
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> rep_name
+)
+<span class="kw">SELECT</span>
+    r.rep_name,
+    r.team,
+    r.target,
+    <span class="fn">COALESCE</span>(rr.total_revenue, <span class="num">0</span>)   <span class="kw">AS</span> actual_revenue,
+    <span class="fn">COALESCE</span>(rr.num_deals, <span class="num">0</span>)        <span class="kw">AS</span> deals,
+    <span class="fn">COALESCE</span>(rr.last_sale_date, <span class="str">'Never'</span>) <span class="kw">AS</span> last_sale
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> rep_revenue rr <span class="kw">ON</span> r.rep_name = rr.rep_name
+<span class="kw">ORDER BY</span> actual_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- CTE replaces the subquery in FROM — cleaner, readable, same result
+-- Eve appears with revenue=0, deals=0, last_sale='Never'</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Query 3B — Chained CTEs: Performance Scorecard with Status</h3>
+    <pre><span class="kw">WITH</span> rep_actuals <span class="kw">AS</span> (
+    <span class="cm">-- CTE 1: Aggregate sales per rep</span>
+    <span class="kw">SELECT</span>
+        rep_name,
+        <span class="fn">SUM</span>(revenue)   <span class="kw">AS</span> actual_revenue,
+        <span class="fn">COUNT</span>(*)        <span class="kw">AS</span> num_deals
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> rep_name
+),
+rep_scorecard <span class="kw">AS</span> (
+    <span class="cm">-- CTE 2: Join to reps, calculate % of target, assign status</span>
+    <span class="kw">SELECT</span>
+        r.rep_name,
+        r.team,
+        r.target,
+        <span class="fn">COALESCE</span>(ra.actual_revenue, <span class="num">0</span>)   <span class="kw">AS</span> actual_revenue,
+        <span class="fn">COALESCE</span>(ra.num_deals, <span class="num">0</span>)         <span class="kw">AS</span> deals,
+        <span class="fn">ROUND</span>(
+            <span class="fn">COALESCE</span>(ra.actual_revenue, <span class="num">0</span>)
+            * <span class="num">100.0</span> / r.target,
+        <span class="num">1</span>)                                 <span class="kw">AS</span> pct_of_target
+    <span class="kw">FROM</span> reps r
+    <span class="kw">LEFT JOIN</span> rep_actuals ra <span class="kw">ON</span> r.rep_name = ra.rep_name
+)
+<span class="cm">-- Final SELECT: add status label from CTE 2 results</span>
+<span class="kw">SELECT</span>
+    rep_name,
+    team,
+    target,
+    actual_revenue,
+    deals,
+    pct_of_target,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> pct_of_target &gt;= <span class="num">100</span> <span class="kw">THEN</span> <span class="str">'🟢 On Track'</span>
+        <span class="kw">WHEN</span> pct_of_target &gt;= <span class="num">80</span>  <span class="kw">THEN</span> <span class="str">'🟡 At Risk'</span>
+        <span class="kw">ELSE</span>                           <span class="str">'🔴 Underperforming'</span>
+    <span class="kw">END</span>                              <span class="kw">AS</span> status
+<span class="kw">FROM</span> rep_scorecard
+<span class="kw">ORDER BY</span> pct_of_target <span class="kw">DESC</span>;
+
+<span class="cm">-- Alice 115% 🟢 · Bob 89% 🟡 · Carol 63% 🔴 · Dave 50% 🔴 · Eve 0% 🔴
+-- CASE WHEN uses pct_of_target alias — valid here (SELECT reads from CTE, no execution order issue)
+-- Business: HR scorecard — 3 of 5 reps underperforming → team-level intervention needed</span></pre>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">Task 4 — CTE + JOIN + Subquery Combined (25 min)</div>
+  <div class="card warn">
+    <h3 style="color:#854d0e">🎯 Business Ask: For each region, show: total revenue, its % of grand total, the top rep in that region, and the zone manager. This is a real BFSI dashboard query.</h3>
+  </div>
+
+  <div class="card">
+    <h3>Query 4 — Full Business Dashboard Query</h3>
+    <pre><span class="kw">WITH</span> region_totals <span class="kw">AS</span> (
+    <span class="cm">-- CTE 1: Revenue per region</span>
+    <span class="kw">SELECT</span>
+        region,
+        <span class="fn">SUM</span>(revenue)   <span class="kw">AS</span> region_revenue,
+        <span class="fn">COUNT</span>(*)        <span class="kw">AS</span> num_deals
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> region
+),
+top_reps <span class="kw">AS</span> (
+    <span class="cm">-- CTE 2: Top rep per region (by revenue)</span>
+    <span class="kw">SELECT</span>
+        region,
+        rep_name,
+        <span class="fn">SUM</span>(revenue) <span class="kw">AS</span> rep_revenue,
+        <span class="fn">RANK</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> region
+            <span class="kw">ORDER BY</span> <span class="fn">SUM</span>(revenue) <span class="kw">DESC</span>
+        )             <span class="kw">AS</span> rep_rank
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> region, rep_name
+)
+<span class="kw">SELECT</span>
+    rt.region,
+    rg.zone,
+    rg.manager,
+    rt.region_revenue,
+    rt.num_deals,
+    <span class="fn">ROUND</span>(
+        rt.region_revenue * <span class="num">100.0</span> /
+        (<span class="kw">SELECT</span> <span class="fn">SUM</span>(revenue) <span class="kw">FROM</span> sales),   <span class="cm">-- scalar subquery for grand total</span>
+    <span class="num">1</span>)                                       <span class="kw">AS</span> pct_of_total,
+    tr.rep_name                              <span class="kw">AS</span> top_rep
+<span class="kw">FROM</span> region_totals rt
+<span class="kw">INNER JOIN</span> regions rg  <span class="kw">ON</span> rt.region = rg.region
+<span class="kw">INNER JOIN</span> top_reps tr <span class="kw">ON</span> rt.region = tr.region
+    <span class="kw">AND</span> tr.rep_rank = <span class="num">1</span>                     <span class="cm">-- only the #1 rep per region</span>
+<span class="kw">ORDER BY</span> rt.region_revenue <span class="kw">DESC</span>;
+
+<span class="cm">-- North: Zone-A, Rajesh, 230K, 42.2%, Alice
+-- South: Zone-B, Priya,  160K, 29.4%, Bob
+-- East:  Zone-A, Amit,    95K, 17.4%, Carol
+-- West:  Zone-B, Sunita,  60K, 11.0%, Dave
+-- Business: Complete regional dashboard — revenue, share, owner, escalation contact</span></pre>
+  </div>
+
+  <div class="card success">
+    <h3 style="color:#166534">✅ Expected Results — Verify All Tasks</h3>
+    <table>
+      <thead><tr><th>Query</th><th>Expected Rows</th><th>Key Value to Verify</th></tr></thead>
+      <tbody>
+        <tr><td>1A — LEFT JOIN all reps</td><td>5 rows</td><td>Eve: 0 revenue, 0% of target</td></tr>
+        <tr><td>1B — 3-table JOIN</td><td>6 rows</td><td>Each sale enriched with zone + manager</td></tr>
+        <tr><td>1C — Anti-JOIN (no sales)</td><td>1 row</td><td>Eve only</td></tr>
+        <tr><td>2A — WHERE subquery</td><td>3 rows</td><td>Alice 120K, Alice 110K, Carol 95K</td></tr>
+        <tr><td>3B — Chained CTEs</td><td>5 rows</td><td>Alice 🟢, Bob 🟡, Carol/Dave/Eve 🔴</td></tr>
+        <tr><td>4 — Full dashboard</td><td>4 rows</td><td>SUM(pct_of_total) = 100.0</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title orange">📐 Day 2 Flowchart — JOIN + CTE Decision Tree</div>
+  <div class="flow-wrap">
+    <svg width="700" height="580" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+      <defs>
+        <marker id="arr">
+          <path d="M0 0L10 5L0 10z" fill="#9ca3af"></path>
+        </marker>
+      </defs>
+      <text x="350" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2328">Day 2 — JOIN · Subquery · CTE Decision Tree</text>
+
+      
+      <rect x="210" y="34" width="280" height="36" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="49" text-anchor="middle" fill="#e6edf3" font-weight="700">Need data from multiple tables?</text>
+      <text x="350" y="63" text-anchor="middle" fill="#8b949e" font-size="11">reps + sales · sales + regions · all three</text>
+      <line x1="350" y1="70" x2="350" y2="90" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,90 475,124 350,158 225,124" fill="#fef9c3" stroke="#fde047" stroke-width="2"></polygon>
+      <text x="350" y="119" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">Must ALL rows from</text>
+      <text x="350" y="133" text-anchor="middle" fill="#854d0e" font-weight="700" font-size="11">one table appear?</text>
+      <text x="170" y="121" text-anchor="middle" fill="#57606a" font-size="10">NO — only matches</text>
+      <text x="528" y="121" text-anchor="middle" fill="#57606a" font-size="10">YES — keep all</text>
+
+      
+      <line x1="225" y1="124" x2="110" y2="124" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="12" y="104" width="98" height="40" rx="7" fill="#dbeafe" stroke="#93c5fd"></rect>
+      <text x="61" y="120" text-anchor="middle" fill="#1e3a8a" font-weight="700">INNER JOIN</text>
+      <text x="61" y="134" text-anchor="middle" fill="#1e40af" font-size="10">Only matching rows</text>
+
+      
+      <line x1="475" y1="124" x2="590" y2="124" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="590" y="104" width="100" height="40" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="640" y="120" text-anchor="middle" fill="#14532d" font-weight="700">LEFT JOIN</text>
+      <text x="640" y="134" text-anchor="middle" fill="#166534" font-size="10">All left + NULLs right</text>
+
+      
+      <line x1="61" y1="144" x2="61" y2="186" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="640" y1="144" x2="640" y2="186" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="158" x2="350" y2="186" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="61" y1="186" x2="640" y2="186" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="186" x2="350" y2="206" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="130" y="206" width="440" height="42" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="350" y="223" text-anchor="middle" fill="#7f1d1d" font-weight="700">NULL Handling After JOIN</text>
+      <text x="350" y="238" text-anchor="middle" fill="#991b1b" font-size="11">COALESCE(SUM(s.revenue), 0) · IS NULL for anti-join · never = NULL</text>
+      <line x1="350" y1="248" x2="350" y2="268" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <polygon points="350,268 470,300 350,332 230,300" fill="#ede9fe" stroke="#c4b5fd" stroke-width="2"></polygon>
+      <text x="350" y="295" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">Complex intermediate</text>
+      <text x="350" y="309" text-anchor="middle" fill="#4c1d95" font-weight="700" font-size="11">logic needed?</text>
+      <text x="175" y="296" text-anchor="middle" fill="#57606a" font-size="10">Simple filter</text>
+      <text x="523" y="296" text-anchor="middle" fill="#57606a" font-size="10">Multi-step logic</text>
+
+      
+      <line x1="230" y1="300" x2="118" y2="300" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="18" y="278" width="100" height="44" rx="7" fill="#fef9c3" stroke="#fde047"></rect>
+      <text x="68" y="294" text-anchor="middle" fill="#854d0e" font-weight="700">Subquery</text>
+      <text x="68" y="306" text-anchor="middle" fill="#b45309" font-size="10">WHERE / FROM /</text>
+      <text x="68" y="317" text-anchor="middle" fill="#b45309" font-size="10">SELECT scalar</text>
+
+      
+      <line x1="470" y1="300" x2="575" y2="300" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+      <rect x="575" y="278" width="114" height="44" rx="7" fill="#ede9fe" stroke="#c4b5fd"></rect>
+      <text x="632" y="294" text-anchor="middle" fill="#4c1d95" font-weight="700">CTE (WITH)</text>
+      <text x="632" y="306" text-anchor="middle" fill="#5b21b6" font-size="10">Named · Reusable</text>
+      <text x="632" y="317" text-anchor="middle" fill="#5b21b6" font-size="10">Chain multiple CTEs</text>
+
+      
+      <line x1="68" y1="322" x2="68" y2="362" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="632" y1="322" x2="632" y2="362" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="332" x2="350" y2="362" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="68" y1="362" x2="632" y2="362" stroke="#9ca3af" stroke-width="1.5"></line>
+      <line x1="350" y1="362" x2="350" y2="382" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="130" y="382" width="440" height="42" rx="7" fill="#dcfce7" stroke="#86efac"></rect>
+      <text x="350" y="399" text-anchor="middle" fill="#14532d" font-weight="700">Add CASE WHEN Status Labels (CTE 2 output)</text>
+      <text x="350" y="414" text-anchor="middle" fill="#166534" font-size="11">🟢 On Track (≥100%) · 🟡 At Risk (≥80%) · 🔴 Underperforming (&lt;80%)</text>
+      <line x1="350" y1="424" x2="350" y2="444" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="130" y="444" width="440" height="42" rx="7" fill="#fee2e2" stroke="#fca5a5"></rect>
+      <text x="350" y="461" text-anchor="middle" fill="#7f1d1d" font-weight="700">Eve Test — Final Validation</text>
+      <text x="350" y="476" text-anchor="middle" fill="#991b1b" font-size="11">Does result have 5 rows? Eve shows 0 revenue / 🔴 status? ✅ Pass · 4 rows = ❌ INNER JOIN bug</text>
+      <line x1="350" y1="486" x2="350" y2="506" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"></line>
+
+      
+      <rect x="170" y="506" width="360" height="36" rx="8" fill="#1f2328"></rect>
+      <text x="350" y="522" text-anchor="middle" fill="#e6edf3" font-weight="700">✅ Business Report Delivered</text>
+      <text x="350" y="537" text-anchor="middle" fill="#8b949e" font-size="11">Complete · Accurate · Business-contextualised</text>
+    </svg>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">📄 Day 2 Cheat Sheet — JOINs · Subqueries · CTEs</div>
+  <div class="cheat-grid">
+
+    <div class="cheat-cell">
+      <h4 class="blue">🔗 JOIN Patterns</h4>
+      <pre><span class="cm">-- INNER: only matching rows</span>
+<span class="kw">FROM</span> sales s
+<span class="kw">INNER JOIN</span> reps r
+    <span class="kw">ON</span> s.rep_name = r.rep_name
+
+<span class="cm">-- LEFT: keep ALL left rows</span>
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s
+    <span class="kw">ON</span> r.rep_name = s.rep_name
+<span class="cm">-- Eve stays! Revenue = NULL</span>
+<span class="cm">-- Fix: COALESCE(SUM(s.revenue),0)</span>
+
+<span class="cm">-- 3-table JOIN</span>
+<span class="kw">FROM</span> sales s
+<span class="kw">INNER JOIN</span> reps r
+    <span class="kw">ON</span> s.rep_name = r.rep_name
+<span class="kw">INNER JOIN</span> regions rg
+    <span class="kw">ON</span> s.region = rg.region
+
+<span class="cm">-- Anti-JOIN (find non-matches)</span>
+<span class="kw">FROM</span> reps r
+<span class="kw">LEFT JOIN</span> sales s <span class="kw">ON</span> ...
+<span class="kw">WHERE</span> s.sale_id <span class="kw">IS NULL</span></pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="green">🔍 3 Subquery Types</h4>
+      <pre><span class="cm">-- WHERE subquery (filter rows)</span>
+<span class="kw">WHERE</span> revenue &gt;
+  (<span class="kw">SELECT</span> <span class="fn">AVG</span>(revenue)
+   <span class="kw">FROM</span> sales)
+
+<span class="cm">-- FROM subquery (derived table)</span>
+<span class="cm">-- MUST have alias!</span>
+<span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> region,
+    <span class="fn">SUM</span>(revenue) <span class="kw">AS</span> tot
+  <span class="kw">FROM</span> sales
+  <span class="kw">GROUP BY</span> region
+) <span class="kw">AS</span> reg_summary
+
+<span class="cm">-- SELECT scalar subquery</span>
+<span class="kw">SELECT</span> rep_name, revenue,
+  (<span class="kw">SELECT</span> <span class="fn">SUM</span>(revenue)
+   <span class="kw">FROM</span> sales) <span class="kw">AS</span> grand_total,
+  revenue * <span class="num">100.0</span> /
+  (<span class="kw">SELECT</span> <span class="fn">SUM</span>(revenue)
+   <span class="kw">FROM</span> sales) <span class="kw">AS</span> pct</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="purple">🧱 CTE Syntax</h4>
+      <pre><span class="cm">-- Single CTE</span>
+<span class="kw">WITH</span> cte_name <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> col1, <span class="fn">SUM</span>(rev) <span class="kw">AS</span> tot
+    <span class="kw">FROM</span> sales
+    <span class="kw">GROUP BY</span> col1
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> cte_name;
+
+<span class="cm">-- Chained CTEs (comma-separated)</span>
+<span class="kw">WITH</span>
+cte_one <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> ... <span class="kw">FROM</span> sales
+),
+cte_two <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> ...
+    <span class="kw">FROM</span> reps r
+    <span class="kw">LEFT JOIN</span> cte_one c
+        <span class="kw">ON</span> r.rep_name = c.rep_name
+)
+<span class="kw">SELECT</span> *,
+  <span class="kw">CASE WHEN</span> pct &gt;= <span class="num">100</span>
+       <span class="kw">THEN</span> <span class="str">'On Track'</span>
+       <span class="kw">ELSE</span> <span class="str">'At Risk'</span> <span class="kw">END</span> <span class="kw">AS</span> status
+<span class="kw">FROM</span> cte_two;</pre>
+    </div>
+
+    <div class="cheat-cell">
+      <h4 class="red">⚠ Day 2 Traps + Fixes</h4>
+      <pre><span class="cm">-- TRAP 1: INNER JOIN loses Eve</span>
+<span class="cm">Fix: LEFT JOIN from reps → sales</span>
+
+<span class="cm">-- TRAP 2: NULL revenue after LEFT JOIN</span>
+<span class="fn">COALESCE</span>(<span class="fn">SUM</span>(s.revenue), <span class="num">0</span>)
+<span class="cm">-- or COALESCE(s.revenue, 0)</span>
+
+<span class="cm">-- TRAP 3: FROM subquery no alias</span>
+<span class="cm">Fix: always add AS alias_name</span>
+<span class="kw">FROM</span> (SELECT ...) <span class="kw">AS</span> my_alias
+
+<span class="cm">-- TRAP 4: CTE not terminated</span>
+<span class="cm">Fix: comma after each CTE block</span>
+<span class="kw">WITH</span> cte1 <span class="kw">AS</span> (...),   <span class="cm">-- comma</span>
+     cte2 <span class="kw">AS</span> (...)    <span class="cm">-- no comma on last</span>
+<span class="kw">SELECT</span> ...;
+
+<span class="cm">-- TRAP 5: = NULL instead of IS NULL</span>
+<span class="kw">WHERE</span> s.sale_id <span class="kw">IS NULL</span>  <span class="cm">-- ✅</span>
+<span class="kw">WHERE</span> s.sale_id = <span class="kw">NULL</span>   <span class="cm">-- ❌</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title red">⚖ What Gets You HIRED vs REJECTED on Day 2</div>
+  <div class="rh-grid">
+    <div class="rh reject">
+      <h4>❌ Rejected</h4>
+      <ul>
+        <li>Uses INNER JOIN on reps → sales — Eve disappears, result has 4 rows not 5</li>
+        <li>Doesn't add COALESCE — Eve shows NULL revenue in report</li>
+        <li>Writes FROM subquery without alias — MySQL syntax error</li>
+        <li>Can't explain difference between CTE and subquery</li>
+        <li>Nests 3 levels of subqueries — unreadable, unmaintainable</li>
+        <li>Uses <code>WHERE sale_id = NULL</code> for anti-join — returns 0 rows</li>
+        <li>Says "I'd just use INNER JOIN — it's simpler" without thinking about completeness</li>
+        <li>Output has numbers but zero business interpretation</li>
+      </ul>
+    </div>
+    <div class="rh hire">
+      <h4>✅ Hired</h4>
+      <ul>
+        <li>States LEFT JOIN rationale before writing: "reps is the primary entity — all reps must appear"</li>
+        <li>COALESCE(SUM(s.revenue), 0) on every LEFT JOIN revenue column — automatic reflex</li>
+        <li>FROM subquery always aliased — never forgets</li>
+        <li>Chooses CTE over nested subqueries — cites readability + reusability</li>
+        <li>Anti-JOIN pattern: LEFT JOIN + WHERE right_key IS NULL — not NOT IN</li>
+        <li>Chains 2 CTEs cleanly — comma placement correct, final SELECT references both</li>
+        <li>Validates result: "5 rows — Eve present with 0 revenue — data complete"</li>
+        <li>Business insight: "3 of 5 reps underperforming — team intervention needed by Q3"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🚀 Copy-Paste Prompt to Start Day 2 Session</div>
+  <div style="background:#1f2328;color:#e6edf3;font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.7;border-radius:6px;padding:16px 18px;border-left:4px solid #3b82d4;white-space:pre-wrap">You are a 15+ year Senior Data Analyst, Persistent Systems hiring panel member,
+and technical interview coach for September 2026.
+
+Treat me as a professional (MBA Finance, 6+ years BFSI experience).
+Grade harshly and fairly. Always connect technical answers to business impact.
+Tell me exactly what gets me REJECTED vs HIRED.
+
+Today is DAY 2 of my 15-day Data Analyst prep.
+Topic: JOINs (INNER · LEFT · RIGHT) · Subqueries (WHERE / FROM / SELECT) · CTEs
+Tool: MySQL Workbench
+Database: persistence_analytics (tables: sales, reps, regions)
+Time available: 3.5 hours (20% theory, 80% hands-on)
+
+Key context: Eve (in reps table) has NO sales — she is the NULL trap for every JOIN query.
+
+START DAY 2 NOW.</div>
+  <p style="font-size:11px;color:#57606a;margin-top:6px">⬆ Copy entire block → paste into new chat → type DAY 2 → session begins.</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-title">🌙 Tonight — Prep for Day 3 (Window Functions)</div>
+  <table>
+    <thead><tr><th>Revise</th><th>Why It Matters Tomorrow</th></tr></thead>
+    <tbody>
+      <tr><td>What is RANK() vs DENSE_RANK() vs ROW_NUMBER()?</td><td>Day 3 opens with this as a 3-minute theory question — most fail it</td></tr>
+      <tr><td>What does PARTITION BY do inside OVER()?</td><td>PARTITION BY = GROUP BY but rows stay — fundamental Day 3 concept</td></tr>
+      <tr><td>What is a running total? How does ROWS BETWEEN work?</td><td>Running total syntax is tested cold — memorise the frame clause</td></tr>
+      <tr><td>Re-run today's 4 tasks from memory — no notes</td><td>Day 3 builds directly on Day 2 CTEs — speed and clarity matter</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0" />
+<p style="font-size:12px;color:#57606a;text-align:center">
+  <strong>15-Day Tracker:</strong>  
+  Day 1 ✅  | 
+  <strong style="color:#1e40af">Day 2 🔵 TODAY</strong>  | 
+  Day 3 · 4 · 5 · 6 · 7 · 8 · 9 · 10 · 11 · 12 · 13 · 14 · 15 ⬜
+</p>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>
